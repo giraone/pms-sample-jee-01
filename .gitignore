@@ -8,6 +8,18 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
+# Typical Eclipse, IntelliJ and Maven stuff
+.classpath
+.project
+.tern-project
+target
+.settings
+bin
+MANIFEST.MF
+*.swp
+*.iml
+*.idea
+
 # Windows Installer files
 *.cab
 *.msi
