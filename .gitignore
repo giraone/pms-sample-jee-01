@@ -20,6 +20,11 @@ MANIFEST.MF
 *.iml
 *.idea
 
+# Gulp Build results
+build/
+dist/
+node_modules/
+
 # Windows Installer files
 *.cab
 *.msi
