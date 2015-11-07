@@ -1,4 +1,4 @@
-# A modern JEE Web Application #
+# Kickstart 1 for JEE (JAX-RS/EJB/JPA) Web Application #
 
 This project is indented to show the basic modules of a modern REST-based web application with a ***back-end based on core JEE technology***, like JPA, EJB and JAX-RS and a ***front-end based on HTML5/JS/CSS3*** using the "main stream frameworks" *Google Angular 2* and *Twitter Bootstrap*. From a functional perspective, it is designed to be a CRUD application with some more features, than a typical TODO list application with a database at the back-end normally has. The starter project should be easily understandable for everybody and comes with two entities
 
@@ -99,8 +99,11 @@ The corresponding static meta model class is
 
 - Bean validation together with I18N. Currently we use:
 ```
+
 @Pattern(regexp = "[0-9A-Za-z]*", message = "Only numbers and ASCII letters are allowed")
-```. This is not good idea! Best solution would be to separate the field validation definitions together with their messages.
+```
+
+This is not a good idea! Best solution would be to separate the field validation definitions together with their messages.
 
 - Usage of `@XmlRootElement` vs. `@JsonSerialize` to serialize the DTOs. This includes some decisions, e.g.
   - How to serialize date and time values: ISO strings vs. long values?
