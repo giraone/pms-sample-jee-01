@@ -35,9 +35,11 @@ building an owner-member relationship: An employee may have 0 or 1 cost center. 
 
 ## Conventions and design decisions of the project ##
 
-**Entity ID generation** (surrogate keys): In the sample we use surrogate keys generated with the default JPA method by simply annotating ```@GeneratedValue```. All surrogate keys are named ```oid``` and of type ```Long```.
+### Entity ID generation (surrogate keys) ###
+In the sample we use surrogate keys generated with the default JPA method by simply annotating ```@GeneratedValue```. All surrogate keys are named ```oid``` and of type ```Long```.
 
-**Meta Models and SQL Naming**: To be prepared for refactoring, we use [static meta models](http://docs.oracle.com/javaee/6/tutorial/doc/gjiup.html) and avoid the direct usage of strings in JPA annotations for SQL table and SQL column naming. These SQL names are defined also within the meta model classes as constants. So a typical attribute *myWellDefinedName* in a class *MyWellDefinedClass* looks like:
+### Meta Models and SQL Naming ###
+To be prepared for refactoring, we use [static meta models](http://docs.oracle.com/javaee/6/tutorial/doc/gjiup.html) and avoid the direct usage of strings in JPA annotations for SQL table and SQL column naming. These SQL names are defined also within the meta model classes as constants. So a typical attribute *myWellDefinedName* in a class *MyWellDefinedClass* looks like:
 
 ```
 
@@ -67,7 +69,8 @@ The corresponding static meta model class is
 	}
 ```
 
-**Optimistic locking columns**: For detecting parallel changes of entities by the users, we use optimistic locking. The column definition are all unique:
+### Optimistic locking columns ###
+For detecting parallel changes of entities by the users, we use optimistic locking. The column definition are all unique:
 
 ```
 
@@ -77,15 +80,17 @@ The corresponding static meta model class is
 	private int versionNumber;
 ```
 
-**Transaction management type**: Despite the fact, that the standard JEE method is to use container based transaction management (`TransactionManagementType.CONTAINER`), we use `TransactionManagementType.BEAN` in the project. The reason for this, is the usage of **database constraints** in the projects. Constraints on a database level are robust restrictions and cannot by-passed by tools or batch programs operating directly on the database. But with container transaction management, we cannot catch exceptions like `java.sql.SQLIntegrityConstraintViolationException`, which are thrown on `tx.commit()` operations called by the container, e.g. when a new cost center is created with an already existing *identification*. Therefore we do our own transaction management using
+### Transaction management type ###
+Despite the fact, that the standard JEE method is to use container based transaction management (`TransactionManagementType.CONTAINER`), we use `TransactionManagementType.BEAN` in the project. The reason for this, is the usage of **database constraints** in the projects. Constraints on a database level are robust restrictions and cannot by-passed by tools or batch programs operating directly on the database. But with container transaction management, we cannot catch exceptions like `java.sql.SQLIntegrityConstraintViolationException`, which are thrown on `tx.commit()` operations called by the container, e.g. when a new cost center is created with an already existing *identification*. Therefore we do our own transaction management using
 
 ```
 
     @Resource
     UserTransaction tx;
 ```
-****
-**Field Validation**: based on *Java Bean Validation* with annotations like
+
+### Field Validation ###
+Based on *Java Bean Validation* with annotations like this one
 
 ```
 
@@ -95,7 +100,7 @@ The corresponding static meta model class is
 ```
 
 
-## Open issues and TODOs for current goals ##
+## Open issues and TODOs for the current goals ##
 
 - Bean validation together with I18N. Currently we use:
 ```
