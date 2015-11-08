@@ -7,7 +7,7 @@
 <body>
 <h2>LIFE CHECK</h2>
 <pre>
-Date: <%= Date() %>
+Date: <%= new Date() %>
 </pre>
 <p>Up and running!</p>
 </body>
