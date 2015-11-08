@@ -7,7 +7,9 @@ This project is indented to show the basic modules of a modern REST-based web ap
 
 building an owner-member relationship: An employee may have 0 or 1 cost center. A cost center may habe multiple employees. 
 
-**Hint:** Parts of the original code are from the [JBoss Forge](http://forge.jboss.org/) scaffolding, which is a nice tool to get JEE application "*kick started*".
+**Front-end:** The project comes as a REST-back-end, but the `webapp` folder comes with a release build of the [giraone/pms-sample-jee-01-ajs1](https://github.com/giraone/pms-sample-jee-01-ajs1) GutHub project, so it can be tested together with a browser frontend. The complete solution is hosted [OPENSHIFT](https://www.openshift.com) under [http://pmssamplejee01-giraone.rhcloud.com/].
+
+**Hint:** Parts of the original code are from the [JBoss Forge](http://forge.jboss.org/) scaffolding, which is a nice tool to get JEE applications "*kick started*".
 
 ## Goals ##
 

@@ -1,0 +1,110 @@
+{
+  "mainApp": {
+    "shortTitle": "PMS",
+    "title": "PMS App"
+  },
+  "common": {
+    "toggleNavigation": "Toggle navigation",
+    "showAll": "Show all",
+    "noNotifications": "No notification!",
+    "back": "Back",
+    "requestError": "Request failed! Please try again later."
+  },
+  "footer": {
+    "text": "Footer - no text yet."
+  },
+  "sidebar": {
+    "language": "Language",
+    "languages": {
+      "enUS": "English",
+      "deDE": "Deutsch"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "costCenter": "Overview about cost centers",
+    "employees": "Overview about employees",
+    "more": "More info"
+  },
+  "formCommon": {
+    "reset": "Reset",
+    "cancel": "Cancel",
+    "save": "Save",
+    "required": "Field is required!",
+    "minimumLengthIs": "Minimum length is {{v0}}!",
+    "maximumLengthIs": "Maximum length is {{v0}}!"
+  },
+  "costCenterList": {
+    "title": "Cost Center List",
+    "error": "Unable to retrieve list of cost centers.",
+    "noEntities": "No cost centers were found.",
+    "add": "Add new cost centers",
+    "oid": "ID",
+    "identification": "Identification",
+    "description": "Description"
+  },
+  "costCenterDetails": {
+    "title": "Cost center",
+    "successCreate": "New cost center has been created!",
+    "successUpdate": "Cost center has been updated!",
+    "identification": "Unique identification",
+    "identification_placeholder": "Enter a unique identification",
+    "description": "Description",
+    "description_placeholder": "Enter a name"
+  },
+  "employeeList": {
+    "title": "Employee List",
+    "error": "Unable to retrieve list of employees.",
+    "noEntities": "No employees were found.",
+    "add": "Add new employee",
+    "oid": "ID",
+    "personnelNumber": "Personnel Number",
+    "name": "Name",
+    "dateOfBirth": "Date of Birth",
+    "costCenter": "Cost center"
+  },
+  "employeeDetails": {
+    "title": "Employee",
+    "successCreate": "New employee data has been created!",
+    "successUpdate": "Employee data has been updated!",
+    "personnelNumber": {
+      "label": "Personnel Number",
+      "placeholder": "Personnel Number"
+    },
+    "lastName": {
+      "label": "Last Name",
+      "placeholder": "Last Name"
+    },
+    "firstName": {
+      "label": "First Name",
+      "placeholder": "First Name, also multiple"
+    },
+    "dateOfBirth": {
+      "label": "Date of Birth",
+      "placeholder": "Enter date in format yyyy-MM-dd (e.g. 2013-12-01)"
+    },
+    "gender": {
+      "label": "Gender",
+      "placeholder": "Select gender",
+      "value_U": "unknown",
+      "value_M": "male",
+      "value_F": "female",
+      "value_I": "indifferent"
+    },
+    "dateOfEntry": {
+      "label": "Date of Entry",
+      "placeholder": "Enter date in format yyyy-MM-dd (e.g. 2013-12-01)"
+    },
+    "nationalityCode": {
+      "label": "Nationality",
+      "placeholder": "Select nationality",
+      "value_DEU": "Germany",
+      "value_ITA": "Italy",
+      "value_USA": "USA"
+    },
+    "costCenter": {
+      "label": "Cost center",
+      "placeholder": "Select an existing cost center"
+    }
+  }
+}

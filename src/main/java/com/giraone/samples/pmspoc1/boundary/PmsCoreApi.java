@@ -6,5 +6,5 @@ import javax.ws.rs.ApplicationPath;
 @ApplicationPath("/api")
 public class PmsCoreApi extends Application
 {
-	public final static String PERSISTENCE_UNIT = "persistence-unit";
+	public final static String PERSISTENCE_UNIT = "primary";
 }

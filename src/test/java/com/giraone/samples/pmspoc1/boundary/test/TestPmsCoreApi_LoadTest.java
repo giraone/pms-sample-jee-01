@@ -40,19 +40,19 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 	//------------------------------------------------------------------------------------------
 
 	@Test
-	public void t_100_create100CostCenters() throws Exception
+	public void t_100_createManyCostCenters() throws Exception
 	{	
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 25; i++)
 		{
 			this.createCostCenter(i);
 		}
 	}
 	
 	@Test
-	public void t_200_create1000Employees() throws Exception
+	public void t_200_createManyEmployees() throws Exception
 	{
 		JsonArray allCostCenters = this.loadAllCostCenters();
-		for (int i = 1; i < 1000; i++)
+		for (int i = 1; i < 200; i++)
 		{
 			this.createEmployee(i, allCostCenters);
 		}

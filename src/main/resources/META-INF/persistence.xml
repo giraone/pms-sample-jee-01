@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
-  <persistence-unit name="persistence-unit" transaction-type="JTA">
-    <description>PmsSample Persistence Unit</description>
-    <provider>org.hibernate.ejb.HibernatePersistence</provider>
-    <jta-data-source>java:jboss/datasources/PmsSample1</jta-data-source>
-    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+<persistence version="2.0"
+   xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="
+        http://java.sun.com/xml/ns/persistence
+        http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+  <persistence-unit name="primary" transaction-type="JTA">
+	<jta-data-source>java:jboss/datasources/PostgreSQLDS</jta-data-source>
     <properties>
-      <property name="hibernate.hbm2ddl.auto" value="update"/>
+	  <!-- Properties for Hibernate -->
+      <property name="hibernate.hbm2ddl.auto" value="create"/>
       <!-- <property name="hibernate.hbm2ddl.auto" value="create"/> -->
       <!-- <property name="hibernate.hbm2ddl.auto" value="create-drop"/> -->
-      <property name="hibernate.show_sql" value="true"/>
+      <property name="hibernate.show_sql" value="false"/> <!-- true for development -->
       <property name="hibernate.format_sql" value="true"/>
-      <property name="hibernate.transaction.flush_before_completion" value="true"/>
-      <!--  Derby -->
-      <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect"/>
-      <!--  HSQLDB -->
-      <!-- <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/> -->
-      <!--  PostgresQL -->
-      <!-- <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/> -->
+      <property name="hibernate.transaction.flush_before_completion" value="false"/> <!-- needed? -->
+      <!-- Derby -->
+      <!-- <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect"/> -->
+      <!-- PostgresQL -->
+      <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
     </properties>
   </persistence-unit>
 </persistence>

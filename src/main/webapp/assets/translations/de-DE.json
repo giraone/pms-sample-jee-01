@@ -1,0 +1,110 @@
+{
+  "mainApp": {
+    "shortTitle": "PMS",
+    "title": "PMS App"
+  },
+  "common": {
+    "toggleNavigation": "Navigation umschalten",
+    "showAll": "Alle anzeigen",
+    "noNotifications": "Keine Hinweise!",
+    "back": "Zurück",
+    "requestError": "Anfrage konnte nicht ausgeführt werden! Bitte probiere es später noch einmal."
+  },
+  "footer": {
+    "text": "Footer - noch ohne Text."
+  },
+  "sidebar": {
+    "language": "Sprache",
+    "languages": {
+      "enUS": "English",
+      "deDE": "Deutsch"
+    }
+  },
+  "dashboard": {
+    "title": "Übersicht",
+    "costCenter": "Übersicht Kostenstellen",
+    "employees": "Übersicht Mitarbeiter",
+    "more": "Mehr erfahren"
+  },
+  "formCommon": {
+    "reset": "Zurücksetzen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "required": "Feld muß ausgefüllt werden!",
+    "minimumLengthIs": "Minimallänge ist {{v0}}!",
+    "maximumLengthIs": "Maximallänge ist {{v0}}!"
+  },
+  "costCenterList": {
+    "title": "Liste der Kostenstellen",
+    "error": "Fehler beim Abrufen der Kostenstellen.",
+    "noEntities": "Es konnten keine Kostenstellen gefunden werden.",
+    "add": "Neue Kostenstelle hinzufügen",
+    "oid": "ID",
+    "identification": "Bezeichnung",
+    "description": "Beschreibung"
+  },
+  "costCenterDetails": {
+    "title": "Kostenstelle",
+    "successCreate": "Kostenstelle wurde angelegt!",
+    "successUpdate": "Kostenstelle wurde geändert!",
+    "identification": "Eindeutige Bezeichnung",
+    "identification_placeholder": "Geben Sie eine eindeutige Bezeichnung ein",
+    "description": "Beschreibung",
+    "description_placeholder": "Geben Sie einen Namen ein"
+  },
+  "employeeList": {
+    "title": "Liste der Mitarbeiter",
+    "error": "Fehler beim Abrufen der Mitarbeiter.",
+    "noEntities": "Es konnten keine Mitarbeiter gefunden werden.",
+    "add": "Neuen Mitarbeiter hinzufügen",
+    "oid": "ID",
+    "personnelNumber": "Personalnummer",
+    "name": "Name",
+    "dateOfBirth": "Geburtsdatum",
+    "costCenter": "Kostenstelle"
+  },
+  "employeeDetails": {
+    "title": "Mitarbeiter",
+    "successCreate": "Mitarbeiter wurde angelegt!",
+    "successUpdate": "Mitarbeiter wurde geändert!",
+    "personnelNumber": {
+      "label": "Personalnummer",
+      "placeholder": "Geben Sie eine eindeutige Personalnummer ein"
+    },
+    "lastName": {
+      "label": "Nachname",
+      "placeholder": "Nachname"
+    },
+    "firstName": {
+      "label": "Vorname",
+      "placeholder": "Vorname (auch mehrere)"
+    },
+    "dateOfBirth": {
+      "label": "Geburtsdatum",
+      "placeholder": "Datum im Format yyyy-MM-dd (z.B. 2013-12-01)"
+    },
+    "gender": {
+      "label": "Geschlecht",
+      "placeholder": "Geschlecht auswählen",
+      "value_U": "unbestimmt",
+      "value_M": "maennlich",
+      "value_F": "weiblich",
+      "value_I": "indifferent"
+    },
+    "dateOfEntry": {
+      "label": "Eintrittsdatum",
+      "placeholder": "Datum im Format yyyy-MM-dd (z.B. 2013-12-01)"
+    },
+    "nationalityCode": {
+      "label": "Nationalität",
+      "placeholder": "Nationalität auswählen",
+      "value_DEU": "Deutschland",
+      "value_ITA": "Italien",
+      "value_USA": "USA"
+    },
+    "costCenter": {
+      "label": "Kostenstelle",
+      "placeholder": "Existierende Kostenstelle auswählen"
+    }
+  }
+}
