@@ -34,8 +34,8 @@ The complete solution is hosted on [RedHat's OPENSHIFT](https://www.openshift.co
   - JPA 2.0
   - EJB 3.2
   - JAX-RS 2.0
-- I used *JBoss EAP 6.4.0* and *JBoss Wildfly 9.1* with [Resteasy](http://resteasy.jboss.org/) for JAX-RS and [Hibernate](http://hibernate.org/orm/) for JPA. But it shouldrun on any other JEE6 application server - the only dependencies in the source code for JBoss are in [blob/master/pom.xml] and [persistence.xml](blob/master/src/main/resources/META-INF/persistence.xml).
-- A relational database supported by the JPA implementation. I used *Apache Derby Network Server 10.X* and *PostgresQL 9.4*. Others may work also with slight adoptions to [persistence.xml](blob/master/src/main/resources/META-INF/persistence.xml).
+- I used *JBoss EAP 6.4.0* and *JBoss Wildfly 9.1* with [Resteasy](http://resteasy.jboss.org/) for JAX-RS and [Hibernate](http://hibernate.org/orm/) for JPA. But it should run on any other JEE6 application server - the only dependencies in the source code for JBoss are in [pom.xml](pom.xml) and [persistence.xml](src/main/resources/META-INF/persistence.xml).
+- A relational database supported by the JPA implementation. I used *Apache Derby Network Server 10.X* and *PostgresQL 9.4*. Others may work also with slight adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml).
 
 
 ----------
@@ -117,7 +117,7 @@ Field validation at the JPA level is based on [Java Bean Validation (JSR 303)](h
 
 ## Open issues and TODOs for the current goals ##
 
-- The unit tests with *REST-assured* aren't currently real unit tests - they need a server with a well known configuration. See [TestPmsCoreApi](blob/master/src/com/giraone/samples/pmspoc1/boundary/test/TestPmsCoreApi.java) in the source to see, what I mean.
+- The unit tests with *REST-assured* aren't currently real unit tests - they need a server with a well known configuration. See [TestPmsCoreApi](src/com/giraone/samples/pmspoc1/boundary/test/TestPmsCoreApi.java) in the source to see, what I mean.
 
 - Bean validation together with I18N. Currently we use sth. like:
 
