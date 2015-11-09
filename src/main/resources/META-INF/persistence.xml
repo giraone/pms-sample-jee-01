@@ -8,9 +8,9 @@
 	<jta-data-source>java:jboss/datasources/PostgreSQLDS</jta-data-source>
     <properties>
 	  <!-- Properties for Hibernate -->
-      <property name="hibernate.hbm2ddl.auto" value="create"/>
-      <!-- <property name="hibernate.hbm2ddl.auto" value="create"/> -->
-      <!-- <property name="hibernate.hbm2ddl.auto" value="create-drop"/> -->
+      <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- UPDATE tables, if needed -->
+      <!-- <property name="hibernate.hbm2ddl.auto" value="create"/> --> <!-- CREATE tables -->
+      <!-- <property name="hibernate.hbm2ddl.auto" value="create-drop"/> -->  <!-- DROP and CREATE tables -->
       <property name="hibernate.show_sql" value="false"/> <!-- true for development -->
       <property name="hibernate.format_sql" value="true"/>
       <property name="hibernate.transaction.flush_before_completion" value="false"/> <!-- needed? -->

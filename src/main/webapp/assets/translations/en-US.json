@@ -10,6 +10,11 @@
     "back": "Back",
     "requestError": "Request failed! Please try again later."
   },
+  "globals": {
+    "dateFormatMedium": "{{date|date:'MM/dd/yyyy'}}",
+    "dateInputFormatMedium": "MM/DD/YYYY'}}",
+    "dateFormatMediumInValid": "does not match correct format \"dd.mm.yyyy\" (e.g. 29.03.1966)"
+  },
   "footer": {
     "text": "Footer - no text yet."
   },
@@ -25,6 +30,9 @@
     "costCenter": "Overview about cost centers",
     "employees": "Overview about employees",
     "more": "More info"
+  },
+  "about": {
+    "title": "About..."
   },
   "formCommon": {
     "reset": "Reset",
@@ -59,6 +67,7 @@
     "add": "Add new employee",
     "oid": "ID",
     "personnelNumber": "Personnel Number",
+    "personnelNumberShort": "P#",
     "name": "Name",
     "dateOfBirth": "Date of Birth",
     "costCenter": "Cost center"
@@ -81,7 +90,7 @@
     },
     "dateOfBirth": {
       "label": "Date of Birth",
-      "placeholder": "Enter date in format yyyy-MM-dd (e.g. 2013-12-01)"
+      "placeholder": "Enter DoB in format mm/dd/yyyy (e.g. 03/29/1966)"
     },
     "gender": {
       "label": "Gender",
@@ -93,12 +102,14 @@
     },
     "dateOfEntry": {
       "label": "Date of Entry",
-      "placeholder": "Enter date in format yyyy-MM-dd (e.g. 2013-12-01)"
+      "placeholder": "Enter entry date in format mm/dd/yyyy (e.g. 09/30/2015)"
     },
     "nationalityCode": {
       "label": "Nationality",
       "placeholder": "Select nationality",
       "value_DEU": "Germany",
+      "value_AUT": "Austria",
+      "value_CHE": "Switzerland",
       "value_ITA": "Italy",
       "value_USA": "USA"
     },

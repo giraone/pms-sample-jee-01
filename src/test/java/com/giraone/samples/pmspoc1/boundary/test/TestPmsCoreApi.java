@@ -9,8 +9,10 @@ import com.jayway.restassured.http.ContentType;
 
 public class TestPmsCoreApi
 {
-	static final String BASE_URI = "http://localhost";
-	static final int PORT = 8080;
+	//static final String BASE_URI = "http://localhost";
+	static final String BASE_URI = "http://pmssamplejee01-giraone.rhcloud.com";
+	//static final int PORT = 8080;
+	static final int PORT = 80;
 	static final String PATH_API = "/PmsSample/api";
 	
 	RequestSpecBuilder requestSpecBuilder = new RequestSpecBuilder();

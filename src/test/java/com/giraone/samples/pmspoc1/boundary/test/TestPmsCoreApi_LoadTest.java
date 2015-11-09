@@ -25,6 +25,9 @@ import com.jayway.restassured.response.Response;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 {	
+	private static final int NR_OF_COST_CENTERS = 25;
+	private static final int NR_OF_EMPLOYEES = 200;
+	
 	@BeforeClass
 	public static void setupConnection()
 	{
@@ -42,7 +45,7 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 	@Test
 	public void t_100_createManyCostCenters() throws Exception
 	{	
-		for (int i = 0; i < 25; i++)
+		for (int i = 0; i < NR_OF_COST_CENTERS; i++)
 		{
 			this.createCostCenter(i);
 		}
@@ -52,7 +55,7 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 	public void t_200_createManyEmployees() throws Exception
 	{
 		JsonArray allCostCenters = this.loadAllCostCenters();
-		for (int i = 1; i < 200; i++)
+		for (int i = 0; i < NR_OF_EMPLOYEES; i++)
 		{
 			this.createEmployee(i, allCostCenters);
 		}
@@ -80,7 +83,7 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 	
 	private void createEmployee(int i, JsonArray allCostCenters) throws Exception
 	{
-		JsonObject costCenter = (JsonObject) allCostCenters.get(i % 100);
+		JsonObject costCenter = (JsonObject) allCostCenters.get(i % NR_OF_COST_CENTERS);
 		String personnelNumber = String.format("%05d", i);
 		EnumGender gender = SimpleTestDataGenerator.randomGender();
 		

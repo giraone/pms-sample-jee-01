@@ -10,6 +10,11 @@
     "back": "Zurück",
     "requestError": "Anfrage konnte nicht ausgeführt werden! Bitte probiere es später noch einmal."
   },
+  "globals": {
+    "dateFormatMedium": "{{date|date:'dd.MM.yyyy'}}",
+    "dateInputFormatMedium": "DD.MM.YYYY'}}",
+    "dateFormatMediumInValid": "passt nicht zum notwendigen Datumsformat \"TT.MM.JJJJ\" (z.B. 29.03.1966)"
+  },
   "footer": {
     "text": "Footer - noch ohne Text."
   },
@@ -25,6 +30,9 @@
     "costCenter": "Übersicht Kostenstellen",
     "employees": "Übersicht Mitarbeiter",
     "more": "Mehr erfahren"
+  },
+  "about": {
+    "title": "Über..."
   },
   "formCommon": {
     "reset": "Zurücksetzen",
@@ -59,6 +67,7 @@
     "add": "Neuen Mitarbeiter hinzufügen",
     "oid": "ID",
     "personnelNumber": "Personalnummer",
+    "personnelNumberShort": "PNR",
     "name": "Name",
     "dateOfBirth": "Geburtsdatum",
     "costCenter": "Kostenstelle"
@@ -81,24 +90,26 @@
     },
     "dateOfBirth": {
       "label": "Geburtsdatum",
-      "placeholder": "Datum im Format yyyy-MM-dd (z.B. 2013-12-01)"
+      "placeholder": "Geburtsdatum im Format TT.MM.JJJJ (z.B. 29.03.1966)"
     },
     "gender": {
       "label": "Geschlecht",
       "placeholder": "Geschlecht auswählen",
       "value_U": "unbestimmt",
-      "value_M": "maennlich",
+      "value_M": "männlich",
       "value_F": "weiblich",
       "value_I": "indifferent"
     },
     "dateOfEntry": {
       "label": "Eintrittsdatum",
-      "placeholder": "Datum im Format yyyy-MM-dd (z.B. 2013-12-01)"
+      "placeholder": "Eintrittsdatum im Format TT.MM.JJJJ (z.B. 30.09.2015)"
     },
     "nationalityCode": {
       "label": "Nationalität",
       "placeholder": "Nationalität auswählen",
       "value_DEU": "Deutschland",
+      "value_AUT": "Österreich",
+      "value_CHE": "Schweiz",
       "value_ITA": "Italien",
       "value_USA": "USA"
     },

@@ -86,7 +86,7 @@ public class EmployeeEndpoint extends BaseEndpoint
      * Additional GET method using the also unique "personnelNumber" attribute prefixed with "pnr-"
      * 
      * @param personnelNumber
-     * @return
+     * @return EmployeeDTO object
      */
     @GET
     @Path("/pnr-{personnelNumber:[0-9a-zA-Z][0-9a-zA-Z]*}")
@@ -178,8 +178,9 @@ public class EmployeeEndpoint extends BaseEndpoint
 		return results;
 	}
 
+	// TODO: Remove this JPQL version
 	@GET
-	@Path("/x")
+	@Path("/alternative")
 	@Produces("application/json")
 	public List<EmployeeDTO> listAll2(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult)
 	{
@@ -237,7 +238,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@Consumes("application/json")
 	public Response update(@PathParam("id") Long id, EmployeeDTO dto)
 	{
-		System.err.println("xxxxxxxxxxxxxx update " + id + " " + dto);
+		//System.err.println("EmployeeEndpoint.update " + id + " " + dto);
 		if (dto == null || id == null)
 		{
 			return Response.status(Status.BAD_REQUEST).build();
@@ -245,7 +246,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 
 		if (!id.equals(dto.getOid()))
 		{
-			System.err.println("xxxxxxxxxxxxxx update CONFLICT");
+			System.err.println("EmployeeEndpoint.update CONFLICT");
 			return Response.status(Status.CONFLICT).entity(dto).build();
 		}
 
@@ -265,7 +266,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 			}
 			catch (OptimisticLockException e)
 			{
-				System.err.println("xxxxxxxxxxxxxx update OptimisticLockException");
+				System.err.println("EmployeeEndpoint.update OptimisticLockException");
 				TransactionUtil.rollback(tx);
 				return Response.status(Status.CONFLICT).entity(e.getEntity()).build();
 			}
@@ -276,7 +277,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 		{
 			TransactionUtil.rollback(tx);
 			boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
-			System.err.println("############ " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
+			System.err.println("EmployeeEndpoint.update: " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
 			if (isConstraintViolated)
 			{
 				return Response.status(Status.CONFLICT).build();

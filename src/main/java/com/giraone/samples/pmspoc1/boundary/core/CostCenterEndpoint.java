@@ -85,7 +85,7 @@ public class CostCenterEndpoint extends BaseEndpoint
      * Additional GET method using the also unique "identification" attribute prefixed with "id-"
      * 
      * @param identification
-     * @return
+     * @return CostCenterDTO object
      */
     @GET
     @Path("/id-{identification:[0-9a-zA-Z][0-9a-zA-Z]*}")
@@ -179,7 +179,7 @@ public class CostCenterEndpoint extends BaseEndpoint
     @Consumes("application/json")
     public Response update(@PathParam("id") Long id, CostCenterDTO dto)
     {
-        System.err.println("xxxxxxxxxxxxxx update " + id + " " + dto);
+        //System.err.println("CostCenterEndpoint.update " + id + " " + dto);
         if (dto == null || id == null)
         {
             return Response.status(Status.BAD_REQUEST).build();
@@ -187,7 +187,7 @@ public class CostCenterEndpoint extends BaseEndpoint
 
         if (!id.equals(dto.getOid()))
         {
-            System.err.println("xxxxxxxxxxxxxx update CONFLICT");
+        	System.err.println("CostCenterEndpoint.update CONFLICT");
             return Response.status(Status.CONFLICT).entity(dto).build();
         }
 
@@ -208,7 +208,7 @@ public class CostCenterEndpoint extends BaseEndpoint
             }
             catch (OptimisticLockException e)
             {
-                System.err.println("xxxxxxxxxxxxxx update OptimisticLockException");
+            	System.err.println("CostCenterEndpoint.update OptimisticLockException");
                 TransactionUtil.rollback(tx);
                 return Response.status(Status.CONFLICT).entity(e.getEntity()).build();
             }
@@ -219,7 +219,7 @@ public class CostCenterEndpoint extends BaseEndpoint
         {
         	TransactionUtil.rollback(tx);
             boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
-            System.err.println("############ " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
+            System.err.println("CostCenterEndpoint.update: " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
             if (isConstraintViolated)
             {
                 return Response.status(Status.CONFLICT).build();
@@ -242,7 +242,7 @@ public class CostCenterEndpoint extends BaseEndpoint
                 return Response.status(Status.NOT_FOUND).build();
             }           
             em.remove(entity);
-            System.err.println("xxxxxxxxxxxxxx DELETED1 " + id);
+            //System.err.println("CostCenterEndpoint.deleteById " + id);
             tx.commit();
             return Response.noContent().build();
         }
@@ -266,9 +266,6 @@ public class CostCenterEndpoint extends BaseEndpoint
 		long count = tq.getSingleResult().longValue();
         Calendar lastUpdate = new GregorianCalendar();
         CostCenterSummaryDTO dto = new CostCenterSummaryDTO(count, lastUpdate);
-        return Response.ok(dto)
-        	.header("Access-Control-Allow-Origin", "127.0.0.1")
-			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
-			.build();
+        return Response.ok(dto).build();
     }
 }
