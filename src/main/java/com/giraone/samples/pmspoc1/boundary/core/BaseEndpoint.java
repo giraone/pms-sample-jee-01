@@ -10,6 +10,8 @@ import javax.ws.rs.core.Response;
  */
 public class BaseEndpoint
 {
+	protected final static String DEFAULT_PAGING_SIZE = "20";
+	
 	// Match root-resources
 	@OPTIONS
 	public Response options()

@@ -10,6 +10,7 @@ import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceContext;
@@ -21,6 +22,7 @@ import javax.persistence.criteria.Root;
 import javax.transaction.UserTransaction;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -31,6 +33,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
 import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterDTO;
@@ -48,8 +54,13 @@ import com.giraone.samples.pmspoc1.entity.CostCenter_;
 @Path("/costcenters")
 public class CostCenterEndpoint extends BaseEndpoint
 {
+	private static final Marker LOG_TAG = MarkerManager.getMarker("API");
+	
+	@Inject
+	private Logger logger;
+	
     @Resource
-    UserTransaction tx;
+    private UserTransaction tx;
 
     @PersistenceContext(unitName = PmsCoreApi.PERSISTENCE_UNIT)
     private EntityManager em;
@@ -59,6 +70,9 @@ public class CostCenterEndpoint extends BaseEndpoint
     @Produces("application/json")
     public Response findById(@PathParam("id") Long id)
     {
+    	if (logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "findById; id=" + id);
+    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<CostCenter> c = cb.createQuery(CostCenter.class);
         final Root<CostCenter> table = c.from(CostCenter.class);
@@ -92,6 +106,9 @@ public class CostCenterEndpoint extends BaseEndpoint
     @Produces("application/json")
     public Response findByIdentification(@PathParam("identification") String identification)
     {
+    	if (logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "identification; identification=\"" + identification + "\"");
+    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<CostCenter> c = cb.createQuery(CostCenter.class);
         final Root<CostCenter> table = c.from(CostCenter.class);
@@ -114,29 +131,41 @@ public class CostCenterEndpoint extends BaseEndpoint
         }
     }
 
+    /**
+     * List all entities with support for OData filters.
+     * @param filter	OData filter expression
+     * @param orderby	OData sort expression
+     * @param skip		OData paging
+     * @param top		OData filter expression
+     * @return
+     */
     @GET
     @Produces("application/json")
-    public List<CostCenterDTO> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult)
+    public List<CostCenterDTO> listAll(
+    	@QueryParam("filter") @DefaultValue("") String filter,
+		@QueryParam("orderby") @DefaultValue("") String orderby,
+		@QueryParam("skip") @DefaultValue("0") int skip,
+		@QueryParam("top") @DefaultValue(DEFAULT_PAGING_SIZE) int top)
     {
+    	if (logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "listAll; filter=\"" + filter + "\", orderby=\"" + orderby + "\""
+				+ ", skip=" + skip + ", top=" + top);
+    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<CostCenter> c = cb.createQuery(CostCenter.class);
         final Root<CostCenter> table = c.from(CostCenter.class);
         final CriteriaQuery<CostCenter> select = c.select(table);
-        // TODO: No filtering yet
         /*
-         * final Predicate predicate = null; if (predicate != null) { select.where(predicate); }
-         */
-        select.orderBy(cb.asc(table.get(CostCenter_.oid)));
+        ODataToJpaQueryBuilder<CostCenter> filterBuilder = new ODataToJpaQueryBuilder<CostCenter>();
+		filterBuilder.setCriteriaTable(cb, table);
+		Predicate predicate = filterBuilder.parseFilterExpression(filter);
+		if (predicate != null) { select.where(predicate); }
+		filterBuilder.parseOrderExpression(cb, select, orderby);
+		*/
         final TypedQuery<CostCenter> tq = em.createQuery(select);
-
-        if (startPosition != null)
-        {
-            tq.setFirstResult(startPosition);
-        }
-        if (maxResult != null)
-        {
-            tq.setMaxResults(maxResult);
-        }
+        //tq.setFirstResult(skip);
+        //tq.setMaxResults(top);
+                
         final List<CostCenter> searchResults = tq.getResultList();
         final List<CostCenterDTO> results = new ArrayList<CostCenterDTO>();
         for (CostCenter searchResult : searchResults)
@@ -151,6 +180,10 @@ public class CostCenterEndpoint extends BaseEndpoint
     @Consumes("application/json")
     public Response create(CostCenterDTO dto)
     {
+    	if (logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "create; identification=\""
+				+ (dto == null ? "null" :dto.getIdentification()) + "\"");
+    	
         try
         {
             tx.begin();
@@ -179,7 +212,11 @@ public class CostCenterEndpoint extends BaseEndpoint
     @Consumes("application/json")
     public Response update(@PathParam("id") Long id, CostCenterDTO dto)
     {
-        //System.err.println("CostCenterEndpoint.update " + id + " " + dto);
+    	if (logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "update; id=" + id
+				+ ", new.id" + (dto == null ? "null" : dto.getOid())
+				+ ", new.identification" + (dto == null ? "null" :dto.getIdentification()) + "\"");
+    	
         if (dto == null || id == null)
         {
             return Response.status(Status.BAD_REQUEST).build();
@@ -187,7 +224,7 @@ public class CostCenterEndpoint extends BaseEndpoint
 
         if (!id.equals(dto.getOid()))
         {
-        	System.err.println("CostCenterEndpoint.update CONFLICT");
+        	logger.warn(LOG_TAG, "update CONFLICT id1=" + id + ", id2=" + dto.getOid());
             return Response.status(Status.CONFLICT).entity(dto).build();
         }
 
@@ -208,7 +245,7 @@ public class CostCenterEndpoint extends BaseEndpoint
             }
             catch (OptimisticLockException e)
             {
-            	System.err.println("CostCenterEndpoint.update OptimisticLockException");
+            	logger.warn(LOG_TAG, "update OptimisticLockException");
                 TransactionUtil.rollback(tx);
                 return Response.status(Status.CONFLICT).entity(e.getEntity()).build();
             }
@@ -219,7 +256,7 @@ public class CostCenterEndpoint extends BaseEndpoint
         {
         	TransactionUtil.rollback(tx);
             boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
-            System.err.println("CostCenterEndpoint.update: " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
+            logger.warn(LOG_TAG, "update: " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
             if (isConstraintViolated)
             {
                 return Response.status(Status.CONFLICT).build();
@@ -232,6 +269,9 @@ public class CostCenterEndpoint extends BaseEndpoint
     @Path("/{id:[0-9][0-9]*}")
     public Response deleteById(@PathParam("id") Long id)
     {
+    	if (logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "deleteById; id=" + id);
+    	
         try
         {  
         	tx.begin();
@@ -242,7 +282,6 @@ public class CostCenterEndpoint extends BaseEndpoint
                 return Response.status(Status.NOT_FOUND).build();
             }           
             em.remove(entity);
-            //System.err.println("CostCenterEndpoint.deleteById " + id);
             tx.commit();
             return Response.noContent().build();
         }

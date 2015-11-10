@@ -2,9 +2,8 @@ package com.giraone.samples.pmspoc1.boundary.test;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.path.json.JsonPath.from;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.StringReader;
 import java.net.HttpURLConnection;
@@ -68,6 +67,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	        .statusCode(HttpURLConnection.HTTP_NOT_FOUND);
 	        .contentType(ContentType.JSON); // if content is returned
 	        .body("attr", is(attr_value)); // if response has to be checked
+	        .body("any { it.key == 'attr' }", is(true)); // attr must be defined (no value check)
 	        
 	  * Samples JSON generation:
 	  	JsonObject model = Json.createObjectBuilder()
@@ -86,23 +86,9 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	  */
 	
 	//------------------------------------------------------------------------------------------
-
-	@Test
-	public void t_100_GET_simple_shouldReturnCorrectStatusAndHeader() throws Exception
-	{	
-	    given()
-	        .spec(requestSpecBuilder.build())
-	        .log().all()
-		.when()
-			.get(PATH_TO_RESOURCE)
-		.then()
-			.log().body()
-			.statusCode(HttpURLConnection.HTTP_OK)
-			.contentType(ContentType.JSON);
-	}
 	
 	@Test
-	public void t_101_GET_byExistingId_shouldReturnCorrectStatusHeaderAndBody() throws Exception
+	public void t_100_GET_byExistingId_shouldReturnCorrectStatusHeaderAndBody() throws Exception
 	{	
 		String domainKey = ENTITY_VALID_domainKey;
 		int oid = this.createFreshEntityAndReturnOid(domainKey);
@@ -117,11 +103,13 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 			.log().body()
 			.statusCode(HttpURLConnection.HTTP_OK)
 			.contentType(ContentType.JSON)
-			.body("oid", is(oid));
+			.body("oid", is(oid))
+	    	.body("any { it.key == '" + CostCenter_.DTO_NAME_identification + "' }", is(true))
+	    	.body("any { it.key == '" + CostCenter_.DTO_NAME_description + "' }", is(true));
 	}
 	
 	@Test
-	public void t_102_GET_byNonExistingId_shouldReturnStatusNotFound() throws Exception
+	public void t_101_GET_byNonExistingId_shouldReturnStatusNotFound() throws Exception
 	{
 		// Create an entity, to get a valid oid ...
 	    String domainKey = ENTITY_NOT_EXISTING_domainKey;
@@ -138,6 +126,51 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		.then()
 			.log().all()
 			.statusCode(HttpURLConnection.HTTP_NOT_FOUND);
+	}
+	
+	@Test
+	public void t_110_GET_listAll_shouldReturnCorrectStatusAndHeader() throws Exception
+	{	
+	    given()
+	        .spec(requestSpecBuilder.build())
+		.when()
+			.get(PATH_TO_RESOURCE)
+		.then()
+			.log().body()
+			.statusCode(HttpURLConnection.HTTP_OK)
+			.contentType(ContentType.JSON);
+	}
+		
+	@Test
+	public void t_111_GET_listAll_Top10_shouldReturnLessThanOrEqualTo() throws Exception
+	{
+		String response = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("top", 10)
+	        .get(PATH_TO_RESOURCE).asString();
+		int count = from(response).getList("").size();
+		assertThat("count", count, lessThanOrEqualTo(10));
+	}
+
+	@Test
+	public void t_112_GET_listAll_Skip1_shouldReturnNotFirst() throws Exception
+	{
+		String response1 = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("top", 10)
+	        .queryParam("skip", 0)
+	        .get(PATH_TO_RESOURCE).asString();
+		long firstOid = from(response1).getLong("[0].oid");
+		long secondOid = from(response1).getLong("[1].oid");
+		assertThat(secondOid, not(equalTo(firstOid)));
+		
+		String response2 = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("top", 10)
+	        .queryParam("skip", 1)
+	        .get(PATH_TO_RESOURCE).asString();
+		long firstOid2 = from(response2).getLong("[0].oid");
+		assertThat(firstOid2, not(equalTo(secondOid)));
 	}
 	
 	@Test

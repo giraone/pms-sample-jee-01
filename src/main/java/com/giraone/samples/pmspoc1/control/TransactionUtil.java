@@ -1,5 +1,6 @@
 package com.giraone.samples.pmspoc1.control;
 
+import javax.inject.Inject;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -7,8 +8,17 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+
 public class TransactionUtil
 {
+	private static final Marker LOG_TAG = MarkerManager.getMarker("JTA");
+	
+	@Inject
+	private static Logger logger;
+	
 	public static void begin(UserTransaction tx) throws NotSupportedException, SystemException
 	{
 		tx.begin();
@@ -30,8 +40,7 @@ public class TransactionUtil
     		}
     		catch (Exception e)
     		{
-    			// TODO: Introduce special logger
-    			System.err.println(e);
+    			logger.warn(LOG_TAG, "TransactionUtil.rollback failed", e);
     		}
     	}
 	}
