@@ -40,7 +40,10 @@ public class TransactionUtil
     		}
     		catch (Exception e)
     		{
-    			logger.warn(LOG_TAG, "TransactionUtil.rollback failed", e);
+    			if (logger != null)
+    				logger.warn(LOG_TAG, "TransactionUtil.rollback failed", e);
+    			else
+    				System.err.println("TransactionUtil.rollback failed: " + e);
     		}
     	}
 	}
