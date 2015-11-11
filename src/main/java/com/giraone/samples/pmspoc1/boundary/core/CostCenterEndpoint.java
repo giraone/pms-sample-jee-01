@@ -41,6 +41,7 @@ import org.apache.logging.log4j.MarkerManager;
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
 import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterSummaryDTO;
+import com.giraone.samples.pmspoc1.boundary.core.odata.ODataToJpaQueryBuilder;
 import com.giraone.samples.pmspoc1.control.PersistenceUtil;
 import com.giraone.samples.pmspoc1.control.TransactionUtil;
 import com.giraone.samples.pmspoc1.entity.CostCenter;
@@ -155,16 +156,16 @@ public class CostCenterEndpoint extends BaseEndpoint
         final CriteriaQuery<CostCenter> c = cb.createQuery(CostCenter.class);
         final Root<CostCenter> table = c.from(CostCenter.class);
         final CriteriaQuery<CostCenter> select = c.select(table);
-        /*
+        
         ODataToJpaQueryBuilder<CostCenter> filterBuilder = new ODataToJpaQueryBuilder<CostCenter>();
 		filterBuilder.setCriteriaTable(cb, table);
 		Predicate predicate = filterBuilder.parseFilterExpression(filter);
 		if (predicate != null) { select.where(predicate); }
 		filterBuilder.parseOrderExpression(cb, select, orderby);
-		*/
+		
         final TypedQuery<CostCenter> tq = em.createQuery(select);
-        //tq.setFirstResult(skip);
-        //tq.setMaxResults(top);
+        tq.setFirstResult(skip);
+        tq.setMaxResults(top);
                 
         final List<CostCenter> searchResults = tq.getResultList();
         final List<CostCenterDTO> results = new ArrayList<CostCenterDTO>();

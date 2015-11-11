@@ -3,11 +3,16 @@ package com.giraone.samples.pmspoc1.boundary.test;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.path.json.JsonPath.from;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
 
 import java.net.HttpURLConnection;
 import java.util.Date;
+import java.util.Random;
 
 import javax.json.Json;
 
@@ -36,6 +41,8 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	static final String ENTITY_VALID_domainKey = "123456";
 	static final String ENTITY_NOT_EXISTING_domainKey = "fake98765";
 
+	static final Random RANDOM = new Random();
+	
 	@BeforeClass
 	public static void setupConnection()
 	{
@@ -65,6 +72,103 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 
 	// ------------------------------------------------------------------------------------------
 
+	@Test
+	public void t_110_GET_listAll_shouldReturnCorrectStatusAndHeader() throws Exception
+	{	
+	    given()
+	        .spec(requestSpecBuilder.build())
+		.when()
+			.get(PATH_TO_RESOURCE)
+		.then()
+			.log().body()
+			.statusCode(HttpURLConnection.HTTP_OK)
+			.contentType(ContentType.JSON);
+	}
+		
+	@Test
+	public void t_111_GET_listAll_top10_shouldReturnLessThanOrEqualTo() throws Exception
+	{
+		int top = 3;
+		String response = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("top", top)
+	        .get(PATH_TO_RESOURCE).asString();
+		int count = from(response).getList("").size();
+		assertThat("count", count, lessThanOrEqualTo(top));
+	}
+
+	@Test
+	public void t_112_GET_listAll_skip1_shouldReturnNotFirst() throws Exception
+	{
+		String response1 = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("top", 10)
+	        .queryParam("skip", 0)
+	        .get(PATH_TO_RESOURCE).asString();
+		int count = from(response1).getList("").size();
+		if (count < 3) return;
+		
+		long firstOid = from(response1).getLong("[0].oid");
+		long secondOid = from(response1).getLong("[1].oid");
+		assertThat(secondOid, not(equalTo(firstOid)));
+		
+		String response2 = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("top", 10)
+	        .queryParam("skip", 1)
+	        .get(PATH_TO_RESOURCE).asString();
+		long firstOid2 = from(response2).getLong("[0].oid");
+		assertThat(firstOid2, equalTo(secondOid));
+	}
+
+	@Test
+	public void t_113_GET_listAll_filters_shouldWork() throws Exception
+	{
+		// Create an entity, to get a valid oid ...
+		int oid = this.createFreshEntityAndReturnOid();
+		String getUri = PATH_TO_RESOURCE + "/" + oid;
+		Response response1 = given().spec(requestSpecBuilder.build()).get(getUri);
+		String personnelNumber = response1.path(Employee_.DTO_NAME_personnelNumber);
+		String lastName = response1.path(Employee_.DTO_NAME_lastName);
+		//String dateOfBirth = response1.path(Employee_.DTO_NAME_dateOfBirth);
+		
+		{
+			String response = given()
+		        .spec(requestSpecBuilder.build())
+		        .queryParam("filter", CostCenter_.DTO_NAME_oid + " eq " + oid)
+				.get(PATH_TO_RESOURCE).asString();
+			int fetchedOid = from(response).getInt("[0].oid");
+			assertThat(fetchedOid, equalTo(oid));
+		}
+		
+		{
+			String response = given()
+		        .spec(requestSpecBuilder.build())
+		        .queryParam("filter", Employee_.DTO_NAME_personnelNumber + " eq '" + personnelNumber + "'")
+				.get(PATH_TO_RESOURCE).asString();
+			int fetchedOid = from(response).getInt("[0].oid");
+			assertThat(fetchedOid, equalTo(oid));
+		}
+		
+		{
+			String response = given()
+		        .spec(requestSpecBuilder.build())
+		        .queryParam("filter", Employee_.DTO_NAME_oid + " eq " + oid + " and " + Employee_.DTO_NAME_personnelNumber + " eq '" + personnelNumber + "'")
+				.get(PATH_TO_RESOURCE).asString();
+			int fetchedOid = from(response).getInt("[0].oid");
+			assertThat(fetchedOid, equalTo(oid));
+		}
+		
+		{
+			String response = given()
+		        .spec(requestSpecBuilder.build())
+		        .queryParam("filter", Employee_.DTO_NAME_lastName + " eq " + lastName)
+				.get(PATH_TO_RESOURCE).asString();
+			int fetchedOid = from(response).getInt("[0].oid");
+			assertThat(fetchedOid, equalTo(oid));
+		}
+	}
+	
 	@Test
 	public void t_100_GET_simple_shouldReturnCorrectStatusAndHeader() throws Exception
 	{
@@ -326,6 +430,11 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
     		entityLocation.lastIndexOf("/") + 1, entityLocation.length()));
 	}
 
+	int createFreshEntityAndReturnOid()
+	{
+		return this.createFreshEntityAndReturnOid("R" + RANDOM.nextInt(100000));
+	}
+	
 	private int createFreshCostCenterAndReturnOid(String domainKey)
 	{
 		TestPmsCoreApi_CostCenter costCenterTest = new TestPmsCoreApi_CostCenter();

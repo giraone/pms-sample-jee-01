@@ -43,6 +43,7 @@ import javax.ws.rs.core.UriBuilder;
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeSummaryDTO;
+import com.giraone.samples.pmspoc1.boundary.core.odata.ODataToJpaQueryBuilder;
 import com.giraone.samples.pmspoc1.control.PersistenceUtil;
 import com.giraone.samples.pmspoc1.control.TransactionUtil;
 import com.giraone.samples.pmspoc1.entity.Employee;
@@ -188,13 +189,13 @@ public class EmployeeEndpoint extends BaseEndpoint
 		final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
 		final Root<Employee> table = c.from(Employee.class);
 		final CriteriaQuery<Employee> select = c.select(table);
-		/*
+		
         ODataToJpaQueryBuilder<Employee> filterBuilder = new ODataToJpaQueryBuilder<Employee>();
 		filterBuilder.setCriteriaTable(cb, table);
 		Predicate predicate = filterBuilder.parseFilterExpression(filter);
 		if (predicate != null) { select.where(predicate); }
 		filterBuilder.parseOrderExpression(cb, select, orderby);
-		*/
+		
         final TypedQuery<Employee> tq = em.createQuery(select);
 
         tq.setFirstResult(skip);

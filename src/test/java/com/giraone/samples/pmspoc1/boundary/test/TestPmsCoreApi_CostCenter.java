@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 
 import java.io.StringReader;
 import java.net.HttpURLConnection;
+import java.util.Random;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -38,6 +39,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	
 	static final String ENTITY_VALID_description = "Cost Center OneTwoThreeFourFive";
 	
+	static final Random RANDOM = new Random();
 	
 	@BeforeClass
 	public static void setupConnection()
@@ -90,8 +92,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	@Test
 	public void t_100_GET_byExistingId_shouldReturnCorrectStatusHeaderAndBody() throws Exception
 	{	
-		String domainKey = ENTITY_VALID_domainKey;
-		int oid = this.createFreshEntityAndReturnOid(domainKey);
+		int oid = this.createFreshEntityAndReturnOid();
 		
 	    given()
 	        .spec(requestSpecBuilder.build())
@@ -112,8 +113,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	public void t_101_GET_byNonExistingId_shouldReturnStatusNotFound() throws Exception
 	{
 		// Create an entity, to get a valid oid ...
-	    String domainKey = ENTITY_NOT_EXISTING_domainKey;
-	    int oid = this.createFreshEntityAndReturnOid(domainKey);
+	    int oid = this.createFreshEntityAndReturnOid();
 	    // ... and delete it, to force "NOT FOUND"
 	    this.deleteEntityByOidAndIgnoreStatus(oid);
 		
@@ -142,24 +142,28 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	}
 		
 	@Test
-	public void t_111_GET_listAll_Top10_shouldReturnLessThanOrEqualTo() throws Exception
+	public void t_111_GET_listAll_top10_shouldReturnLessThanOrEqualTo() throws Exception
 	{
+		int top = 3;
 		String response = given()
 	        .spec(requestSpecBuilder.build())
-	        .queryParam("top", 10)
+	        .queryParam("top", top)
 	        .get(PATH_TO_RESOURCE).asString();
 		int count = from(response).getList("").size();
-		assertThat("count", count, lessThanOrEqualTo(10));
+		assertThat("count", count, lessThanOrEqualTo(top));
 	}
 
 	@Test
-	public void t_112_GET_listAll_Skip1_shouldReturnNotFirst() throws Exception
+	public void t_112_GET_listAll_skip1_shouldReturnNotFirst() throws Exception
 	{
 		String response1 = given()
 	        .spec(requestSpecBuilder.build())
 	        .queryParam("top", 10)
 	        .queryParam("skip", 0)
 	        .get(PATH_TO_RESOURCE).asString();
+		int count = from(response1).getList("").size();
+		if (count < 3) return;
+		
 		long firstOid = from(response1).getLong("[0].oid");
 		long secondOid = from(response1).getLong("[1].oid");
 		assertThat(secondOid, not(equalTo(firstOid)));
@@ -170,7 +174,95 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	        .queryParam("skip", 1)
 	        .get(PATH_TO_RESOURCE).asString();
 		long firstOid2 = from(response2).getLong("[0].oid");
-		assertThat(firstOid2, not(equalTo(secondOid)));
+		assertThat(firstOid2, equalTo(secondOid));
+	}
+
+	@Test
+	public void t_113_GET_listAll_filters_shouldWork() throws Exception
+	{
+		// Create an entity, to get a valid oid ...
+		int oid = this.createFreshEntityAndReturnOid();
+		String getUri = PATH_TO_RESOURCE + "/" + oid;
+		Response response1 = given().spec(requestSpecBuilder.build()).get(getUri);
+		String identifcation = response1.path(CostCenter_.DTO_NAME_identification);
+
+		{
+			String response = given()
+		        .spec(requestSpecBuilder.build())
+		        .queryParam("filter", CostCenter_.DTO_NAME_oid + " eq " + oid)
+				.get(PATH_TO_RESOURCE).asString();
+			int fetchedOid = from(response).getInt("[0].oid");
+			assertThat(fetchedOid, equalTo(oid));
+		}
+		
+		{
+			String response = given()
+		        .spec(requestSpecBuilder.build())
+		        .queryParam("filter", CostCenter_.DTO_NAME_identification + " eq '" + identifcation + "'")
+				.get(PATH_TO_RESOURCE).asString();
+			int fetchedOid = from(response).getInt("[0].oid");
+			assertThat(fetchedOid, equalTo(oid));
+		}
+		
+		{
+			String response = given()
+		        .spec(requestSpecBuilder.build())
+		        .queryParam("filter", CostCenter_.DTO_NAME_oid + " eq " + oid + " and " + CostCenter_.DTO_NAME_identification + " eq '" + identifcation + "'")
+				.get(PATH_TO_RESOURCE).asString();
+			int fetchedOid = from(response).getInt("[0].oid");
+			assertThat(fetchedOid, equalTo(oid));
+		}
+	}
+
+	@Test
+	public void t_120_GET_listAll_orderBy_shouldWork() throws Exception
+	{
+		String response1 = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("orderBy", "oid")
+	        .get(PATH_TO_RESOURCE).asString();
+		int count = from(response1).getList("").size();
+		if (count < 3) return;
+		
+		long firstOid = from(response1).getLong("[0].oid");
+		long secondOid = from(response1).getLong("[1].oid");
+		long thirdOid = from(response1).getLong("[2].oid");
+		assertThat(firstOid, lessThan(secondOid));
+		assertThat(secondOid, lessThan(thirdOid));
+	}
+
+	@Test
+	public void t_121_GET_listAll_orderByAsc_shouldWork() throws Exception
+	{
+		String response1 = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("orderBy", "oid asc")
+	        .get(PATH_TO_RESOURCE).asString();
+		int count = from(response1).getList("").size();
+		if (count < 3) return;
+		
+		long firstOid = from(response1).getLong("[0].oid");
+		long secondOid = from(response1).getLong("[1].oid");
+		long thirdOid = from(response1).getLong("[2].oid");
+		assertThat(firstOid, lessThan(secondOid));
+		assertThat(secondOid, lessThan(thirdOid));
+	}
+	
+	@Test
+	public void t_122_GET_listAll_orderByDesc_shouldWork() throws Exception
+	{
+		String response1 = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("orderBy", "oid desc")
+	        .get(PATH_TO_RESOURCE).asString();
+		int count = from(response1).getList("").size();
+		if (count < 3) return;
+		
+		long firstOid = from(response1).getLong("[0].oid");
+		long secondOid = from(response1).getLong("[1].oid");
+		long thirdOid = from(response1).getLong("[2].oid");
+		assertThat(firstOid, lessThan(secondOid));
+		assertThat(secondOid, lessThan(thirdOid));
 	}
 	
 	@Test
@@ -232,7 +324,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	@Test
 	public void t_300_PUT_validData_shouldReturnStatusNoContent() throws Exception
 	{
-	    int oid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
+	    int oid = this.createFreshEntityAndReturnOid();
 	    String getUri = PATH_TO_RESOURCE + "/" + oid;
 	    Response oldResponse = given().spec(requestSpecBuilder.build()).get(getUri);
 	    int oldVersionNumber = oldResponse.path(CostCenter_.DTO_NAME_versionNumber);
@@ -277,7 +369,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	@Test
 	public void t_300_PUT_orginalData_shouldReturnStatusNoContentAndNoVersionChange() throws Exception
 	{
-	    int oid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
+	    int oid = this.createFreshEntityAndReturnOid();
 	    String getUri = PATH_TO_RESOURCE + "/" + oid;
 	    Response oldResponse = given().spec(requestSpecBuilder.build()).get(getUri);
 	    int oldVersionNumber = oldResponse.path(CostCenter_.DTO_NAME_versionNumber);
@@ -320,7 +412,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	@Test
 	public void t_400_DELETE_existing_shouldReturnStatusNoContent() throws Exception
 	{
-		int newOid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
+		int newOid = this.createFreshEntityAndReturnOid();
 	     
 	    ResponseSpecBuilder noContentInResponse = new ResponseSpecBuilder();
 	    noContentInResponse.expectBody(is("")).expectContentType("");
@@ -340,8 +432,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	public void t_401_DELETE_nonExisting_shouldReturnStatusNotFound() throws Exception
 	{
 		// Create an entity, to get a valid oid ...
-	    String domainKey = ENTITY_NOT_EXISTING_domainKey;
-	    int oid = this.createFreshEntityAndReturnOid(domainKey);
+	    int oid = this.createFreshEntityAndReturnOid();
 	    // ... and delete it, to force "NOT FOUND"
 	    this.deleteEntityByOidAndIgnoreStatus(oid);
 	    
@@ -392,9 +483,15 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		this.deleteEntityByOidAndIgnoreStatus(oid);
 	}
 	
+	int createFreshEntityAndReturnOid()
+	{
+		return this.createFreshEntityAndReturnOid("R" + RANDOM.nextInt(100000));
+	}
+	
 	int createFreshEntityAndReturnOid(String domainKey)
 	{	
-		this.deleteEntityByIdentificationAndIgnoreStatus(domainKey);		
+		this.deleteEntityByIdentificationAndIgnoreStatus(domainKey);
+		
 	    Response response = given()
 	    	.spec(requestSpecBuilder.build())
 	        	.body("{"
