@@ -24,6 +24,7 @@ MANIFEST.MF
 build/
 dist/
 node_modules/
+.temp/
 
 # Windows Installer files
 *.cab
