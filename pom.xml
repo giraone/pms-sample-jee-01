@@ -137,10 +137,12 @@
 		</dependency>
 		
 		<!-- For OData filters in REST APIs -->
+		<!--
 		<dependency>
 			<groupId>org.apache.olingo</groupId>
 			<artifactId>olingo-odata2-core</artifactId>
 		</dependency>
+		-->
 		<!-- Log4J as logging framework -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
