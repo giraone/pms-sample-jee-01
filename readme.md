@@ -119,9 +119,13 @@ The base for the implementation of $filter and $orderby query options in REST AP
 
 ## Open issues and TODOs for the current goals ##
 
+- Currently the solution must use *olingo-odata2-core 2.0.6-SNAPSHOT*, because of this bug: [OLINGO-761](https://issues.apache.org/jira/browse/OLINGO-761?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel)
+
 - The unit tests with *REST-assured* aren't currently real unit tests - they need a server with a well known configuration. See [TestPmsCoreApi](src/com/giraone/samples/pmspoc1/boundary/test/TestPmsCoreApi.java) in the source to see, what I mean.
 
-- Bean validation together with I18N. Currently we use sth. like:
+- Unit tests for the OData implementation are missed. There is only a test page `webapp/test/index.html`.
+
+- Bean validation together with I18N is not yet perfect. Currently the code uses sth. like:
 
 ```
 	@Pattern(regexp = "[0-9A-Za-z]*", message = "Only numbers and ASCII letters are allowed")
