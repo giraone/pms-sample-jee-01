@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Some REST Examples</title>
+</head>
+<body>
+<h1>Some REST Examples with OData parameters to be used from a Browser</h1>
+<ul>
+<li><a href="../api/costcenters">All cost centers</a></li>
+<li><a href="../api/costcenters?orderby=oid asc">All cost centers - orderBy oid ASC</a></li>
+<li><a href="../api/costcenters?orderby=oid desc">All cost centers - orderBy oid DESC</a></li>
+<li><a href="../api/costcenters?orderby=description asc">All cost centers - orderBy description ASC</a></li>
+<li><a href="../api/costcenters?orderby=description desc">All cost centers - orderBy description DESC</a></li>
+<li><a href="../api/costcenters?orderby=oid&skip=0&top=5">All cost centers - orderBy oid ASC, skip=0, top=5</a></li>
+<li><a href="../api/costcenters?orderby=oid&skip=5&top=5">All cost centers - orderBy oid ASC, skip=5, top=5</a></li>
+<li><a href="../api/costcenters?filter=identification eq 'K00002'">Cost centers - filter=identification eq 'K00002'</a></li>
+<li><a href="../api/costcenters?filter=startswith(identification, 'K00') eq true">Cost centers - filter=startswith(identification, 'K00') eq true</a></li>
+<li><a href="../api/costcenters?filter=startswith(identification, 'K00') ne true">Cost centers - filter=startswith(identification, 'K00') eq false</a></li>
+<li><a href="../api/costcenters?filter=startswith(identification, 'K00') eq false">Cost centers - filter=startswith(identification, 'K00') ne true</a></li>
+<li><a href="../api/costcenters?filter=startswith(identification, 'K00') ne false">Cost centers - filter=startswith(identification, 'K00') ne false</a></li>
+<li><a href="../api/costcenters?filter=startswith(identification, 'K00') eq true and versionNumber eq 0">Cost centers - filter=startswith(identification, 'K00') eq true and versionNumber eq 0</a></li>
+<li><a href="../api/costcenters/224">cost center 224</a></li>
+<li><a href="../api/costcenters/id-K00002">cost center identification=K00002</a></li>
+</ul>
+</body>
+</html>
