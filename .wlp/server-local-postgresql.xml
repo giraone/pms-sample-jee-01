@@ -13,13 +13,13 @@
 
 	<httpEndpoint host="*" httpPort="8080" httpsPort="8443" id="defaultHttpEndpoint">
 	</httpEndpoint>
-        
-    <dataSource id="PmsSample1" jdbcDriverRef="DerbyJDBCDriver" jndiName="datasources/PmsSample1">
-    	<properties.derby.client createDatabase="create" databaseName="PmsSample1" password="system" user="app"/>
+     	 
+    <dataSource id="PmsSample1" jdbcDriverRef="PostgreSqlJDBCDriver" jndiName="datasources/PmsSample1" type="javax.sql.XADataSource">
+    	<properties serverName="localhost" portNumber="5432" user="pms" password="pms" databaseName="PmsSample1" />
     </dataSource>
-    <jdbcDriver id="DerbyJDBCDriver">
-        <library name="DerbyLib">
-            <fileset dir="${shared.resource.dir}/derby" includes="*.jar"/>           
+    <jdbcDriver id="PostgreSqlJDBCDriver" javax.sql.XADataSource="org.postgresql.xa.PGXADataSource">
+        <library name="PostgreSqlLib">
+            <fileset dir="${shared.resource.dir}/postgresql" includes="*.jar"/>           
         </library>
     </jdbcDriver>
 	
