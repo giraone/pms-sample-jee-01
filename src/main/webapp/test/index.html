@@ -6,6 +6,7 @@
 </head>
 <body>
 <h1>Some REST Examples with OData parameters to be used from a Browser</h1>
+<h2>Cost centers</h2>
 <ul>
 <li><a href="../api/costcenters">All cost centers</a></li>
 <li><a href="../api/costcenters?orderby=oid asc">All cost centers - orderBy oid ASC</a></li>
@@ -22,6 +23,12 @@
 <li><a href="../api/costcenters?filter=startswith(identification, 'K00') eq true and versionNumber eq 0">Cost centers - filter=startswith(identification, 'K00') eq true and versionNumber eq 0</a></li>
 <li><a href="../api/costcenters/224">cost center 224</a></li>
 <li><a href="../api/costcenters/id-K00002">cost center identification=K00002</a></li>
+</ul>
+<h2>Employees</h2>
+<ul>
+<li><a href="../api/employees">All employees</a></li>
+<li><a href="../api/employees?orderby=oid asc">All employees - orderBy oid ASC</a></li>
+<li><a href="../api/employees?orderby=oid desc">All employees - orderBy oid DESC</a></li>
 </ul>
 </body>
 </html>
