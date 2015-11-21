@@ -9,6 +9,6 @@
 <pre>
 Date: <%= new Date() %>
 </pre>
-<p>Up and running!</p>
+<p>Up and running! <a href="snoop.jsp">More info ...</a></p>
 </body>
 </html>
