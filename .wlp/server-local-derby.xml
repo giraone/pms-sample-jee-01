@@ -1,0 +1,30 @@
+<server description="WLP Server for PmsSample (with Derby)">
+
+	<!-- Enable features -->
+	<featureManager>
+		<feature>jndi-1.0</feature>
+    	<feature>jpa-2.0</feature>
+		<feature>jaxrs-2.0</feature>
+    	<feature>cdi-1.2</feature>
+		<feature>ejb-3.2</feature>
+    </featureManager>
+
+	<httpEndpoint host="*" httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint">
+	</httpEndpoint>
+
+    <applicationMonitor updateTrigger="mbean"/>
+        
+    <dataSource id="PmsSampleDatabase" jdbcDriverRef="DerbyJDBCDriver" jndiName="jdbc/PmsSample">
+    	<properties.derby.client createDatabase="create" databaseName="PmsSample" password="derby" user="app"/>
+    </dataSource>
+    <jdbcDriver id="DerbyJDBCDriver">
+        <library name="DerbyLib">
+            <fileset dir="${shared.resource.dir}/derby" includes="*.jar"/>           
+        </library>
+    </jdbcDriver>
+
+    <webApplication contextRoot="PmsSample" id="pms-sample-jee-01" location="PmsSample.war" name="PmsSampleWar">
+    </webApplication>
+	
+    <logging/>
+</server>
