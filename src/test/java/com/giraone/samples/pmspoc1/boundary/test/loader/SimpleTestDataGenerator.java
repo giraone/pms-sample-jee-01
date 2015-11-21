@@ -18,7 +18,7 @@ import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
 
 public class SimpleTestDataGenerator
 {
-	static final String DATA_PATH = "C:/Workspaces/JBoss/jee-test/PmsSample/src/test/resources/data";
+	static final String DATA_PATH = "./src/test/resources/data";
 	
 	static final Random RANDOM = new Random();
 	
