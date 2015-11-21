@@ -22,6 +22,7 @@ import org.apache.logging.log4j.MarkerManager;
 public class CorsFeature implements Feature, ContainerResponseFilter
 {
 	private static final Marker LOG_TAG = MarkerManager.getMarker("API-CORS");
+	private static final String CORS_ALLOW_HEADER = "Access-Control-Allow-Origin";
 	
 	@Inject
 	private Logger logger;
@@ -37,7 +38,10 @@ public class CorsFeature implements Feature, ContainerResponseFilter
 		throws IOException
 	{
 		final MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-		headers.add("Access-Control-Allow-Origin", "*"); // "127.0.0.1" may not work always
+		if (!headers.containsKey(CORS_ALLOW_HEADER))
+		{
+			headers.add(CORS_ALLOW_HEADER, "*"); // "127.0.0.1" may not work always
+		}
 		if (logger != null && logger.isDebugEnabled())
 		{
 			logger.debug(LOG_TAG, "Access-Control-Allow-Origin=" + headers.get("Access-Control-Allow-Origin"));
