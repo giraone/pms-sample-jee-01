@@ -11,9 +11,10 @@ building an owner-member relationship. An employee entity is related to 0 or 1 c
 
 **Front-end:** The front-end is a separate [GitHub project giraone/pms-sample-jee-01-ajs1](https://github.com/giraone/pms-sample-jee-01-ajs1)
 
-The complete solution is hosted on [RedHat's OPENSHIFT](https://www.openshift.com) under the URL [http://pmssamplejee01-giraone.rhcloud.com/PmsSample].
+The complete solution is hosted on
 
-**Hint:** Parts of the code are from the [JBoss Forge](http://forge.jboss.org/) scaffolding, which is a nice tool to get JEE applications "*kick started*".
+- [RedHat's OPENSHIFT PaaS](https://www.openshift.com) under the URL [http://pmssamplejee01-giraone.rhcloud.com/PmsSample].
+- [IBM's BLUEMIX PaaS](https://www.bluemix.net) under the URL [http://pmssamplejee01.eu-gb.mybluemix.net/] - *IN WORK*.
 
 ## Goals of this project ##
 
@@ -28,16 +29,24 @@ The complete solution is hosted on [RedHat's OPENSHIFT](https://www.openshift.co
 - The creation of a HTML5/JS/CSS3 user interface based on *Angular 2* and *Boostrap 3*.
 - The usage of the REST API from the Angular 2 JavaScript code.
 
-## Prerequisites to develop and run the project ##
+## Prerequisites to develop locally and run the project ##
 - Maven 3
 - An Eclipse based IDE (I used JBoss Dev Studio 9.0)
 - A JEE6 compliant application server. In detail, we need:
   - JPA 2.0
   - EJB 3.2
   - JAX-RS 2.0
-- I used *JBoss EAP 6.4.0* and *JBoss Wildfly 9.1* with [Resteasy](http://resteasy.jboss.org/) for JAX-RS and [Hibernate](http://hibernate.org/orm/) for JPA. But it should run on any other JEE6 application server - the only dependencies in the source code for JBoss are in [pom.xml](pom.xml) and [persistence.xml](src/main/resources/META-INF/persistence.xml).
-- A relational database supported by the JPA implementation. I used *Apache Derby Network Server 10.X* and *PostgresQL 9.4*. Others may work also with slight adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml).
+- For development I used *JBoss Wildfly 9.1* with [Resteasy](http://resteasy.jboss.org/) for JAX-RS and [Hibernate](http://hibernate.org/orm/) for JPA. But it should run on any other JEE6 application server - the only dependencies in the source code for JBoss are in [pom.xml](pom.xml) and [persistence.xml](src/main/resources/META-INF/persistence.xml).
+- A relational database supported by the JPA implementation. For development I used *Apache Derby Network Server 10.X* and *PostgresQL 9.4*. Others may work also with slight adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml). For the different environments, there are Maven profiles in the [pom.xml](pom.xml)
+- In the hosting environment the following components are used:
 
+| Tables        | OPENSHIFT         | BLUEMIX               |
+| ------------- |:-----------------:| ---------------------:|
+| JEE container | JBoss Wildfly 9.1 | IBM WebSphere Liberty |
+| Database      | Postgres 9.2      | IBM DB2               |
+| JPA provider  | Hibernate         | OpenJPA               |
+| JAX-RS        | Resteasy          | ?                     |
+    
 
 ----------
 
