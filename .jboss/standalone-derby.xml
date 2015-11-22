@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+
+<server xmlns="urn:jboss:domain:3.0">
+
+    <profile>
+           
+        <subsystem xmlns="urn:jboss:domain:datasources:3.0">
+            <datasources>
+              
+                <datasource jta="true" jndi-name="java:jboss/datasources/PmsSample1" pool-name="PmsSample1" enabled="true" use-ccm="true" statistics-enabled="false">
+                    <connection-url>jdbc:derby://localhost:1527/PmsSample1;create=true</connection-url>
+                    <driver-class>org.apache.derby.jdbc.ClientDriver</driver-class>
+                    <driver>derby</driver>
+                    <security>
+                        <user-name>system</user-name>
+                        <password>app</password>
+                    </security>
+                    <validation>
+                        <validate-on-match>false</validate-on-match>
+                        <background-validation>false</background-validation>
+                    </validation>
+                    <timeout>
+                        <set-tx-query-timeout>false</set-tx-query-timeout>
+                        <blocking-timeout-millis>0</blocking-timeout-millis>
+                        <idle-timeout-minutes>0</idle-timeout-minutes>
+                        <query-timeout>0</query-timeout>
+                        <use-try-lock>0</use-try-lock>
+                        <allocation-retry>0</allocation-retry>
+                        <allocation-retry-wait-millis>0</allocation-retry-wait-millis>
+                    </timeout>
+                    <statement>
+                        <share-prepared-statements>false</share-prepared-statements>
+                    </statement>
+                </datasource>
+								
+                <drivers>
+                    <driver name="derby" module="org.apache.derby">
+                        <xa-datasource-class>org.apache.derby.jdbc.ClientXADataSource</xa-datasource-class>
+                    </driver>
+                </drivers>
+				
+            </datasources>
+        </subsystem>
+ 
+</server>
