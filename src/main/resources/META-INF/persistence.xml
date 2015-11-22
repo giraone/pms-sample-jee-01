@@ -11,6 +11,8 @@
 		- WildFly: Use jndi-name="java:jboss/datasources/PmsSample1" in datasource element within standalone.xml
 		-->
 		<jta-data-source>datasources/PmsSample1</jta-data-source>
+		<!-- This is for OpenShift with PostgreSQL  -->
+		<!-- <jta-data-source>datasources/PostgreSQLDS</jta-data-source> -->
 		<!-- This is for Bluemix with sqldb  -->
 		<!-- <jta-data-source>java:comp/env/jdbc/mydbdatasource</jta-data-source> -->
 		
