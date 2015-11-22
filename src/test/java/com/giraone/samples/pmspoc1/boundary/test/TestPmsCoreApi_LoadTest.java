@@ -112,6 +112,7 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 	{	
 		Response response = given()
 	        .spec(requestSpecBuilder.build())
+	        .queryParam("top", NR_OF_COST_CENTERS)
 			.get(TestPmsCoreApi_CostCenter.PATH_TO_RESOURCE);
 				
 		JsonReader reader = Json.createReader(new StringReader(response.asString()));      
