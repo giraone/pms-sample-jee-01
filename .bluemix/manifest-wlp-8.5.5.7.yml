@@ -1,0 +1,13 @@
+applications:
+- buildpack: https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
+  env:
+    IBM_JVM_LICENSE: L-JWOD-9SYNCP 
+    IBM_LIBERTY_LICENSE: L-MCAO-9SYMVC
+  memory: 512M
+  instances: 1
+  domain: eu-gb.mybluemix.net
+  name: pmssamplejee1
+  host: pmssamplejee1
+  disk_quota: 1024M
+  services:
+  - pmssamplejee1sqldb
