@@ -1,4 +1,4 @@
-<server description="WLP Server for PmsSample (with Derby)">
+<server description="WLP Server for PmsSample (with PostgreSQL)">
 
 	<!-- Enable features -->
 	<featureManager>
