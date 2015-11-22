@@ -40,15 +40,21 @@ The complete solution is hosted on
 - A relational database supported by the JPA implementation. For development I used *Apache Derby Network Server 10.X* and *PostgresQL 9.4*. Others may work also with slight adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml). For the different environments, there are Maven profiles in the [pom.xml](pom.xml)
 - In the hosting environment the following components are used:
 
-| Tables        | OPENSHIFT         | BLUEMIX               |
-| ------------- |:-----------------:| ---------------------:|
-| JEE container | JBoss Wildfly 9.1 | IBM WebSphere Liberty |
-| Database      | Postgres 9.2      | IBM DB2               |
-| JPA provider  | Hibernate         | OpenJPA               |
-| JAX-RS        | Resteasy          | ?                     |
-    
-
-----------
+|               | OPENSHIFT           | BLUEMIX               |
+| ------------- |:-------------------:| ---------------------:|
+| JEE container | JBoss Wildfly 9.0.1 | IBM WebSphere Liberty |
+| Database      | Postgres 9.2        | IBM DB2               |
+| JPA provider  | Hibernate           | EclipseLink           |
+| JAX-RS        | Resteasy            | IBM?                  |
+  
+- In the local develpment environments it was tested with:
+  - JEE container:
+    - JBoss EAP 6.4 (snippets from standalone.xml see .jboss folder)
+    - JBoss Wildfly 9.0.1 (snippets from standalone.xml see .jboss folder)
+    - IBM WLP Full Profile 8.5.5.7 (server.xml see .wlp folder)
+  - Database:
+    - Derby Network Server 10
+    - PostgreSQL 9.4.5
 
 
 ## Conventions and design decisions in the project ##
