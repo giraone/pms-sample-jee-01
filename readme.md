@@ -14,7 +14,7 @@ building an owner-member relationship. An employee entity is related to 0 or 1 c
 The complete solution is hosted on
 
 - [RedHat's OPENSHIFT PaaS](https://www.openshift.com) under the URL [http://pmssamplejee01-giraone.rhcloud.com/PmsSample].
-- [IBM's BLUEMIX PaaS](https://www.bluemix.net) under the URL [http://pmssamplejee01.eu-gb.mybluemix.net/] - *IN WORK*.
+- [IBM's BLUEMIX PaaS](https://www.bluemix.net) under the URL [http://pmssamplejee1.eu-gb.mybluemix.net/].
 
 ## Goals of this project ##
 
@@ -40,14 +40,14 @@ The complete solution is hosted on
 - A relational database supported by the JPA implementation. For development I used *Apache Derby Network Server 10.X* and *PostgresQL 9.4*. Others may work also with slight adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml). For the different environments, there are Maven profiles in the [pom.xml](pom.xml)
 - In the hosting environment the following components are used:
 
-|               | OPENSHIFT           | BLUEMIX               |
-| ------------- |:-------------------:| ---------------------:|
-| JEE container | JBoss Wildfly 9.0.1 | IBM WebSphere Liberty |
-| Database      | Postgres 9.2        | IBM DB2               |
-| JPA provider  | Hibernate           | EclipseLink           |
-| JAX-RS        | Resteasy            | IBM?                  |
+|               | OPENSHIFT           | BLUEMIX                       |
+| ------------- |:-------------------:| -----------------------------:|
+| JEE container | JBoss Wildfly 9.0.1 | IBM WebSphere Liberty 8.5.5.7 |
+| Database      | PostgreSQL 9.2      | IBM DB2                       |
+| JPA provider  | Hibernate           | EclipseLink                   |
+| JAX-RS        | Resteasy            | IBM?                          |
   
-- In the local develpment environments it was tested with:
+- In local development environments the code was tested with:
   - JEE container:
     - JBoss EAP 6.4 (snippets from standalone.xml see .jboss folder)
     - JBoss Wildfly 9.0.1 (snippets from standalone.xml see .jboss folder)
