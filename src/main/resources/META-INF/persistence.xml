@@ -1,23 +1,71 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<persistence version="2.0"
-   xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
         http://java.sun.com/xml/ns/persistence
         http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
-  <persistence-unit name="primary" transaction-type="JTA">
-	<jta-data-source>java:jboss/datasources/PostgreSQLDS</jta-data-source>
-    <properties>
-	  <!-- Properties for Hibernate -->
-      <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- UPDATE tables, if needed -->
-      <!-- <property name="hibernate.hbm2ddl.auto" value="create"/> --> <!-- CREATE tables -->
-      <!-- <property name="hibernate.hbm2ddl.auto" value="create-drop"/> -->  <!-- DROP and CREATE tables -->
-      <property name="hibernate.show_sql" value="false"/> <!-- true for development -->
-      <property name="hibernate.format_sql" value="true"/>
-      <property name="hibernate.transaction.flush_before_completion" value="false"/> <!-- needed? -->
-      <!-- Derby -->
-      <!-- <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect"/> -->
-      <!-- PostgresQL -->
-      <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
-    </properties>
-  </persistence-unit>
+	<persistence-unit name="primary" transaction-type="JTA">
+	
+		<!--
+		This works for
+		- WLP:     Use jndiName="datasources/PmsSample1" in datasource element within server.sml
+		- WildFly: Use jndi-name="java:jboss/datasources/PmsSample1" in datasource element within standalone.xml
+		-->
+		<jta-data-source>datasources/PmsSample1</jta-data-source>
+		<!-- This is for Bluemix with sqldb  -->
+		<!-- <jta-data-source>java:comp/env/jdbc/mydbdatasource</jta-data-source> -->
+		
+		<properties>
+
+
+			<!-- Properties for Hibernate (ignored in non-Hibernate environments) -->
+			<property name="hibernate.hbm2ddl.auto" value="update" /> <!-- UPDATE tables, if needed -->
+			<!-- <property name="hibernate.hbm2ddl.auto" value="create"/> --> <!-- CREATE tables -->
+			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop"/> --> <!-- DROP and CREATE tables -->
+			<property name="hibernate.show_sql" value="true" /> <!-- true for development -->
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.transaction.flush_before_completion" value="false" /> <!-- needed? -->
+			<!-- Derby -->
+			<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect" />
+			<!-- PostgresQL -->
+			<!-- <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/> -->
+			<!-- DB2 -->
+			<!-- <property name="hibernate.dialect" value="org.hibernate.dialect.DB2Dialect"/> -->
+
+
+			<!-- Properties for EclipseLink (ignored in non-EclipseLink environments) -->
+			<property name="eclipselink.ddl-generation" value="create-or-extend-tables" /> <!-- UPDATE tables, if needed -->		
+			<!-- property name="eclipselink.ddl-generation" value="create-tables" /> --> <!-- CREATE tables -->
+			<property name="eclipselink.ddl-generation.output-mode" value="database" /> <!-- Needed for create-or-extend-tables -->			
+				
+			<!-- Optimization - statement caching -->
+			<property name="eclipselink.jdbc.cache-statements" value="true" />
+
+			<!-- Optimization - batch writing -->
+			<!-- <property name="eclipselink.jdbc.batch-writing" value="JDBC" />
+			<property name="eclipselink.jdbc.batch-writing.size" value="1000" /> -->
+
+			<!-- Do not use caching, until we need it (caching only improves reads, but adds adds overhead for insert) -->
+			<property name="eclipselink.cache.shared.default" value="false" />
+			<!-- Switch on again for single entity <property name="eclipselink.cache.shared.Employee" value="true"/> -->
+
+			<!-- DEVELOPMENT LOGGING -->
+			<!-- See https://wiki.eclipse.org/EclipseLink/Examples/JPA/Logging -->
+			<property name="eclipselink.logging.file" value="logs/sql.log"/>
+			<!--  To enable java.util.logging the persistence unit property eclipselink.logging.logger can be set -->
+			<!-- <property name="eclipselink.logging.logger" value="JavaLogger"/> -->
+			<!--  Most Java EE application servers have their own logging. To integrate with an application servers logging set the server logger type too -->
+			<!-- <property name="eclipselink.logging.logger" value="ServerLogger"/> -->
+			<!-- <property name="eclipselink.logging.logger" value="DefaultLogger"/> -->
+									
+			<property name="eclipselink.logging.level" value="FINE"/>
+			<property name="eclipselink.logging.level.sql" value="FINE"/>
+			<property name="eclipselink.logging.parameters" value="true"/>
+				
+			<!-- PRODUCTION Optimization - turn logging off instead of WARN, INFO, FINE, FINEST, ... -->
+			<!-- <property name="eclipselink.logging.level" value="off" /> -->
+			<!-- <property name="eclipselink.logging.level" value="INFO" /> -->
+
+
+		</properties>
+	</persistence-unit>
 </persistence>
