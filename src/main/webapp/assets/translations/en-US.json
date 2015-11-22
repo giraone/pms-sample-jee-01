@@ -12,7 +12,7 @@
   },
   "globals": {
     "dateFormatMedium": "{{date|date:'MM/dd/yyyy'}}",
-    "dateInputFormatMedium": "MM/DD/YYYY'}}",
+    "dateInputFormatMedium": "MM/DD/YYYY",
     "dateFormatMediumInValid": "does not match correct format \"dd.mm.yyyy\" (e.g. 29.03.1966)"
   },
   "footer": {
