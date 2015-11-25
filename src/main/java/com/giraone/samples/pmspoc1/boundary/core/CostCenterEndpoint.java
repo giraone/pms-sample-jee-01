@@ -59,6 +59,9 @@ public class CostCenterEndpoint extends BaseEndpoint
 	
 	@Inject
 	private Logger logger;
+
+	@Inject
+	private TransactionUtil transactionUtil;
 	
     @Resource
     private UserTransaction tx;
@@ -198,7 +201,7 @@ public class CostCenterEndpoint extends BaseEndpoint
         }
         catch (Exception e)
         {
-        	TransactionUtil.rollback(tx);
+        	transactionUtil.rollback(tx);
             boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
             if (isConstraintViolated)
             {
@@ -247,7 +250,7 @@ public class CostCenterEndpoint extends BaseEndpoint
             catch (OptimisticLockException e)
             {
             	logger.warn(LOG_TAG, "update OptimisticLockException");
-                TransactionUtil.rollback(tx);
+            	transactionUtil.rollback(tx);
                 return Response.status(Status.CONFLICT).entity(e.getEntity()).build();
             }
             tx.commit();
@@ -255,7 +258,7 @@ public class CostCenterEndpoint extends BaseEndpoint
         }
         catch (Exception e)
         {
-        	TransactionUtil.rollback(tx);
+        	transactionUtil.rollback(tx);
             boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
             logger.warn(LOG_TAG, "update: " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
             if (isConstraintViolated)
@@ -288,7 +291,7 @@ public class CostCenterEndpoint extends BaseEndpoint
         }
         catch (Exception e)
         {
-        	TransactionUtil.rollback(tx);
+        	transactionUtil.rollback(tx);
             throw new EJBException(e);
         }
     }

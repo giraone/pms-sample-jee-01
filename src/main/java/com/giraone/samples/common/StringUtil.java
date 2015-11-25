@@ -1,5 +1,6 @@
 package com.giraone.samples.common;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -41,6 +42,13 @@ public class StringUtil
 	public static String formatDateAsIsoDate(Calendar calendar)
 	{
 		return formatDateAsIsoDate(calendar.getTime());
+	}
+	
+	public static GregorianCalendar parseIsoDateInput(String str) throws ParseException
+	{
+		GregorianCalendar c = new GregorianCalendar();
+		c.setTime(isoDateFormatter.parse(str));
+		return c;
 	}
 	
 	public static GregorianCalendar parseUserDateInput(String str)

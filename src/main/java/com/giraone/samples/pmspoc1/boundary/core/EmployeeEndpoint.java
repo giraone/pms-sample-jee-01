@@ -62,6 +62,9 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@Inject
 	private Logger logger;
 	
+	@Inject
+	private TransactionUtil transactionUtil;
+	
 	@Resource
 	private UserTransaction tx;
 
@@ -171,7 +174,7 @@ public class EmployeeEndpoint extends BaseEndpoint
      */
 	@GET
 	@Produces("application/json")
-	public List<EmployeeDTO> listAll(
+	public Response listAll(
 		@QueryParam("filter") @DefaultValue("") String filter,
 		@QueryParam("orderby") @DefaultValue("") String orderby,
 		@QueryParam("skip") @DefaultValue("0") int skip,
@@ -192,7 +195,20 @@ public class EmployeeEndpoint extends BaseEndpoint
 		
         ODataToJpaQueryBuilder<Employee> filterBuilder = new ODataToJpaQueryBuilder<Employee>();
 		filterBuilder.setCriteriaTable(cb, table);
-		Predicate predicate = filterBuilder.parseFilterExpression(filter);
+		Predicate predicate;
+		try
+		{
+			predicate = filterBuilder.parseFilterExpression(filter);
+		}
+		catch (IllegalArgumentException iae)
+		{
+			// OData arguments are illegal
+			if (logger.isDebugEnabled())
+			{
+				logger.debug(LOG_TAG, "listAll; filter=\"" + filter + "\"", iae);
+			}
+			return Response.status(Status.BAD_REQUEST).build();
+		}
 		if (predicate != null) { select.where(predicate); }
 		filterBuilder.parseOrderExpression(cb, select, orderby);
 		
@@ -208,7 +224,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 			EmployeeDTO dto = new EmployeeDTO(searchResult);
 			results.add(dto);
 		}
-		return results;
+		return Response.ok(results).build();
 	}
 
 	// TODO: Remove this JPQL version
@@ -256,7 +272,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			TransactionUtil.rollback(tx);
+			transactionUtil.rollback(tx);
 			boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
 			if (isConstraintViolated)
 			{
@@ -308,7 +324,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 			catch (OptimisticLockException e)
 			{
 				logger.warn(LOG_TAG, "update OptimisticLockException");
-				TransactionUtil.rollback(tx);
+				transactionUtil.rollback(tx);
 				return Response.status(Status.CONFLICT).entity(e.getEntity()).build();
 			}
 			tx.commit();
@@ -316,7 +332,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 		}
 		catch (Exception e)
 		{
-			TransactionUtil.rollback(tx);
+			transactionUtil.rollback(tx);
 			boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
 			logger.warn(LOG_TAG, "update: " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
 			if (isConstraintViolated)
@@ -348,7 +364,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 		}
 		catch (Exception e)
 		{
-			TransactionUtil.rollback(tx);
+			transactionUtil.rollback(tx);
 			throw new EJBException(e);
 		}
 	}

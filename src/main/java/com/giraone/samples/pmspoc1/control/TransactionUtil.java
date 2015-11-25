@@ -17,20 +17,20 @@ public class TransactionUtil
 	private static final Marker LOG_TAG = MarkerManager.getMarker("JTA");
 	
 	@Inject
-	private static Logger logger;
+	private Logger logger;
 	
-	public static void begin(UserTransaction tx) throws NotSupportedException, SystemException
+	public void begin(UserTransaction tx) throws NotSupportedException, SystemException
 	{
 		tx.begin();
 	}
 	
-	public static UserTransaction commit(UserTransaction tx) throws SecurityException, IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException, SystemException
+	public UserTransaction commit(UserTransaction tx) throws SecurityException, IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException, SystemException
 	{
 		tx.commit();
 		return tx;
 	}
 	
-	public static void rollback(UserTransaction tx)
+	public void rollback(UserTransaction tx)
 	{
 		if (tx != null)
     	{

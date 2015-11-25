@@ -29,6 +29,13 @@
 <li><a href="../api/employees">All employees</a></li>
 <li><a href="../api/employees?orderby=oid asc">All employees - orderBy oid ASC</a></li>
 <li><a href="../api/employees?orderby=oid desc">All employees - orderBy oid DESC</a></li>
+<li><a href="../api/employees?filter=personnelNumber eq '00012'">Employees - filter=personnelNumber eq '00012'</a></li>
+<li><a href="../api/employees?filter=dateOfBirth eq '19500227'">Employees - filter=dateOfBirth eq '19500227'</a></li>
+<li><a href="../api/employees?filter=dateOfBirth eq 165538800000">Employees - filter=dateOfBirth eq 165538800000</a></li>
+<li><a href="../api/employees?filter=costCenter eq '13'">Employees - filter=costCenter eq '13'</a></li>
+<li><a href="../api/employees?filter=costCenter.identification eq 'K00012'">Employees - filter=costCenter.identification eq 'K00012'</a></li>
+<li><a href="../api/employees?orderby=oid asc&filter=startswith(lastName, 'S') eq true">Employees - filter=startswith(lastName, 'S') eq true</a></li>
+<li><a href="../api/employees?orderby=oid asc&filter=startswith(lastName, 'S') eq true or startswith(lastName, 'S') eq true">Employees - filter=startswith(lastName, 'S') eq true or startswith(lastName, 'S') eq true</a></li>
 </ul>
 </body>
 </html>

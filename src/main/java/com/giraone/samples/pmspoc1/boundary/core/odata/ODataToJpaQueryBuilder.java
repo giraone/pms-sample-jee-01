@@ -1,6 +1,10 @@
 package com.giraone.samples.pmspoc1.boundary.core.odata;
 
+import java.sql.Date;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -29,12 +33,14 @@ import org.apache.olingo.odata2.api.uri.expression.SortOrder;
 import org.apache.olingo.odata2.api.uri.expression.UnaryExpression;
 import org.apache.olingo.odata2.api.uri.expression.UnaryOperator;
 
+import com.giraone.samples.common.StringUtil;
+
 @Stateless
 public class ODataToJpaQueryBuilder<T>
 {
 	public static final String LOG_TAG = "OData";
 	
-	// TODO: Logger is not injected !!!!!!!!!!!!!!!!!!!!!!!
+	// TODO: Logger is not always injected !!!!!!!!!!!!!!!!!!!!!!!
 	@Inject
 	private Logger logger;
 
@@ -190,8 +196,14 @@ public class ODataToJpaQueryBuilder<T>
 					
 			// TODO: Very ugly and not fully correct, but type safe (hs).
 			Path<String> propertyPathString = null;
+			Path<Date> propertyPathDate = null;
 			Path<Integer> propertyPathInteger = null;
-			if (rightValue instanceof Integer)
+			Path<Object> p = this.table.get(leftPropertyName);
+			if (p.getJavaType() == Calendar.class)
+			{
+				propertyPathDate = this.table.get(leftPropertyName);
+			}
+			else if (rightValue instanceof Integer)
 			{
 				propertyPathInteger = this.table.get(leftPropertyName);
 			}
@@ -205,18 +217,45 @@ public class ODataToJpaQueryBuilder<T>
 				case EQ:
 					if (rightValue instanceof Integer)
 					{
-						return cb.equal(propertyPathInteger, rightValue);
+						if (propertyPathDate != null)
+						{
+							return cb.equal(propertyPathDate, new Date(((Integer) rightValue).longValue()));
+						}
+						else
+						{
+							return cb.equal(propertyPathInteger, rightValue);
+						}
 					}
 					else if (methodName != null) // currently only one method (startsWith) supported and eq/ne with true/false.
 					{
 						if (rightMethodBoolean)
+						{
 							return cb.like(propertyPathString, (String) rightValue + "%");
+						}
 						else
+						{
 							return cb.notLike(propertyPathString, (String) rightValue + "%");
+						}
 					}
 					else
 					{
-						return cb.equal(propertyPathString, rightValue);
+						if (propertyPathDate != null)
+						{
+							Calendar cal;
+							try
+							{
+								cal = StringUtil.parseIsoDateInput((String) rightValue);
+							}
+							catch (ParseException e)
+							{
+								throw new IllegalArgumentException("Cannot parse date value " + rightValue + " for property \"" + leftPropertyName + "\"!");
+							}
+							return cb.equal(propertyPathDate, cal);
+						}
+						else
+						{
+							return cb.equal(propertyPathString, rightValue);						
+						}
 					}
 				case NE:
 					if (rightValue instanceof Integer)
@@ -298,7 +337,13 @@ public class ODataToJpaQueryBuilder<T>
 	{
 		if (rightOperand instanceof PropertyExpression)
 		{
-			throw new IllegalArgumentException("RightOperand must not be a properties!");
+			String name = ((PropertyExpression) rightOperand).getUriLiteral();
+			// long numbers are treated as properties!
+			if (name.matches("[0-9]+"))
+			{
+				// ???
+			}
+			throw new IllegalArgumentException("RightOperand must not be a property! Property=\"" + name + "\"");
 		}
 		else if (rightOperand instanceof LiteralExpression)
 		{
