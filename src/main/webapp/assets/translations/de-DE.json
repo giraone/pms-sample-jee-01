@@ -13,6 +13,7 @@
   "globals": {
     "dateFormatMedium": "{{date|date:'dd.MM.yyyy'}}",
     "dateInputFormatMedium": "DD.MM.YYYY",
+    "dateInputFormatMediumRegExp": "[^0-9]*([0-9][0-9]?[.][0-9][0-9]?[.][0-9][0-9][0-9]?[0-9]?)[^0-9]*",
     "dateFormatMediumInValid": "passt nicht zum notwendigen Datumsformat \"TT.MM.JJJJ\" (z.B. 29.03.1966)"
   },
   "footer": {
@@ -62,6 +63,8 @@
   },
   "employeeList": {
     "title": "Liste der Mitarbeiter",
+    "searchFilter_placeholder": "Suchfilter, z.B. Personalnummern, Name oder Geburtsdatum",
+    "searchFilter_tooltip": "Je nach Format des Filters wird nach Personalnummer (5 Ziffern), Geburtsdatum (TT.MM.JJJJ) oder Vor- und Nachname gesucht.",
     "error": "Fehler beim Abrufen der Mitarbeiter.",
     "noEntities": "Es konnten keine Mitarbeiter gefunden werden.",
     "add": "Neuen Mitarbeiter hinzufügen",

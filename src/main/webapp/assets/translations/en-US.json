@@ -13,7 +13,8 @@
   "globals": {
     "dateFormatMedium": "{{date|date:'MM/dd/yyyy'}}",
     "dateInputFormatMedium": "MM/DD/YYYY",
-    "dateFormatMediumInValid": "does not match correct format \"dd.mm.yyyy\" (e.g. 29.03.1966)"
+    "dateInputFormatMediumRegExp": "[^0-9]*([0-9][0-9]?[/][0-9][0-9]?[/][0-9][0-9][0-9]?[0-9]?)[^0-9]*",
+    "dateFormatMediumInValid": "does not match correct format \"mm/dd/yyyy\" (e.g. 03/29/1966)"
   },
   "footer": {
     "text": "Footer - no text yet."
@@ -62,6 +63,8 @@
   },
   "employeeList": {
     "title": "Employee List",
+    "searchFilter_placeholder": "Search filter, e.g. personnel number, name or DoB",
+    "searchFilter_tooltip": "Depending on your input the search is applied to personnel number (5 digits), to date of birth (DD/MM/YYYY) or to the first and last name.",
     "error": "Unable to retrieve list of employees.",
     "noEntities": "No employees were found.",
     "add": "Add new employee",
