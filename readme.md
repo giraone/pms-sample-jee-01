@@ -127,7 +127,7 @@ Field validation at the JPA level is based on [Java Bean Validation (JSR 303)](h
 
 ### OData style query options for filtering and sorting ###
 
-The base for the implementation of $filter and $orderby query options in REST APIs, that produce list data is [Apache Olingo](https://olingo.apache.org/) - currently the only useful Java-based OData implementation. For the current basic requirements OData V2.0 seems to be *good enough*.
+The base for the implementation of $filter and $orderby query options in REST APIs for lists is [Apache Olingo](https://olingo.apache.org/) - currently the only useful Java-based OData implementation. For the current basic requirements OData V2.0 seems to be *good enough*.
 
 ----------
 
@@ -137,6 +137,8 @@ The base for the implementation of $filter and $orderby query options in REST AP
 - Currently the solution must use *olingo-odata2-core 2.0.6-SNAPSHOT*, because of this bug: [OLINGO-761](https://issues.apache.org/jira/browse/OLINGO-761?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel)
 
 - The unit tests with *REST-assured* aren't currently real unit tests - they need a server with a well known configuration. See [TestPmsCoreApi](src/com/giraone/samples/pmspoc1/boundary/test/TestPmsCoreApi.java) in the source to see, what I mean.
+
+- OData filtering (lt, gt) for Date fields
 
 - Unit tests for the OData implementation are missed. There is only a test page `webapp/test/index.html`.
 
@@ -157,13 +159,12 @@ This is not a good idea together with I18N! Best solution would be to separate t
   
 ## Future goals of the project ##
 
-- Using **CDI** instead of EJB (*let's see how much it helps!*)
 - Storing **BLOBS**, e.g. an image for each *employee*.
 - Storing attributes of entities, which are not used in queries or joins in ***key value tables***, to get a more stable data model without the need of schema changes, when new attributes are needed.
+- Extension of the REST API by using **OData** `$expand`. E.g. an expand parameter for employee to show the cost center's description.
 - Additional relationship types for the entities.
 - Usage of **Swagger** (or RAML) for the API definition to have a **contract-first approach**.
 - Usage of [swagger-js-codegen](https://github.com/wcandillon/swagger-js-codegen) or similar to generate JavaScript/Angular code from the Swagger definition.
 - Usage of [swagger-codegen](https://github.com/swagger-api/swagger-codegen) to generate JAX-RS skeletons and the Java DTO classes from the Swagger definition.
-- Extension of the REST API by **OData** conventions like $filter, $select and $expand.
-- Catalog tables for offering typically **lookup tables**, like ISO country codes, ZIP codes, ... 
+- Catalog tables for offering typical **lookup tables**, like ISO country codes, ZIP codes, ... 
 
