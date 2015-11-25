@@ -12,9 +12,11 @@
 		-->
 		<jta-data-source>datasources/PmsSample1</jta-data-source>
 		<!-- This is for OpenShift with PostgreSQL  -->
-		<!-- <jta-data-source>datasources/PostgreSQLDS</jta-data-source> -->
-		<!-- This is for Bluemix with sqldb  -->
+		<!-- <jta-data-source>java:jboss/datasources/PostgreSQLDS</jta-data-source> -->
+		<!-- This is for Bluemix with sqldb and cloudAutowiring-1.0 -->
 		<!-- <jta-data-source>java:comp/env/jdbc/mydbdatasource</jta-data-source> -->
+		<!-- This is for Bluemix with sqldb and WLP 8.5.5.7 without autowiring -->
+		<!-- <jta-data-source>jdbc/pmssamplejee1sqldb</jta-data-source> -->
 		
 		<properties>
 
@@ -27,9 +29,9 @@
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.transaction.flush_before_completion" value="false" /> <!-- needed? -->
 			<!-- Derby -->
-			<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect" />
+			<!-- <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect" /> -->
 			<!-- PostgresQL -->
-			<!-- <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/> -->
+			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
 			<!-- DB2 -->
 			<!-- <property name="hibernate.dialect" value="org.hibernate.dialect.DB2Dialect"/> -->
 
