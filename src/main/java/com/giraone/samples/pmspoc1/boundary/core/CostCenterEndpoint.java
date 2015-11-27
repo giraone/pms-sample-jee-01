@@ -34,10 +34,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
-
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
 import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterSummaryDTO;
@@ -54,12 +50,7 @@ import com.giraone.samples.pmspoc1.entity.CostCenter_;
 @TransactionManagement(TransactionManagementType.BEAN)
 @Path("/costcenters")
 public class CostCenterEndpoint extends BaseEndpoint
-{
-	private static final Marker LOG_TAG = MarkerManager.getMarker("API");
-	
-	@Inject
-	private Logger logger;
-
+{	
 	@Inject
 	private TransactionUtil transactionUtil;
 	
