@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import com.giraone.samples.common.boundary.BaseEndpoint;
+import com.giraone.samples.common.boundary.PagingBlock;
 import com.giraone.samples.common.boundary.odata.ODataToJpaQueryBuilder;
 import com.giraone.samples.common.entity.PersistenceUtil;
 import com.giraone.samples.common.entity.UserTransactionConstraintViolationException;
@@ -152,11 +153,11 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
      * @param orderby	OData sort expression
      * @param skip		OData paging
      * @param top		OData filter expression
-     * @return
+     * @return a {@link PagingBlock} object.
      */
 	@GET
 	@Produces("application/json")
-	public Response listAll(
+	public Response listBlock(
 		@QueryParam("filter") @DefaultValue("") String filter,
 		@QueryParam("orderby") @DefaultValue("") String orderby,
 		@QueryParam("skip") @DefaultValue("0") int skip,
@@ -194,6 +195,13 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 		if (predicate != null) { select.where(predicate); }
 		filterBuilder.parseOrderExpression(cb, select, orderby);
 		
+		// Calculating the total count value - START
+		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+		countQuery.select(cb.count(table));
+		if (predicate != null) { countQuery.where(predicate); }
+		int totalCount = em.createQuery(countQuery).getSingleResult().intValue();
+		// Calculating the total count value - END
+		
         final TypedQuery<Employee> tq = em.createQuery(select);
 
         tq.setFirstResult(skip);
@@ -206,33 +214,12 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 			EmployeeDTO dto = new EmployeeDTO(searchResult);
 			results.add(dto);
 		}
-		return Response.ok(results).build();
-	}
-
-	// TODO: Remove this JPQL version
-	@GET
-	@Path("/alternative")
-	@Produces("application/json")
-	public List<EmployeeDTO> listAll2(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult)
-	{
-		TypedQuery<Employee> findAllQuery = em.createQuery(
-			"SELECT DISTINCT e FROM Employee e LEFT JOIN FETCH e.costCenter ORDER BY e.oid", Employee.class);
-		if (startPosition != null)
-		{
-			findAllQuery.setFirstResult(startPosition);
-		}
-		if (maxResult != null)
-		{
-			findAllQuery.setMaxResults(maxResult);
-		}
-		final List<Employee> searchResults = findAllQuery.getResultList();
-		final List<EmployeeDTO> results = new ArrayList<EmployeeDTO>();
-		for (Employee searchResult : searchResults)
-		{
-			EmployeeDTO dto = new EmployeeDTO(searchResult);
-			results.add(dto);
-		}
-		return results;
+		PagingBlock<EmployeeDTO> pagingBlock = new PagingBlock<EmployeeDTO>();
+		pagingBlock.setBlockCounter(skip);
+		pagingBlock.setBlockSize(top);
+		pagingBlock.setTotalCount(totalCount);
+		pagingBlock.setBlockItems(results);
+		return Response.ok(pagingBlock).build();
 	}
 
 	@POST

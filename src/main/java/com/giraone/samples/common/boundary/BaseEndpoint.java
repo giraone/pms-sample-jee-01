@@ -1,9 +1,15 @@
 package com.giraone.samples.common.boundary;
 
+import java.lang.reflect.Method;
+
 import javax.inject.Inject;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.Logger;
@@ -29,7 +35,7 @@ public class BaseEndpoint
 	private static final String CORS_ALLOW_METHODS_HEADER = "Access-Control-Allow-Methods";
 	private static final String CORS_ALLOW_REQUEST_HEADER = "Access-Control-Allow-Headers";
 
-	private static final int THROTTLE_MSEC = 1000;
+	private static final int THROTTLE_MSEC = 0; // 1000;
 
 	@Inject
 	protected Logger logger;
@@ -55,8 +61,7 @@ public class BaseEndpoint
 			.header(CORS_ALLOW_REQUEST_HEADER, "content-type").build();
 	}
 
-	//@AroundInvoke
-	/*
+	@AroundInvoke
 	private Object doInterceptJaxRsMethods(InvocationContext invocationContext) throws Exception
 	{
 		final Method method = invocationContext.getMethod();
@@ -96,7 +101,7 @@ public class BaseEndpoint
 						sb.append(", ").append(param);
 					}
 				}
-				logger.debug(LOG_TAG, "Params:   " + sb == null ? "null" : sb.toString());
+				logger.debug(LOG_TAG, "Params:   " + (sb == null ? "null" : sb.toString()));
 				
 			}
 			obj = invocationContext.proceed();
@@ -112,5 +117,4 @@ public class BaseEndpoint
 
 		return obj;
 	}
-	*/
 }
