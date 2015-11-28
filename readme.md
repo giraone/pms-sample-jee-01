@@ -13,8 +13,8 @@ building an owner-member relationship. An employee entity is related to 0 or 1 c
 
 The complete solution is hosted on
 
-- [RedHat's OPENSHIFT PaaS](https://www.openshift.com) under the URL [http://pmssamplejee01-giraone.rhcloud.com/PmsSample].
 - [IBM's BLUEMIX PaaS](https://www.bluemix.net) under the URL [http://pmssamplejee1.eu-gb.mybluemix.net/].
+- [RedHat's OPENSHIFT PaaS](https://www.openshift.com) under the URL [http://pmssamplejee01-giraone.rhcloud.com/PmsSample] - Not the latest version!
 
 ## Goals of this project ##
 
