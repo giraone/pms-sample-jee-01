@@ -5,21 +5,16 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.transaction.UserTransaction;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -34,12 +29,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import com.giraone.samples.common.boundary.BaseEndpoint;
+import com.giraone.samples.common.boundary.odata.ODataToJpaQueryBuilder;
+import com.giraone.samples.common.entity.PersistenceUtil;
+import com.giraone.samples.common.entity.UserTransactionConstraintViolationException;
+import com.giraone.samples.common.entity.UserTransactionException;
+import com.giraone.samples.common.entity.UserTransactional;
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
 import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterSummaryDTO;
-import com.giraone.samples.pmspoc1.boundary.core.odata.ODataToJpaQueryBuilder;
-import com.giraone.samples.pmspoc1.control.PersistenceUtil;
-import com.giraone.samples.pmspoc1.control.TransactionUtil;
 import com.giraone.samples.pmspoc1.entity.CostCenter;
 import com.giraone.samples.pmspoc1.entity.CostCenter_;
 
@@ -49,14 +47,8 @@ import com.giraone.samples.pmspoc1.entity.CostCenter_;
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
 @Path("/costcenters")
-public class CostCenterEndpoint extends BaseEndpoint
+public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactionExceptionHandler
 {	
-	@Inject
-	private TransactionUtil transactionUtil;
-	
-    @Resource
-    private UserTransaction tx;
-
     @PersistenceContext(unitName = PmsCoreApi.PERSISTENCE_UNIT)
     private EntityManager em;
 
@@ -65,7 +57,7 @@ public class CostCenterEndpoint extends BaseEndpoint
     @Produces("application/json")
     public Response findById(@PathParam("id") Long id)
     {
-    	if (logger.isDebugEnabled())
+    	if (logger != null && logger.isDebugEnabled())
 			logger.debug(LOG_TAG, "findById; id=" + id);
     	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -101,7 +93,7 @@ public class CostCenterEndpoint extends BaseEndpoint
     @Produces("application/json")
     public Response findByIdentification(@PathParam("identification") String identification)
     {
-    	if (logger.isDebugEnabled())
+    	if (logger != null && logger.isDebugEnabled())
 			logger.debug(LOG_TAG, "identification; identification=\"" + identification + "\"");
     	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -142,7 +134,7 @@ public class CostCenterEndpoint extends BaseEndpoint
 		@QueryParam("skip") @DefaultValue("0") int skip,
 		@QueryParam("top") @DefaultValue(DEFAULT_PAGING_SIZE) int top)
     {
-    	if (logger.isDebugEnabled())
+    	if (logger != null && logger.isDebugEnabled())
 			logger.debug(LOG_TAG, "listAll; filter=\"" + filter + "\", orderby=\"" + orderby + "\""
 				+ ", skip=" + skip + ", top=" + top);
     	
@@ -173,41 +165,28 @@ public class CostCenterEndpoint extends BaseEndpoint
 
     @POST
     @Consumes("application/json")
+    @UserTransactional
     public Response create(CostCenterDTO dto)
     {
-    	if (logger.isDebugEnabled())
+    	if (logger != null && logger.isDebugEnabled())
 			logger.debug(LOG_TAG, "create; identification=\""
 				+ (dto == null ? "null" :dto.getIdentification()) + "\"");
     	
-        try
-        {
-            tx.begin();
-            CostCenter entity = dto.fromDTO(null, em);
-            em.persist(entity);
-            tx.commit();
-            return Response
-                .created(
-                    UriBuilder.fromResource(CostCenterEndpoint.class).path(String.valueOf(entity.getOid())).build())
-                .build();
-        }
-        catch (Exception e)
-        {
-        	transactionUtil.rollback(tx);
-            boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
-            if (isConstraintViolated)
-            {
-                return Response.status(Status.CONFLICT).build();
-            }
-            throw new EJBException(e);
-        }
+        CostCenter entity = dto.fromDTO(null, em);
+        em.persist(entity);
+        return Response
+            .created(
+                UriBuilder.fromResource(CostCenterEndpoint.class).path(String.valueOf(entity.getOid())).build())
+            .build();
     }
 
     @PUT
     @Path("/{id:[0-9][0-9]*}")
     @Consumes("application/json")
+    @UserTransactional
     public Response update(@PathParam("id") Long id, CostCenterDTO dto)
     {
-    	if (logger.isDebugEnabled())
+    	if (logger != null && logger.isDebugEnabled())
 			logger.debug(LOG_TAG, "update; id=" + id
 				+ ", new.id" + (dto == null ? "null" : dto.getOid())
 				+ ", new.identification" + (dto == null ? "null" :dto.getIdentification()) + "\"");
@@ -223,68 +202,28 @@ public class CostCenterEndpoint extends BaseEndpoint
             return Response.status(Status.CONFLICT).entity(dto).build();
         }
 
-        try
-        {  
-        	tx.begin();
-            CostCenter entity = em.find(CostCenter.class, id);
-            if (entity == null)
-            {
-            	tx.commit();
-                return Response.status(Status.NOT_FOUND).build();
-            }
-                        
-            entity = dto.fromDTO(entity, em);
-            try
-            {
-                entity = em.merge(entity);
-            }
-            catch (OptimisticLockException e)
-            {
-            	logger.warn(LOG_TAG, "update OptimisticLockException");
-            	transactionUtil.rollback(tx);
-                return Response.status(Status.CONFLICT).entity(e.getEntity()).build();
-            }
-            tx.commit();
-            return Response.noContent().build();
-        }
-        catch (Exception e)
+        CostCenter entity = em.find(CostCenter.class, id);
+        if (entity == null)
         {
-        	transactionUtil.rollback(tx);
-            boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
-            logger.warn(LOG_TAG, "update: " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
-            if (isConstraintViolated)
-            {
-                return Response.status(Status.CONFLICT).build();
-            }
-            throw new EJBException(e);
-        }
+            return Response.status(Status.NOT_FOUND).build();
+        }                       
+        entity = dto.fromDTO(entity, em);
+        entity = em.merge(entity);
+        return Response.noContent().build();
     }
 
     @DELETE
     @Path("/{id:[0-9][0-9]*}")
+    @UserTransactional
     public Response deleteById(@PathParam("id") Long id)
-    {
-    	if (logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "deleteById; id=" + id);
-    	
-        try
-        {  
-        	tx.begin();
-            CostCenter entity = em.find(CostCenter.class, id);
-            if (entity == null)
-            {
-            	tx.commit();
-                return Response.status(Status.NOT_FOUND).build();
-            }           
-            em.remove(entity);
-            tx.commit();
-            return Response.noContent().build();
-        }
-        catch (Exception e)
+    {    	 
+        CostCenter entity = em.find(CostCenter.class, id);
+        if (entity == null)
         {
-        	transactionUtil.rollback(tx);
-            throw new EJBException(e);
-        }
+            return Response.status(Status.NOT_FOUND).build();
+        }           
+        em.remove(entity);
+        return Response.noContent().build();
     }
     
     @GET
@@ -301,5 +240,16 @@ public class CostCenterEndpoint extends BaseEndpoint
         Calendar lastUpdate = new GregorianCalendar();
         CostCenterSummaryDTO dto = new CostCenterSummaryDTO(count, lastUpdate);
         return Response.ok(dto).build();
+    }
+    
+    public Object handleUserTransactionException(UserTransactionException userTransactionException)
+    {
+    	if (logger != null && logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "CostCenterEndpoint.handleTransactionException " + userTransactionException);
+    	
+    	if (userTransactionException instanceof UserTransactionConstraintViolationException)
+    		return Response.status(422).build();
+    	else
+    		return Response.status(Status.CONFLICT).build();
     }
 }

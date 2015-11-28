@@ -8,7 +8,9 @@
     "showAll": "Show all",
     "noNotifications": "No notification!",
     "back": "Back",
-    "requestError": "Request failed! Please try again later."
+    "requestError": "Request failed! Please try again later.",
+    "requestErrorUnprocessable": "Cannot store data! Duplicate key attributes.",
+    "requestErrorConflict": "Cannot store data! Data was modified by somebody else and is not up-to-date."
   },
   "globals": {
     "dateFormatMedium": "{{date|date:'MM/dd/yyyy'}}",

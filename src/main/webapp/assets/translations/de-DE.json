@@ -8,7 +8,9 @@
     "showAll": "Alle anzeigen",
     "noNotifications": "Keine Hinweise!",
     "back": "Zurück",
-    "requestError": "Anfrage konnte nicht ausgeführt werden! Bitte probiere es später noch einmal."
+    "requestError": "Anfrage konnte nicht ausgeführt werden! Bitte probiere es später noch einmal.",
+    "requestErrorUnprocessable": "Speichern konnte nicht ausgeführt werden! Schlüssel nicht eindeutig.",
+    "requestErrorConflict": "Speichern konnte nicht ausgeführt werden! Daten wurde von einem anderen Anwender geändert und sind nicht mehr aktuell."
   },
   "globals": {
     "dateFormatMedium": "{{date|date:'dd.MM.yyyy'}}",

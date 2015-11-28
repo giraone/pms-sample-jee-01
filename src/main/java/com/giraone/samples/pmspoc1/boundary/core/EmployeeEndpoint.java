@@ -5,22 +5,17 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.transaction.UserTransaction;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -35,12 +30,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import com.giraone.samples.common.boundary.BaseEndpoint;
+import com.giraone.samples.common.boundary.odata.ODataToJpaQueryBuilder;
+import com.giraone.samples.common.entity.PersistenceUtil;
+import com.giraone.samples.common.entity.UserTransactionConstraintViolationException;
+import com.giraone.samples.common.entity.UserTransactionException;
+import com.giraone.samples.common.entity.UserTransactional;
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeSummaryDTO;
-import com.giraone.samples.pmspoc1.boundary.core.odata.ODataToJpaQueryBuilder;
-import com.giraone.samples.pmspoc1.control.PersistenceUtil;
-import com.giraone.samples.pmspoc1.control.TransactionUtil;
 import com.giraone.samples.pmspoc1.entity.Employee;
 import com.giraone.samples.pmspoc1.entity.Employee_;
 
@@ -50,14 +48,8 @@ import com.giraone.samples.pmspoc1.entity.Employee_;
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
 @Path("/employees")
-public class EmployeeEndpoint extends BaseEndpoint
-{	
-	@Inject
-	private TransactionUtil transactionUtil;
-	
-	@Resource
-	private UserTransaction tx;
-
+public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionExceptionHandler
+{		
 	@PersistenceContext(unitName = PmsCoreApi.PERSISTENCE_UNIT)
 	private EntityManager em;
 
@@ -245,32 +237,16 @@ public class EmployeeEndpoint extends BaseEndpoint
 
 	@POST
 	@Consumes("application/json")
+	@UserTransactional
 	public Response create(EmployeeDTO dto)
 	{
     	if (logger.isDebugEnabled())
 			logger.debug(LOG_TAG, "create: personnelNumber=\""
 				+ (dto == null ? "null" :dto.getPersonnelNumber()) + "\"");
     	
-		final Employee entity;
-		try
-		{
-			tx.begin();
-			entity = dto.fromDTO(null, em);
-			em.persist(entity);
-			tx.commit();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			transactionUtil.rollback(tx);
-			boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
-			if (isConstraintViolated)
-			{
-				return Response.status(Status.CONFLICT).build();
-			}
-			throw new EJBException(e);
-		}
-
+		final Employee entity =  dto.fromDTO(null, em);
+		em.persist(entity);
+		
 		return Response
 			.created(UriBuilder.fromResource(EmployeeEndpoint.class).path(String.valueOf(entity.getOid())).build())
 			.build();
@@ -279,6 +255,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes("application/json")
+	@UserTransactional
 	public Response update(@PathParam("id") Long id, EmployeeDTO dto)
 	{
     	if (logger.isDebugEnabled())
@@ -297,66 +274,32 @@ public class EmployeeEndpoint extends BaseEndpoint
 			return Response.status(Status.CONFLICT).entity(dto).build();
 		}
 
-		try
+		Employee entity = em.find(Employee.class, id);
+		if (entity == null)
 		{
-			tx.begin();
-			Employee entity = em.find(Employee.class, id);
-			if (entity == null)
-			{
-				tx.commit();
-				return Response.status(Status.NOT_FOUND).build();
-			}
-			entity = dto.fromDTO(entity, em);
-			try
-			{
-				entity = em.merge(entity);
-			}
-			catch (OptimisticLockException e)
-			{
-				logger.warn(LOG_TAG, "update OptimisticLockException");
-				transactionUtil.rollback(tx);
-				return Response.status(Status.CONFLICT).entity(e.getEntity()).build();
-			}
-			tx.commit();
-			return Response.noContent().build();
+			return Response.status(Status.NOT_FOUND).build();
 		}
-		catch (Exception e)
-		{
-			transactionUtil.rollback(tx);
-			boolean isConstraintViolated = PersistenceUtil.isConstraintViolation(e);
-			logger.warn(LOG_TAG, "update: " + e.getClass() + ", isConstraintViolated=" + isConstraintViolated);
-			if (isConstraintViolated)
-			{
-				return Response.status(Status.CONFLICT).build();
-			}
-			throw new EJBException(e);
-		}
+		entity = dto.fromDTO(entity, em);
+		entity = em.merge(entity);
+		
+		return Response.noContent().build();
 	}
 
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")
+	@UserTransactional
 	public Response deleteById(@PathParam("id") Long id)
 	{
     	if (logger.isDebugEnabled())
 			logger.debug(LOG_TAG, "deleteById; id=" + id);
     	
-		try
+		Employee entity = em.find(Employee.class, id);
+		if (entity == null)
 		{
-			tx.begin();
-			Employee entity = em.find(Employee.class, id);
-			if (entity == null)
-			{
-				return Response.status(Status.NOT_FOUND).build();
-			}
-			em.remove(entity);
-			tx.commit();
-			return Response.noContent().build();
+			return Response.status(Status.NOT_FOUND).build();
 		}
-		catch (Exception e)
-		{
-			transactionUtil.rollback(tx);
-			throw new EJBException(e);
-		}
+		em.remove(entity);
+		return Response.noContent().build();
 	}
 	
     @GET
@@ -376,5 +319,16 @@ public class EmployeeEndpoint extends BaseEndpoint
         Calendar lastUpdate = new GregorianCalendar();
         EmployeeSummaryDTO dto = new EmployeeSummaryDTO(count, lastUpdate);
         return Response.ok(dto).build();
+    }
+    
+    public Object handleUserTransactionException(UserTransactionException userTransactionException)
+    {
+    	if (logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "EmployeeEndpoint.handleTransactionException " + userTransactionException);
+    	
+    	if (userTransactionException instanceof UserTransactionConstraintViolationException)
+    		return Response.status(422).build();
+    	else
+    		return Response.status(Status.CONFLICT).build();
     }
 }

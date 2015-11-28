@@ -1,19 +1,12 @@
-package com.giraone.samples.pmspoc1.control;
+package com.giraone.samples.common.entity;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
+/**
+ * Static utilities for JPA.
+ */
 public class PersistenceUtil
-{
-	public static boolean isConstraintViolation(Throwable e)
-	{
-		while (!(e instanceof SQLIntegrityConstraintViolationException) && e.getCause() != null)
-		{
-			e = e.getCause();
-		}
-		return e instanceof SQLIntegrityConstraintViolationException; 
-	}
-	
+{	
 	/**
 	 * Check a result list returned from a JPA query, whether it returns a single result object.
 	 * @param resultList	The result list to be checked.

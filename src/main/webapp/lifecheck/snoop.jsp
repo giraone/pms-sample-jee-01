@@ -32,7 +32,7 @@ private static String classPresent(String className)
   
 <h3>Request information</h3>
   
-<table border="1">
+<table>
 <tr>
     <th align=right>Servlet Name:</th>
     <td><%= getServletName() %></td>
@@ -69,7 +69,7 @@ private static String classPresent(String className)
 %>
 <h3>Request headers</h3>
   
-<table border="1">
+<table>
 <tr>
     <th align=left>Header:</th>
     <th align=left>Value:</th>
@@ -95,7 +95,7 @@ private static String classPresent(String className)
     if (e != null && e.hasMoreElements()) {
 %>
 <h3>Request parameters</h3>
-<table border="1">
+<table>
 <TR valign=top>
     <th align=left>Parameter:</th>
     <th align=left>Value:</th>
@@ -131,7 +131,7 @@ private static String classPresent(String className)
     if(e != null && e.hasMoreElements()) {
 %>
 <h3>Servlet Init parameters</h3>
-<table border="1">
+<table>
 <TR valign=top>
     <th align=left>Parameter:</th>
     <th align=left>Value:</th>
@@ -158,7 +158,7 @@ private static String classPresent(String className)
     if (e != null && e.hasMoreElements()) {
 %>
 <h3>Context Init parameters</h3>
-<table border="1">
+<table>
 <TR valign=top>
     <th align=left>Parameter:</th>
     <th align=left>Value:</th>
@@ -185,7 +185,7 @@ private static String classPresent(String className)
     if (e != null && e.hasMoreElements()) {
 %>
 <h3>Context Attributes</h3>
-<table border="1">
+<table>
 <TR valign=top>
     <th align=left>Parameter:</th>
     <th align=left>Value:</th>
@@ -193,7 +193,7 @@ private static String classPresent(String className)
 <%
         while (e.hasMoreElements()) {
             String k = (String) e.nextElement();
-            String val = getServletConfig().getInitParameter(k);
+            Object val = getServletContext().getAttribute(k);
 %>
 <TR valign=top>
     <td><%= k %></td>
@@ -208,7 +208,7 @@ private static String classPresent(String className)
 %>
   
 <h3>Datasources</h3>
-<table border="1"><tr><td valign="top">
+<table ><tr><td valign="top">
 <%
 String contextName = "datasources"; // "java:/datasources";
 try {
@@ -216,15 +216,14 @@ try {
     NamingEnumeration<Binding> ne = initCtx.listBindings(contextName);
     %>
   
-    <table border="1">
+    <table>
     <tr><th>Name</th><th>Type</th></tr>
     <%  
     while (ne.hasMore()) {
       Binding binding = (Binding) ne.next();
     %>
     <tr>
-      <td><a href="?jndiName=datasources/<%=binding.getName()%>">
-        java:datasources/<%=binding.getName()%></a></td>
+      <td><%= binding.getName() %></td>
       <td>Type: <%=binding.getClassName() %></td>
     </tr>
     <%
@@ -237,7 +236,7 @@ try {
 
 <h3>Classes present</h3>
   
-<table border="1">
+<table>
  <tr><td>javax.jws.WebService</td><td><%= classPresent("javax.jws.WebService") %></td></tr>
  <tr><td>org.jboss.weld.servlet.WeldInitialListener</td><td><%= classPresent("org.jboss.weld.servlet.WeldInitialListener") %></td></tr>
  <tr><td>org.eclipse.persistence.exceptions.EntityManagerSetupException</td><td><%= classPresent("org.eclipse.persistence.exceptions.EntityManagerSetupException") %></td></tr>

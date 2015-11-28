@@ -7,12 +7,18 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Produce logger implementation (log4j2) to be injected by CDI. Simplified version of
+ * <pre>
+ * LogManager.getLogger(ClassName.class);
+ * </pre>
+ */
 @ApplicationScoped
 public class LoggerProducer
 {	
 	/**
 	 * @param ip {@link InjectionPoint}
-	 * @return {@link Logger} Instance of declaring class (Injection Point Class)
+	 * @return {@link Logger} A logger instance for the declaring class (Injection Point Class)
 	 */
 	@Produces
 	public Logger getLogger(final InjectionPoint ip)

@@ -1,10 +1,9 @@
-package com.giraone.samples.pmspoc1.boundary.core.odata;
+package com.giraone.samples.common.boundary.odata;
 
 import java.sql.Date;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -40,7 +39,7 @@ public class ODataToJpaQueryBuilder<T>
 {
 	public static final String LOG_TAG = "OData";
 	
-	// TODO: Logger is not always injected !!!!!!!!!!!!!!!!!!!!!!!
+	// TODO: Logger is not always injected on problems with CDI!
 	@Inject
 	private Logger logger;
 
@@ -56,7 +55,7 @@ public class ODataToJpaQueryBuilder<T>
 		this.cb = cb;
 		this.table = table;
 	}
-
+	
 	/**
 	 * Parse an OData filter expression and return a JPA predicate
 	 * 
@@ -159,7 +158,7 @@ public class ODataToJpaQueryBuilder<T>
 		BinaryOperator binaryOperator = binaryExpression.getOperator();
 
 		if (logger != null && logger.isDebugEnabled())
-			System.err.println(LOG_TAG + 
+			logger.debug(LOG_TAG + 
 				"ODataFilterToJpaQueryBuilder.processFilterExpression operatator=" + binaryOperator.name());
 
 		if (binaryOperator == BinaryOperator.AND)

@@ -1,4 +1,4 @@
-package com.giraone.samples.pmspoc1.boundary.core;
+package com.giraone.samples.common.boundary;
 
 import java.io.IOException;
 

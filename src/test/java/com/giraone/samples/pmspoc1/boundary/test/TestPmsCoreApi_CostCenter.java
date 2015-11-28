@@ -177,6 +177,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		assertThat(firstOid2, equalTo(secondOid));
 	}
 
+	/* TODO: Split this method! */
 	@Test
 	public void t_113_GET_listAll_filters_shouldWork() throws Exception
 	{
@@ -184,33 +185,59 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		int oid = this.createFreshEntityAndReturnOid();
 		String getUri = PATH_TO_RESOURCE + "/" + oid;
 		Response response1 = given().spec(requestSpecBuilder.build()).get(getUri);
-		String identifcation = response1.path(CostCenter_.DTO_NAME_identification);
-
+		String identification = response1.path(CostCenter_.DTO_NAME_identification);
+		String description = response1.path(CostCenter_.DTO_NAME_description);
+		
 		{
 			String response = given()
 		        .spec(requestSpecBuilder.build())
 		        .queryParam("filter", CostCenter_.DTO_NAME_oid + " eq " + oid)
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("[0].oid");
+			int fetchedOid = from(response).getInt("[0]." + CostCenter_.DTO_NAME_oid);
 			assertThat(fetchedOid, equalTo(oid));
 		}
 		
 		{
 			String response = given()
 		        .spec(requestSpecBuilder.build())
-		        .queryParam("filter", CostCenter_.DTO_NAME_identification + " eq '" + identifcation + "'")
+		        .queryParam("filter", CostCenter_.DTO_NAME_identification + " eq '" + identification + "'")
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("[0].oid");
-			assertThat(fetchedOid, equalTo(oid));
+			String fetchedIdentification = from(response).getString("[0]." + CostCenter_.DTO_NAME_identification);
+			assertThat(fetchedIdentification, equalTo(identification));
 		}
 		
 		{
 			String response = given()
 		        .spec(requestSpecBuilder.build())
-		        .queryParam("filter", CostCenter_.DTO_NAME_oid + " eq " + oid + " and " + CostCenter_.DTO_NAME_identification + " eq '" + identifcation + "'")
+		        .queryParam("filter", CostCenter_.DTO_NAME_description + " eq '" + description + "'")
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("[0].oid");
-			assertThat(fetchedOid, equalTo(oid));
+			String fetchedDescription = from(response).getString("[0]." + CostCenter_.DTO_NAME_description);
+			assertThat(fetchedDescription, equalTo(description));
+		}
+		
+		// Boolean AND expression
+		{
+			String response = given()
+		        .spec(requestSpecBuilder.build())
+		        .queryParam("filter", CostCenter_.DTO_NAME_description + " eq '" + description
+		        	+ "' and " + CostCenter_.DTO_NAME_identification + " eq '" + identification + "'")
+				.get(PATH_TO_RESOURCE).asString();
+			String fetchedIdentification = from(response).getString("[0]." + CostCenter_.DTO_NAME_identification);
+			String fetchedDescription = from(response).getString("[0]." + CostCenter_.DTO_NAME_description);
+			assertThat(fetchedIdentification, equalTo(identification));
+			assertThat(fetchedDescription, equalTo(description));
+		}
+		
+		// Boolean OR expression
+		{
+			String response = given()
+		        .spec(requestSpecBuilder.build())
+		        .queryParam("filter", CostCenter_.DTO_NAME_description + " eq '" + description
+		        	+ "' or " + CostCenter_.DTO_NAME_identification + " eq '" + identification + "'")
+				.get(PATH_TO_RESOURCE).asString();
+			String fetchedIdentification = from(response).getString("[0]." + CostCenter_.DTO_NAME_identification);
+			String fetchedDescription = from(response).getString("[0]." + CostCenter_.DTO_NAME_description);
+			assertTrue(fetchedIdentification.equals(identification) || fetchedDescription.equals(fetchedDescription));
 		}
 	}
 
@@ -246,6 +273,41 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		long thirdOid = from(response1).getLong("[2].oid");
 		assertThat(firstOid, lessThan(secondOid));
 		assertThat(secondOid, lessThan(thirdOid));
+	}
+
+	@Test
+	public void t_122_GET_listAll_orderByStringAsc_shouldWork() throws Exception
+	{
+		String response1 = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("orderBy", CostCenter_.DTO_NAME_identification + " asc")
+	        .get(PATH_TO_RESOURCE).asString();
+		int count = from(response1).getList("").size();
+		if (count < 3) return;
+		
+		String firstIdentification = from(response1).getString("[0]." + CostCenter_.DTO_NAME_identification);
+		String secondIdentification = from(response1).getString("[1]." + CostCenter_.DTO_NAME_identification);
+		String thirdIdentification = from(response1).getString("[2]." + CostCenter_.DTO_NAME_identification);
+		assertThat(firstIdentification, lessThan(secondIdentification));
+		assertThat(secondIdentification, lessThan(thirdIdentification));
+	}
+	
+	@Test
+	public void t_122_GET_listAll_orderByMultiple_shouldWork() throws Exception
+	{
+		String response1 = given()
+	        .spec(requestSpecBuilder.build())
+	        .queryParam("orderBy", CostCenter_.DTO_NAME_identification + " asc," + CostCenter_.DTO_NAME_description + " asc")
+	        .get(PATH_TO_RESOURCE).asString();
+		int count = from(response1).getList("").size();
+		if (count < 3) return;
+		
+		// TODO: Not yet perfect
+		String firstIdentification = from(response1).getString("[0]." + CostCenter_.DTO_NAME_identification);
+		String secondIdentification = from(response1).getString("[1]." + CostCenter_.DTO_NAME_identification);
+		String thirdIdentification = from(response1).getString("[2]." + CostCenter_.DTO_NAME_identification);
+		assertThat(firstIdentification, lessThan(secondIdentification));
+		assertThat(secondIdentification, lessThan(thirdIdentification));
 	}
 	
 	@Test
