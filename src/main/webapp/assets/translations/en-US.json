@@ -10,7 +10,8 @@
     "back": "Back",
     "requestError": "Request failed! Please try again later.",
     "requestErrorUnprocessable": "Cannot store data! Duplicate key attributes.",
-    "requestErrorConflict": "Cannot store data! Data was modified by somebody else and is not up-to-date."
+    "requestErrorConflict": "Cannot store data! Data was modified by somebody else and is not up-to-date.",
+    "showMoreButton": "Show more - Currently {{from}} to {{to}} of {{total}}"
   },
   "globals": {
     "dateFormatMedium": "{{date|date:'MM/dd/yyyy'}}",
