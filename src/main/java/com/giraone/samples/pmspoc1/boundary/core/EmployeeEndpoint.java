@@ -9,11 +9,11 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Consumes;
@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import com.giraone.samples.common.StringUtil;
 import com.giraone.samples.common.boundary.BaseEndpoint;
 import com.giraone.samples.common.boundary.PagingBlock;
 import com.giraone.samples.common.boundary.odata.ODataToJpaQueryBuilder;
@@ -58,13 +59,13 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 	@Path("/{id:[0-9][0-9]*}")
 	@Produces("application/json")
 	public Response findById(@PathParam("id") Long id)
-	{
-		if (logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "findById; id=" + id);
-		
+	{		
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
 		final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
 		final Root<Employee> table = c.from(Employee.class);
+		// This is very import! We want the cost center object too (may be null) and use a left join
+		table.fetch(Employee_.costCenter, JoinType.LEFT);
+		
 		final CriteriaQuery<Employee> select = c.select(table);
 		final Predicate predicate = cb.equal(table.get(Employee_.oid), id);
 		// Open issue: Does it make any sense to use also .distinct() here?
@@ -94,13 +95,13 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
     @Path("/pnr-{personnelNumber:[0-9a-zA-Z][0-9a-zA-Z]*}")
     @Produces("application/json")
     public Response findByPersonnelNumber(@PathParam("personnelNumber") String personnelNumber)
-    {
-    	if (logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "findByPersonnelNumber; personnelNumber=" + personnelNumber);
-    	
+    {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
         final Root<Employee> table = c.from(Employee.class);
+		// This is very import! We want the cost center object too (may be null) and use a left join
+		table.fetch(Employee_.costCenter, JoinType.LEFT);
+        
         final CriteriaQuery<Employee> select = c.select(table);
         final Predicate predicate = cb.equal(table.get(Employee_.personnelNumber), personnelNumber);
         // Open issue: Does it make any sense to use also .distinct() here?
@@ -120,33 +121,6 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
         }
     }
     
-    // TODO: Remove
-	@GET
-	@Path("/alternative/{id:[0-9][0-9]*}")
-	@Produces("application/json")
-	public Response findById2(@PathParam("id") Long id)
-	{
-		TypedQuery<Employee> findByIdQuery = em.createQuery(
-			"SELECT DISTINCT e FROM Employee e LEFT JOIN FETCH e.costCenter WHERE e.oid = :entityId ORDER BY e.oid",
-			Employee.class);
-		findByIdQuery.setParameter("entityId", id);
-		Employee entity;
-		try
-		{
-			entity = findByIdQuery.getSingleResult();
-		}
-		catch (NoResultException nre)
-		{
-			entity = null;
-		}
-		if (entity == null)
-		{
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		EmployeeDTO dto = new EmployeeDTO(entity);
-		return Response.ok(dto).build();
-	}
-
     /**
      * List all entities with support for OData filters.
      * @param filter	OData filter expression
@@ -162,18 +136,18 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 		@QueryParam("orderby") @DefaultValue("") String orderby,
 		@QueryParam("skip") @DefaultValue("0") int skip,
 		@QueryParam("top") @DefaultValue(DEFAULT_PAGING_SIZE) int top)
-	{
-		if (logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "listAll; filter=\"" + filter + "\", orderby=\"" + orderby + "\""
-				+ ", skip=" + skip + ", top=" + top);
-		
+	{		
 		// TypedQuery<Employee> findAllQuery = em.createQuery(
 		// "SELECT DISTINCT e FROM Employee e LEFT JOIN FETCH e.costCenter ORDER
 		// BY e.oid", Employee.class);
+		// Join<Employee, CostCenter> join = table.join(Employee_.costCenter, JoinType.LEFT);
 
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
 		final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
 		final Root<Employee> table = c.from(Employee.class);
+		// This is very import! We want the cost center object too (may be null) and use a left join
+		table.fetch(Employee_.costCenter, JoinType.LEFT);
+		
 		final CriteriaQuery<Employee> select = c.select(table);
 		
         ODataToJpaQueryBuilder<Employee> filterBuilder = new ODataToJpaQueryBuilder<Employee>();
@@ -188,7 +162,7 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 			// OData arguments are illegal
 			if (logger.isDebugEnabled())
 			{
-				logger.debug(LOG_TAG, "listAll; filter=\"" + filter + "\"", iae);
+				logger.debug(LOG_TAG, "Illegal OData filter=" + StringUtil.serializeAsJavaString(filter), iae);
 			}
 			return Response.status(Status.BAD_REQUEST).build();
 		}
@@ -226,11 +200,7 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 	@Consumes("application/json")
 	@UserTransactional
 	public Response create(EmployeeDTO dto)
-	{
-    	if (logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "create: personnelNumber=\""
-				+ (dto == null ? "null" :dto.getPersonnelNumber()) + "\"");
-    	
+	{    	
 		final Employee entity =  dto.fromDTO(null, em);
 		em.persist(entity);
 		
@@ -244,12 +214,7 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 	@Consumes("application/json")
 	@UserTransactional
 	public Response update(@PathParam("id") Long id, EmployeeDTO dto)
-	{
-    	if (logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "update; id=" + id
-				+ ", new.id" + (dto == null ? "null" : dto.getOid())
-				+ ", new.personnelNumber" + (dto == null ? "null" :dto.getPersonnelNumber()) + "\"");
-    	
+	{    	
 		if (dto == null || id == null)
 		{
 			return Response.status(Status.BAD_REQUEST).build();
@@ -276,10 +241,7 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 	@Path("/{id:[0-9][0-9]*}")
 	@UserTransactional
 	public Response deleteById(@PathParam("id") Long id)
-	{
-    	if (logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "deleteById; id=" + id);
-    	
+	{    	
 		Employee entity = em.find(Employee.class, id);
 		if (entity == null)
 		{
@@ -293,10 +255,7 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
     @Path("/summary")
     @Produces("application/json")
     public Response summary()
-    {
-    	if (logger.isDebugEnabled())
-			logger.debug(LOG_TAG + "summary");
-    	
+    {    	
     	CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Long> c = cb.createQuery(Long.class);
 		Root<Employee> table = c.from(Employee.class);

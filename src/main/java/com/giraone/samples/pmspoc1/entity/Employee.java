@@ -47,10 +47,13 @@ public class Employee implements Serializable
 	@Pattern(regexp = "[0-9]*", message = "Only numbers")
 	private String personnelNumber;
 
-	// Having a cost center is optional at the database level. This simplifies the overall workflow.
-	@ManyToOne(fetch = FetchType.EAGER, optional = true, targetEntity = CostCenter.class, cascade = CascadeType.REFRESH)
+	// (1) Having a cost center for an employee is optional at the database level, therefore
+	//     we use optional=true and @JoinColumn(nullable = true). This also simplifies the overall workflow.
+	// (2) We always use FetchType.LAZY to have full control in criteria API, when we'd like to fetch more data.
+	// (3) We use CascadeType.REFRESH only. This means no persist/merge/remove is cascaded, Only when we call refresh()
+	//     the employee will be fetched again with the cost center.
+	@ManyToOne(fetch = FetchType.LAZY, optional = true, targetEntity = CostCenter.class, cascade = CascadeType.REFRESH)
 	@JoinColumn(nullable = true)
-	// @ForeignKey (nur OpenJPA)
 	private CostCenter costCenter;
 
 	@Column(name = Employee_.SQL_NAME_lastName, nullable = false, length = 256)

@@ -56,10 +56,7 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
     @Path("/{id:[0-9][0-9]*}")
     @Produces("application/json")
     public Response findById(@PathParam("id") Long id)
-    {
-    	if (logger != null && logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "findById; id=" + id);
-    	
+    {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<CostCenter> c = cb.createQuery(CostCenter.class);
         final Root<CostCenter> table = c.from(CostCenter.class);
@@ -92,10 +89,7 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
     @Path("/id-{identification:[0-9a-zA-Z][0-9a-zA-Z]*}")
     @Produces("application/json")
     public Response findByIdentification(@PathParam("identification") String identification)
-    {
-    	if (logger != null && logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "identification; identification=\"" + identification + "\"");
-    	
+    {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<CostCenter> c = cb.createQuery(CostCenter.class);
         final Root<CostCenter> table = c.from(CostCenter.class);
@@ -133,11 +127,7 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
 		@QueryParam("orderby") @DefaultValue("") String orderby,
 		@QueryParam("skip") @DefaultValue("0") int skip,
 		@QueryParam("top") @DefaultValue(DEFAULT_PAGING_SIZE) int top)
-    {
-    	if (logger != null && logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "listAll; filter=\"" + filter + "\", orderby=\"" + orderby + "\""
-				+ ", skip=" + skip + ", top=" + top);
-    	
+    {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<CostCenter> c = cb.createQuery(CostCenter.class);
         final Root<CostCenter> table = c.from(CostCenter.class);
@@ -167,11 +157,7 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
     @Consumes("application/json")
     @UserTransactional
     public Response create(CostCenterDTO dto)
-    {
-    	if (logger != null && logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "create; identification=\""
-				+ (dto == null ? "null" :dto.getIdentification()) + "\"");
-    	
+    {    	
         CostCenter entity = dto.fromDTO(null, em);
         em.persist(entity);
         return Response
@@ -185,12 +171,7 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
     @Consumes("application/json")
     @UserTransactional
     public Response update(@PathParam("id") Long id, CostCenterDTO dto)
-    {
-    	if (logger != null && logger.isDebugEnabled())
-			logger.debug(LOG_TAG, "update; id=" + id
-				+ ", new.id" + (dto == null ? "null" : dto.getOid())
-				+ ", new.identification" + (dto == null ? "null" :dto.getIdentification()) + "\"");
-    	
+    {    	
         if (dto == null || id == null)
         {
             return Response.status(Status.BAD_REQUEST).build();

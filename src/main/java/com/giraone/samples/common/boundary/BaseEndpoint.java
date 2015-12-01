@@ -1,5 +1,6 @@
 package com.giraone.samples.common.boundary;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import javax.inject.Inject;
@@ -15,6 +16,8 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+
+import com.giraone.samples.common.StringUtil;
 
 /**
  * Base class for REST services. Features:
@@ -88,21 +91,32 @@ public class BaseEndpoint
 				logger.debug(LOG_TAG, "Entering: " + invocationContext.getTarget().getClass().getSimpleName() + "."
 					+ invocationContext.getMethod().getName());
 				
-				StringBuilder sb = null;
-				for (Object param : invocationContext.getParameters())
+				// Logs all parameters with their annotations
+				StringBuilder sb = new StringBuilder();
+				Annotation[][] annotations = method.getParameterAnnotations();
+				Object[] params = invocationContext.getParameters();
+				for (int i = 0; i < params.length; i++)
 				{
-					if (sb == null)
+					if (i > 0)
 					{
-						sb = new StringBuilder();
-						sb.append(param);
+						sb.append(", ");
+					}
+					if (annotations[i] != null && annotations[i].length > 0)
+					{
+						sb.append(annotations[i][0]);
 					}
 					else
 					{
-						sb.append(", ").append(param);
+						sb.append(i);
 					}
+					sb.append("=");
+					Object param = params[i];
+					if (param instanceof String)
+						sb.append(StringUtil.serializeAsJavaString((String) param));
+					else
+						sb.append(param);
 				}
-				logger.debug(LOG_TAG, "Params:   " + (sb == null ? "null" : sb.toString()));
-				
+				logger.debug(LOG_TAG, "  Params: " + (sb == null ? "null" : sb.toString()));				
 			}
 			obj = invocationContext.proceed();
 		}
