@@ -32,6 +32,14 @@ public class StringUtil
 	{
 		return s != null ? s.toString() : defaultValue;
 	}
+		
+	public static String serializeAsJavaString(String s)
+	{
+		if (s == null)
+			return "null";
+		else
+			return "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
+	}
 	
 	// Not thread safe!
 	public static String formatDateAsIsoDate(Date date)
