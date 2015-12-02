@@ -1,15 +1,13 @@
 package com.giraone.samples.pmspoc1.boundary.core.dto;
 
 import java.io.Serializable;
-
-import com.giraone.samples.pmspoc1.boundary.core.dto.NestedCostCenterDTO;
-import com.giraone.samples.pmspoc1.entity.Employee;
-import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
+import java.util.Calendar;
+import java.util.List;
 
 import javax.persistence.EntityManager;
-
-import java.util.Calendar;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.giraone.samples.pmspoc1.entity.Employee;
 
 @XmlRootElement
 public class EmployeeDTO implements Serializable
@@ -19,7 +17,7 @@ public class EmployeeDTO implements Serializable
 	private Long oid;
 	private int versionNumber;
 	private String personnelNumber;
-	private NestedCostCenterDTO costCenter;
+	private CostCenterDTO costCenter;
 	private String lastName;
 	private String firstName;
 	private String gender;
@@ -27,6 +25,8 @@ public class EmployeeDTO implements Serializable
 	private String nationalityCode;
 	private Calendar dateOfEntry;
 
+	private List<EmployeePostalAddressDTO> postalAddresses;
+	
 	public EmployeeDTO()
 	{
 	}
@@ -35,16 +35,8 @@ public class EmployeeDTO implements Serializable
 	{
 		if (entity != null)
 		{
-			this.oid = entity.getOid();
-			this.versionNumber = entity.getVersionNumber();
-			this.personnelNumber = entity.getPersonnelNumber();
-			this.costCenter = new NestedCostCenterDTO(entity.getCostCenter());
-			this.lastName = entity.getLastName();
-			this.firstName = entity.getFirstName();
-			this.gender = entity.getGender().toString();
-			this.dateOfBirth = entity.getDateOfBirth();
-			this.nationalityCode = entity.getNationalityCode();
-			this.dateOfEntry = entity.getDateOfEntry();
+			EmployeeMapper.INSTANCE.updateDtoFromEntity(entity, this);
+			//this.costCenter = new NestedCostCenterDTO(entity.getCostCenter());
 		}
 	}
 
@@ -54,17 +46,8 @@ public class EmployeeDTO implements Serializable
 		{
 			entity = new Employee();
 		}
-		entity.setPersonnelNumber(this.personnelNumber);
-		if (this.costCenter != null)
-		{
-			entity.setCostCenter(this.costCenter.fromDTO(entity.getCostCenter(), em));
-		}
-		entity.setLastName(this.lastName);
-		entity.setFirstName(this.firstName);
-		entity.setGender(EnumGender.fromString(this.gender));
-		entity.setDateOfBirth(this.dateOfBirth);
-		entity.setNationalityCode(this.nationalityCode);
-		entity.setDateOfEntry(this.dateOfEntry);
+		// entity.setCostCenter(this.costCenter.fromDTO(entity.getCostCenter(), em));
+		EmployeeMapper.INSTANCE.updateEntityFromDto(this, entity);
 		entity = em.merge(entity);
 		return entity;
 	}
@@ -99,12 +82,12 @@ public class EmployeeDTO implements Serializable
 		this.personnelNumber = personnelNumber;
 	}
 
-	public NestedCostCenterDTO getCostCenter()
+	public CostCenterDTO getCostCenter()
 	{
 		return this.costCenter;
 	}
 
-	public void setCostCenter(final NestedCostCenterDTO costCenter)
+	public void setCostCenter(final CostCenterDTO costCenter)
 	{
 		this.costCenter = costCenter;
 	}
@@ -167,5 +150,15 @@ public class EmployeeDTO implements Serializable
 	public void setDateOfEntry(final Calendar dateOfEntry)
 	{
 		this.dateOfEntry = dateOfEntry;
+	}
+	
+	public List<EmployeePostalAddressDTO> getPostalAddresses()
+	{
+		return postalAddresses;
+	}
+
+	public void setPostalAddresses(List<EmployeePostalAddressDTO> postalAddresses)
+	{
+		this.postalAddresses = postalAddresses;
 	}
 }

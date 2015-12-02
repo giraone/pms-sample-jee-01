@@ -1,15 +1,17 @@
 package com.giraone.samples.pmspoc1.boundary.core.dto;
 
 import java.io.Serializable;
-import com.giraone.samples.pmspoc1.entity.CostCenter;
+
 import javax.persistence.EntityManager;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.giraone.samples.pmspoc1.entity.CostCenter;
 
 @XmlRootElement
 public class CostCenterDTO implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-	
+    
 	private Long oid;
 	private int versionNumber;
 	private String identification;
@@ -22,11 +24,8 @@ public class CostCenterDTO implements Serializable
 	public CostCenterDTO(final CostCenter entity)
 	{
 		if (entity != null)
-		{
-			this.oid = entity.getOid();
-			this.versionNumber = entity.getVersionNumber();
-			this.identification = entity.getIdentification();
-			this.description = entity.getDescription();
+		{			
+			CostCenterMapper.INSTANCE.updateDtoFromEntity(entity, this);
 		}
 	}
 
@@ -36,8 +35,7 @@ public class CostCenterDTO implements Serializable
 		{
 			entity = new CostCenter();
 		}
-		entity.setIdentification(this.identification);
-		entity.setDescription(this.description);
+		CostCenterMapper.INSTANCE.updateEntityFromDto(this, entity);
 		entity = em.merge(entity);
 		return entity;
 	}

@@ -43,6 +43,8 @@ public class Employee_ extends AbstractEntity_
 	public static final String DTO_NAME_nationalityCode = "nationalityCode";
 	public static final String DTO_NAME_dateOfEntry = "dateOfEntry";
 	
+	public static final String DTO_NAME_postalAddresses = "postalAddresses";
+	
 	/*
 	public static final String NAME_PROPERTY_familienstand = "familienstand";
 	public static final String NAME_PROPERTY_geburtsland = "geburtsland";

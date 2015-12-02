@@ -1,7 +1,9 @@
 package com.giraone.samples.pmspoc1.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,6 +15,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Persistence;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -84,6 +89,14 @@ public class Employee implements Serializable
 	@Temporal(TemporalType.DATE)
 	private Calendar dateOfEntry;
 
+	// (1) We may use this list, but it is fetched lazy
+	// (2) Cascade type is REMOVE and orphanRemoval = true. If the employee is removed, the postal postalAddresses are removed too
+	@OneToMany(mappedBy = EmployeePostalAddress_.SQL_NAME_employee, fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
+	// (3) The list is order by the postal address ranking
+    @OrderBy(PostalAddress_.SQL_NAME_ranking + " ASC")
+	//@CascadeOnDelete  // This is an EclipseLink only annotation, which leads to ON DELETE CASCADE on the database level
+	private List<EmployeePostalAddress> postalAddresses;
+	
 	public Employee()
 	{
 		super();
@@ -183,4 +196,62 @@ public class Employee implements Serializable
 	{
 		this.dateOfEntry = dateOfEntry;
 	}
+
+	//-- PostalAddress START ---------------------------------------------------------------
+
+	public List<EmployeePostalAddress> getAddresses()
+	{
+		if (this.oid > 0 && this.postalAddresses == null && !Persistence.getPersistenceUtil().isLoaded(this.postalAddresses))
+			throw new IllegalStateException("You cannot access Mitarbeiter.getAddresses when it was not loaded!");
+		
+		if (this.postalAddresses == null)
+		{
+			this.postalAddresses = new ArrayList<EmployeePostalAddress>();
+		}
+		return postalAddresses;
+	}
+
+	public void setAddresses(List<EmployeePostalAddress> postalAddresses)
+	{
+		int i = 1;
+		for (EmployeePostalAddress address : postalAddresses)
+		{
+			address.setEmployee(this);
+			address.setRanking(i++);
+		}
+		this.postalAddresses = postalAddresses;
+	}
+	
+	public void addAddress(EmployeePostalAddress address)
+	{
+		this.getAddresses().add(address);
+		address.setEmployee(this);
+		address.setRanking(this.getAddresses().size());
+	}
+	
+	public void removeAddress(EmployeePostalAddress postalAddress)
+	{
+		this.getAddresses().remove(postalAddress);
+		int i = 1;
+		for (EmployeePostalAddress address : this.getAddresses())
+		{
+			address.setRanking(i++);
+		}
+	}
+	
+	public void removeAddress(long postalAddressId)
+	{
+		EmployeePostalAddress toBeRemoved = null;
+		for (EmployeePostalAddress address : this.getAddresses())
+		{
+			if (address.getOid() == postalAddressId)
+			{
+				toBeRemoved = address;
+				break;
+			}			
+		}
+		this.removeAddress(toBeRemoved);
+	}
+	
+	//-- PostalAddress END -----------------------------------------------------------------
 }
