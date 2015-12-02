@@ -11,6 +11,7 @@ $RECYCLE.BIN/
 # Typical Eclipse, IntelliJ and Maven stuff
 .classpath
 .project
+.factorypath
 .tern-project
 target
 .settings
