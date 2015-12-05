@@ -16,6 +16,8 @@ public class TestPmsCoreApi
 	//static final int PORT = 80;
 	static final String PATH_API = "/api";
 	
+	static final int HTTP_UNPROCESSABLE = 422;
+	
 	RequestSpecBuilder requestSpecBuilder = new RequestSpecBuilder();
 	
 	@BeforeClass

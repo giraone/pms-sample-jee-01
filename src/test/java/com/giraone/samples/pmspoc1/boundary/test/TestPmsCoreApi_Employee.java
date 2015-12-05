@@ -93,7 +93,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	        .spec(requestSpecBuilder.build())
 	        .queryParam("top", top)
 	        .get(PATH_TO_RESOURCE).asString();
-		int count = from(response).getList("").size();
+		int count = from(response).getList("blockItems").size();
 		assertThat("count", count, lessThanOrEqualTo(top));
 	}
 
@@ -105,7 +105,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	        .queryParam("top", 10)
 	        .queryParam("skip", 0)
 	        .get(PATH_TO_RESOURCE).asString();
-		int count = from(response1).getList("").size();
+		int count = from(response1).getList("blockItems").size();
 		if (count < 3) return;
 		
 		long firstOid = from(response1).getLong("[0].oid");
@@ -137,7 +137,8 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		        .spec(requestSpecBuilder.build())
 		        .queryParam("filter", CostCenter_.DTO_NAME_oid + " eq " + oid)
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("[0].oid");
+
+			int fetchedOid = from(response).getInt("blockItems[0].oid");
 			assertThat(fetchedOid, equalTo(oid));
 		}
 		
@@ -146,7 +147,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		        .spec(requestSpecBuilder.build())
 		        .queryParam("filter", Employee_.DTO_NAME_personnelNumber + " eq '" + personnelNumber + "'")
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("[0].oid");
+			int fetchedOid = from(response).getInt("blockItems[0].oid");
 			assertThat(fetchedOid, equalTo(oid));
 		}
 		
@@ -155,16 +156,16 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		        .spec(requestSpecBuilder.build())
 		        .queryParam("filter", Employee_.DTO_NAME_oid + " eq " + oid + " and " + Employee_.DTO_NAME_personnelNumber + " eq '" + personnelNumber + "'")
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("[0].oid");
+			int fetchedOid = from(response).getInt("blockItems[0].oid");
 			assertThat(fetchedOid, equalTo(oid));
 		}
 		
 		{
 			String response = given()
 		        .spec(requestSpecBuilder.build())
-		        .queryParam("filter", Employee_.DTO_NAME_lastName + " eq " + lastName)
+		        .queryParam("filter", Employee_.DTO_NAME_lastName + " eq '" + lastName + "'")
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("[0].oid");
+			int fetchedOid = from(response).getInt("blockItems[0].oid");
 			assertThat(fetchedOid, equalTo(oid));
 		}
 	}
@@ -409,11 +410,19 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	{
 		this.deleteEntityByIdentificationAndIgnoreStatus(domainKey);
 		
+		String jsonPayload = Json.createObjectBuilder()
+			.add(Employee_.DTO_NAME_personnelNumber, domainKey)
+			.add(Employee_.DTO_NAME_lastName, "LastName-" + domainKey)
+			.add(Employee_.DTO_NAME_firstName, "FirstName-" + domainKey)
+			.add(Employee_.DTO_NAME_dateOfBirth, "1966-12-31T00:00:00.000Z")
+			.add(Employee_.DTO_NAME_gender, EnumGender.F.toString())
+			.add(Employee_.DTO_NAME_dateOfEntry, "2014-01-01T00:00:00.000Z")
+			.add(Employee_.DTO_NAME_nationalityCode, "DEU")
+			.build().toString();
+		
 		Response response = given()
 			.spec(requestSpecBuilder.build())
-			.body("{"
-				+ "\"" + Employee_.DTO_NAME_personnelNumber + "\":\"" + domainKey
-			    + "\"," + "\"" + Employee_.DTO_NAME_lastName + "\":\"LastName-" + domainKey + "\"" + "}")
+			.body(jsonPayload)
 			.post(PATH_TO_RESOURCE);
 		
 	    String entityLocation = response.header("location");

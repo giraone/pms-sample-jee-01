@@ -2,8 +2,15 @@ package com.giraone.samples.pmspoc1.boundary.test;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.path.json.JsonPath.from;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.StringReader;
 import java.net.HttpURLConnection;
@@ -33,7 +40,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 {
 	static final String PATH_TO_RESOURCE = "/costcenters";
 	
-	static final String ENTITY_VALID_domainKey = "center12345";
+	//static final String ENTITY_VALID_domainKey = "center12345";
 	static final String ENTITY_NOT_EXISTING_domainKey = "fake98765";
 	static final String ENTITY_INVALID_domainKey = "%()";
 	
@@ -297,7 +304,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	{
 		String response1 = given()
 	        .spec(requestSpecBuilder.build())
-	        .queryParam("orderBy", CostCenter_.DTO_NAME_identification + " asc," + CostCenter_.DTO_NAME_description + " asc")
+	        .queryParam("orderby", CostCenter_.DTO_NAME_identification + " asc," + CostCenter_.DTO_NAME_description + " asc")
 	        .get(PATH_TO_RESOURCE).asString();
 		int count = from(response1).getList("").size();
 		if (count < 3) return;
@@ -315,7 +322,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	{
 		String response1 = given()
 	        .spec(requestSpecBuilder.build())
-	        .queryParam("orderBy", "oid desc")
+	        .queryParam("orderby", "oid desc")
 	        .get(PATH_TO_RESOURCE).asString();
 		int count = from(response1).getList("").size();
 		if (count < 3) return;
@@ -323,17 +330,18 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		long firstOid = from(response1).getLong("[0].oid");
 		long secondOid = from(response1).getLong("[1].oid");
 		long thirdOid = from(response1).getLong("[2].oid");
-		assertThat(firstOid, lessThan(secondOid));
-		assertThat(secondOid, lessThan(thirdOid));
+		assertThat(firstOid, greaterThan(secondOid));
+		assertThat(secondOid, greaterThan(thirdOid));
 	}
 	
 	@Test
 	public void t_200_POST_newValidData_shouldReturnStatusCreatedWithLocation() throws Exception
 	{
-		this.deleteEntityByIdentificationAndIgnoreStatus(ENTITY_VALID_domainKey);
+		final String domainKey = this.getRandomOid();
+		this.deleteEntityByIdentificationAndIgnoreStatus(domainKey);
 		
 		String jsonPayload = Json.createObjectBuilder()
-		    .add(CostCenter_.DTO_NAME_identification, ENTITY_VALID_domainKey)
+		    .add(CostCenter_.DTO_NAME_identification, domainKey)
 		    .add(CostCenter_.DTO_NAME_description, ENTITY_VALID_description)
 		    .build()
 		    .toString();
@@ -358,17 +366,18 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 			.log().body()
 			.statusCode(HttpURLConnection.HTTP_OK)
 			.contentType(ContentType.JSON)	        
-	        .body(CostCenter_.DTO_NAME_identification, is(ENTITY_VALID_domainKey))
+	        .body(CostCenter_.DTO_NAME_identification, is(domainKey))
 	        .body(CostCenter_.DTO_NAME_description, is(ENTITY_VALID_description));
 	}
 	
 	@Test
 	public void t_200_POST_duplicateValidData_shouldReturnStatusConflict() throws Exception
-	{		
-		this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
+	{	
+		final String domainKey = this.getRandomOid();
+		this.createFreshEntityAndReturnOid(domainKey);
 		
 		String jsonPayload = Json.createObjectBuilder()
-		    .add(CostCenter_.DTO_NAME_identification, ENTITY_VALID_domainKey)
+		    .add(CostCenter_.DTO_NAME_identification, domainKey)
 		    .add(CostCenter_.DTO_NAME_description, ENTITY_VALID_description)
 		    .build()
 		    .toString();
@@ -380,13 +389,15 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	        .post(PATH_TO_RESOURCE)
 	    .then()
 	    	.log().all()
-	        .statusCode(HttpURLConnection.HTTP_CONFLICT);
+	        .statusCode(HTTP_UNPROCESSABLE);
 	}
 	
 	@Test
 	public void t_300_PUT_validData_shouldReturnStatusNoContent() throws Exception
 	{
-	    int oid = this.createFreshEntityAndReturnOid();
+		final String domainKey = this.getRandomOid();
+	    int oid = this.createFreshEntityAndReturnOid(domainKey);
+	    
 	    String getUri = PATH_TO_RESOURCE + "/" + oid;
 	    Response oldResponse = given().spec(requestSpecBuilder.build()).get(getUri);
 	    int oldVersionNumber = oldResponse.path(CostCenter_.DTO_NAME_versionNumber);
@@ -399,7 +410,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	     
 		String jsonPayload = Json.createObjectBuilder()
 		    .add(CostCenter_.DTO_NAME_oid, oid)
-		    .add(CostCenter_.DTO_NAME_identification, ENTITY_VALID_domainKey)
+		    .add(CostCenter_.DTO_NAME_identification, domainKey)
 		    .add(CostCenter_.DTO_NAME_description, newDescription)
 		    .build()
 		    .toString();
@@ -545,9 +556,14 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		this.deleteEntityByOidAndIgnoreStatus(oid);
 	}
 	
+	String getRandomOid()
+	{
+		return "R" + RANDOM.nextInt(100000);
+	}
+	
 	int createFreshEntityAndReturnOid()
 	{
-		return this.createFreshEntityAndReturnOid("R" + RANDOM.nextInt(100000));
+		return this.createFreshEntityAndReturnOid(this.getRandomOid());
 	}
 	
 	int createFreshEntityAndReturnOid(String domainKey)
