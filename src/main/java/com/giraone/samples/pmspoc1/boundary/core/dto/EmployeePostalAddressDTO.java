@@ -22,6 +22,7 @@ public class EmployeePostalAddressDTO implements Serializable
 	protected String street;
 	protected String houseNumber;
 	protected String poBoxNumber;
+	protected Long employeeId;
 
 	public EmployeePostalAddressDTO()
 	{
@@ -34,18 +35,21 @@ public class EmployeePostalAddressDTO implements Serializable
 			EmployeePostalAddressMapper.INSTANCE.updateDtoFromEntity(entity, this);
 		}
 	}
-
-	public EmployeePostalAddress fromDTO(EmployeePostalAddress entity, EntityManager em)
+	
+	public EmployeePostalAddress entityFromDTO()
 	{
-		if (entity == null)
-		{
-			entity = new EmployeePostalAddress();
-		}
+		EmployeePostalAddress entity = new EmployeePostalAddress();
 		EmployeePostalAddressMapper.INSTANCE.updateEntityFromDto(this, entity);
-		entity = em.merge(entity);
 		return entity;
 	}
 
+	public EmployeePostalAddress mergeFromDTO(EmployeePostalAddress entity, EntityManager em)
+	{
+		EmployeeMapper.INSTANCE.updateEntityFromDto(this, entity);
+		entity = em.merge(entity);
+		return entity;
+	}
+	
 	public Long getOid()
 	{
 		return this.oid;
@@ -65,8 +69,7 @@ public class EmployeePostalAddressDTO implements Serializable
 	{
 		this.versionNumber = versionNumber;
 	}
-	
-	
+		
 	public int getRanking()
 	{
 		return ranking;
@@ -145,5 +148,15 @@ public class EmployeePostalAddressDTO implements Serializable
 	public void setPoBoxNumber(String poBoxNumber)
 	{
 		this.poBoxNumber = poBoxNumber;
+	}
+
+	public Long getEmployeeId()
+	{
+		return employeeId;
+	}
+
+	public void setEmployeeId(Long employeeId)
+	{
+		this.employeeId = employeeId;
 	}
 }

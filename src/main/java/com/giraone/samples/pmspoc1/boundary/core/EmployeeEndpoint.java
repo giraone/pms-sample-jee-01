@@ -40,8 +40,11 @@ import com.giraone.samples.common.entity.UserTransactionException;
 import com.giraone.samples.common.entity.UserTransactional;
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeDTO;
+import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeePostalAddressDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeSummaryDTO;
 import com.giraone.samples.pmspoc1.entity.Employee;
+import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress;
+import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress_;
 import com.giraone.samples.pmspoc1.entity.Employee_;
 
 /**
@@ -50,15 +53,20 @@ import com.giraone.samples.pmspoc1.entity.Employee_;
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
 @Path("/employees")
-public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionExceptionHandler
+public class EmployeeEndpoint extends BaseEndpoint
 {		
 	@PersistenceContext(unitName = PmsCoreApi.PERSISTENCE_UNIT)
 	private EntityManager em;
 
+	/**
+	 * Find an employee by its object id.
+	 * @param id	The entity object id.
+	 * @return	A found {@link EmployeeDTO} object (status 200) or status "not found (404).
+	 */
 	@GET
-	@Path("/{id:[0-9][0-9]*}")
+	@Path("/{employeeId:[0-9][0-9]*}")
 	@Produces("application/json")
-	public Response findById(@PathParam("id") Long id)
+	public Response findById(@PathParam("employeeId") Long employeeId)
 	{		
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
 		final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
@@ -67,8 +75,7 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 		table.fetch(Employee_.costCenter, JoinType.LEFT);
 		
 		final CriteriaQuery<Employee> select = c.select(table);
-		final Predicate predicate = cb.equal(table.get(Employee_.oid), id);
-		// Open issue: Does it make any sense to use also .distinct() here?
+		final Predicate predicate = cb.equal(table.get(Employee_.oid), employeeId);
 		select.where(predicate);
 		final TypedQuery<Employee> tq = em.createQuery(select);
 
@@ -85,12 +92,11 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 		}
 	}
 
-    /**
-     * Additional GET method using the also unique "personnelNumber" attribute prefixed with "pnr-"
-     * 
-     * @param personnelNumber
-     * @return EmployeeDTO object
-     */
+	/**
+	 * Alternate find method to find an employee by its unique "personnelNumber".
+     * @param personnelNumber (this path parameter prefixed with "pnr-")
+	 * @return	A found {@link EmployeeDTO} object (status 200) or status "not found (404).
+	 */
     @GET
     @Path("/pnr-{personnelNumber:[0-9a-zA-Z][0-9a-zA-Z]*}")
     @Produces("application/json")
@@ -104,7 +110,6 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
         
         final CriteriaQuery<Employee> select = c.select(table);
         final Predicate predicate = cb.equal(table.get(Employee_.personnelNumber), personnelNumber);
-        // Open issue: Does it make any sense to use also .distinct() here?
         select.where(predicate);
         final TypedQuery<Employee> tq = em.createQuery(select);
 
@@ -122,12 +127,12 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
     }
     
     /**
-     * List all entities with support for OData filters.
+     * List all employees with support for OData filters.
      * @param filter	OData filter expression
      * @param orderby	OData sort expression
      * @param skip		OData paging
      * @param top		OData filter expression
-     * @return a {@link PagingBlock} object.
+     * @return a {@link PagingBlock} object with {@link EmployeeDTO} object.
      */
 	@GET
 	@Produces("application/json")
@@ -196,12 +201,18 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 		return Response.ok(pagingBlock).build();
 	}
 
+	/**
+	 * Create a new entity
+	 * @param dto the new employee's data.
+	 * @return Status CREATED (success), BAD_REQUEST (argument fault),
+	 * CONFLICT (duplicate personnelNumber) or NOT_FOUND (created but not found in DB);
+	 */
 	@POST
 	@Consumes("application/json")
 	@UserTransactional
 	public Response create(EmployeeDTO dto)
 	{    	
-		final Employee entity =  dto.fromDTO(null, em);
+		final Employee entity =  dto.entityFromDTO();
 		em.persist(entity);
 		
 		return Response
@@ -210,39 +221,188 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 	}
 
 	@PUT
-	@Path("/{id:[0-9][0-9]*}")
+	@Path("/{employeeId:[0-9][0-9]*}")
 	@Consumes("application/json")
 	@UserTransactional
-	public Response update(@PathParam("id") Long id, EmployeeDTO dto)
+	public Response update(@PathParam("employeeId") Long employeeId, EmployeeDTO dto)
 	{    	
-		if (dto == null || id == null)
+		if (dto == null || employeeId == null)
 		{
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
-		if (!id.equals(dto.getOid()))
+		if (!employeeId.equals(dto.getOid()))
 		{
-			logger.warn(LOG_TAG, "update CONFLICT id1=" + id + ", id2=" + dto.getOid());
+			logger.warn(LOG_TAG, "update CONFLICT employeeId=" + employeeId + ", employeeId2=" + dto.getOid());
 			return Response.status(Status.CONFLICT).entity(dto).build();
 		}
 
-		Employee entity = em.find(Employee.class, id);
+		Employee entity = em.find(Employee.class, employeeId);
 		if (entity == null)
 		{
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		entity = dto.fromDTO(entity, em);
+		entity = dto.mergeFromDTO(entity, em);
 		entity = em.merge(entity);
 		
 		return Response.noContent().build();
 	}
 
+	/**
+	 * Delete an employee using its object id.
+	 * @param id	the employee object id.
+	 * @return NOT_FOUND (employee not found) or NO_CONTENT (success).
+	 */
 	@DELETE
-	@Path("/{id:[0-9][0-9]*}")
+	@Path("/{employeeId:[0-9][0-9]*}")
 	@UserTransactional
-	public Response deleteById(@PathParam("id") Long id)
+	public Response deleteById(@PathParam("employeeId") Long employeeId)
 	{    	
-		Employee entity = em.find(Employee.class, id);
+		Employee entity = em.find(Employee.class, employeeId);
+		if (entity == null)
+		{
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		em.remove(entity);
+		return Response.noContent().build();
+	}
+
+	/**
+	 * Find an employee address by its object id.
+	 * @param id	The entity object id.
+	 * @return	A found {@link EmployeePostalAddressDTO} object (status 200) or status "not found (404).
+	 */
+	@GET
+	@Path("/{employeeId:[0-9][0-9]*}/addresses/{addressId:[0-9][0-9]*}")
+	@Produces("application/json")
+	public Response findPostalAddressById(@PathParam("employeeId") Long employeeId, @PathParam("addressId") Long addressId)
+	{
+		final CriteriaBuilder cb = em.getCriteriaBuilder();
+		final CriteriaQuery<EmployeePostalAddress> c = cb.createQuery(EmployeePostalAddress.class);
+		final Root<EmployeePostalAddress> table = c.from(EmployeePostalAddress.class);		
+		final CriteriaQuery<EmployeePostalAddress> select = c.select(table);
+		final Predicate predicate = cb.and(
+			cb.equal(table.get(EmployeePostalAddress_.employee).get(Employee_.oid), employeeId),
+			cb.equal(table.get(EmployeePostalAddress_.oid), addressId));
+		select.where(predicate);
+		final TypedQuery<EmployeePostalAddress> tq = em.createQuery(select);
+
+		final EmployeePostalAddress entity = PersistenceUtil.sanityCheckForSingleResultList(tq.getResultList(),
+			EmployeePostalAddress_.SQL_NAME_oid);
+		if (entity != null)
+		{
+			EmployeePostalAddressDTO dto = new EmployeePostalAddressDTO(entity);
+			return Response.ok(dto).build();
+		}
+		else
+		{
+			return Response.status(Status.NOT_FOUND).build();
+		}
+	}
+
+    /**
+     * List all postal addresses of an employee ordered by their ranking.
+     * @return list of {@link EmployeePostalAddressDTO} object.
+     */
+	@GET
+	@Path("/{employeeId:[0-9][0-9]*}/addresses")
+	@Produces("application/json")
+    public List<EmployeePostalAddressDTO> listAll(@PathParam("employeeId") Long employeeId)
+    {    	
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<EmployeePostalAddress> c = cb.createQuery(EmployeePostalAddress.class);
+        final Root<EmployeePostalAddress> table = c.from(EmployeePostalAddress.class);
+        final CriteriaQuery<EmployeePostalAddress> select = c.select(table);
+        select.where(cb.equal(table.get(EmployeePostalAddress_.employee).get(Employee_.oid), employeeId));
+        select.orderBy(cb.asc(table.get(EmployeePostalAddress_.ranking)));
+        final TypedQuery<EmployeePostalAddress> tq = em.createQuery(select);              
+        final List<EmployeePostalAddress> searchResults = tq.getResultList();
+        final List<EmployeePostalAddressDTO> results = new ArrayList<EmployeePostalAddressDTO>();
+        for (EmployeePostalAddress searchResult : searchResults)
+        {
+        	EmployeePostalAddressDTO dto = new EmployeePostalAddressDTO(searchResult);
+            results.add(dto);
+        }
+        return results;
+    }
+ 
+	/**
+	 * Create a new employee address
+	 * @param dto the new employee postal address data.
+	 * @return Status CREATED (success), BAD_REQUEST (argument fault), NOT_FOUND (created but not found in DB);
+	 */
+	@POST
+	@Path("/{employeeId:[0-9][0-9]*}/addresses")
+	@Consumes("application/json")
+	@UserTransactional
+	public Response create(@PathParam("employeeId") Long employeeId, EmployeePostalAddressDTO dto)
+	{    			
+		Employee employee = em.find(Employee.class, employeeId);
+		if (employee == null)
+		{			
+			return Response.status(Status.NOT_FOUND).build();
+		}		
+		final EmployeePostalAddress entity = dto.entityFromDTO();
+		entity.setEmployee(employee);
+		em.persist(entity);
+		
+		return Response
+			.created(UriBuilder.fromResource(EmployeeEndpoint.class)
+				.path(String.valueOf(employeeId))
+				.path("addresses")
+				.path(String.valueOf(entity.getOid()))
+				.build())
+			.build();
+	}
+
+	@PUT
+	@Path("/{employeeId:[0-9][0-9]*}/addresses/{addressId:[0-9][0-9]*}")
+	@Consumes("application/json")
+	@UserTransactional
+	public Response update(@PathParam("employeeId") Long employeeId, @PathParam("addressId") Long addressId,
+		EmployeePostalAddressDTO dto)
+	{    	
+		if (dto == null || employeeId == null || addressId == null)
+		{
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+
+		if (!addressId.equals(dto.getOid()))
+		{
+			logger.warn(LOG_TAG, "update CONFLICT addressId=" + addressId + ", addressId2=" + dto.getOid());
+			return Response.status(Status.CONFLICT).entity(dto).build();
+		}
+
+		/*
+		if (!employeeId.equals(dto.getEmployeeId()))
+		{
+			logger.warn(LOG_TAG, "update CONFLICT employeeId=" + employeeId + ", employeeId2=" + dto.getEmployeeId());
+			return Response.status(Status.CONFLICT).entity(dto).build();
+		}
+		*/
+		
+		EmployeePostalAddress entity = em.find(EmployeePostalAddress.class, addressId);
+		if (entity == null)
+		{
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		entity = dto.mergeFromDTO(entity, em);
+		entity = em.merge(entity);
+		
+		return Response.noContent().build();
+	}
+
+	/**
+	 * Delete an employee's postal address using its object id.
+	 * @param id	the postal address object id.
+	 * @return NOT_FOUND (address not found) or NO_CONTENT (success).
+	 */
+	@DELETE
+	@Path("/{employeeId:[0-9][0-9]*}/addresses/{addressId:[0-9][0-9]*}")
+	@UserTransactional
+	public Response deleteById(@PathParam("employeeId") Long employeeId, @PathParam("addressId") Long addressId)
+	{    	
+		EmployeePostalAddress entity = em.find(EmployeePostalAddress.class, addressId);
 		if (entity == null)
 		{
 			return Response.status(Status.NOT_FOUND).build();
@@ -273,7 +433,7 @@ public class EmployeeEndpoint extends BaseEndpoint// implements UserTransactionE
 			logger.debug(LOG_TAG, "EmployeeEndpoint.handleTransactionException " + userTransactionException);
     	
     	if (userTransactionException instanceof UserTransactionConstraintViolationException)
-    		return Response.status(422).build();
+    		return Response.status(HTTP_UNPROCESSABLE).build();
     	else
     		return Response.status(Status.CONFLICT).build();
     }

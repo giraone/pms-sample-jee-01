@@ -7,6 +7,7 @@ import javax.persistence.metamodel.StaticMetamodel;
 public class EmployeePostalAddress_ extends PostalAddress_
 {
 	public static volatile SingularAttribute<PostalAddress, Long> oid;
+	public static volatile SingularAttribute<PostalAddress, Employee> employee;
 	
 	public static final String SQL_NAME = "PostalAddress";
 	public static final String SQL_NAME_employee = "employee";

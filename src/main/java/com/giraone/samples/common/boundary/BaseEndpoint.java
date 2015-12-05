@@ -30,6 +30,8 @@ import com.giraone.samples.common.StringUtil;
  */
 public class BaseEndpoint
 {
+	protected static final int HTTP_UNPROCESSABLE = 422;
+
 	protected static final Marker LOG_TAG = MarkerManager.getMarker("API");
 
 	protected final static String DEFAULT_PAGING_SIZE = "20";
