@@ -29,12 +29,15 @@ public class CostCenterDTO implements Serializable
 		}
 	}
 
-	public CostCenter fromDTO(CostCenter entity, EntityManager em)
+	public CostCenter entityFromDTO()
 	{
-		if (entity == null)
-		{
-			entity = new CostCenter();
-		}
+		CostCenter entity = new CostCenter();
+		CostCenterMapper.INSTANCE.updateEntityFromDto(this, entity);
+		return entity;
+	}
+	
+	public CostCenter mergeFromDTO(CostCenter entity, EntityManager em)
+	{
 		CostCenterMapper.INSTANCE.updateEntityFromDto(this, entity);
 		entity = em.merge(entity);
 		return entity;

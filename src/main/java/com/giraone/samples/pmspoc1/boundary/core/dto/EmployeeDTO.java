@@ -40,12 +40,15 @@ public class EmployeeDTO implements Serializable
 		}
 	}
 
-	public Employee fromDTO(Employee entity, EntityManager em)
+	public Employee entityFromDTO()
 	{
-		if (entity == null)
-		{
-			entity = new Employee();
-		}
+		Employee entity = new Employee();
+		EmployeeMapper.INSTANCE.updateEntityFromDto(this, entity);
+		return entity;
+	}
+	
+	public Employee mergeFromDTO(Employee entity, EntityManager em)
+	{
 		// entity.setCostCenter(this.costCenter.fromDTO(entity.getCostCenter(), em));
 		EmployeeMapper.INSTANCE.updateEntityFromDto(this, entity);
 		entity = em.merge(entity);
