@@ -47,7 +47,7 @@ import com.giraone.samples.pmspoc1.entity.CostCenter_;
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
 @Path("/costcenters")
-public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactionExceptionHandler
+public class CostCenterEndpoint extends BaseEndpoint
 {	
     @PersistenceContext(unitName = PmsCoreApi.PERSISTENCE_UNIT)
     private EntityManager em;
@@ -62,7 +62,6 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
         final Root<CostCenter> table = c.from(CostCenter.class);
         final CriteriaQuery<CostCenter> select = c.select(table);
         final Predicate predicate = cb.equal(table.get(CostCenter_.oid), id);
-        // Open issue: Does it make any sense to use also .distinct() here?
         select.where(predicate);
         final TypedQuery<CostCenter> tq = em.createQuery(select);
 
@@ -95,7 +94,6 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
         final Root<CostCenter> table = c.from(CostCenter.class);
         final CriteriaQuery<CostCenter> select = c.select(table);
         final Predicate predicate = cb.equal(table.get(CostCenter_.identification), identification);
-        // Open issue: Does it make any sense to use also .distinct() here?
         select.where(predicate);
         final TypedQuery<CostCenter> tq = em.createQuery(select);
 
@@ -113,12 +111,12 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
     }
 
     /**
-     * List all entities with support for OData filters.
+     * List all cost centers with support for OData filters.
      * @param filter	OData filter expression
      * @param orderby	OData sort expression
      * @param skip		OData paging
      * @param top		OData filter expression
-     * @return
+     * @return List of {link @CostCenterDTO} objects.
      */
     @GET
     @Produces("application/json")
@@ -158,7 +156,7 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
     @UserTransactional
     public Response create(CostCenterDTO dto)
     {    	
-        CostCenter entity = dto.fromDTO(null, em);
+        CostCenter entity = dto.entityFromDTO();
         em.persist(entity);
         return Response
             .created(
@@ -188,7 +186,7 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
         {
             return Response.status(Status.NOT_FOUND).build();
         }                       
-        entity = dto.fromDTO(entity, em);
+        entity = dto.mergeFromDTO(entity, em);
         entity = em.merge(entity);
         return Response.noContent().build();
     }
@@ -229,7 +227,7 @@ public class CostCenterEndpoint extends BaseEndpoint// implements UserTransactio
 			logger.debug(LOG_TAG, "CostCenterEndpoint.handleTransactionException " + userTransactionException);
     	
     	if (userTransactionException instanceof UserTransactionConstraintViolationException)
-    		return Response.status(422).build();
+    		return Response.status(HTTP_UNPROCESSABLE).build();
     	else
     		return Response.status(Status.CONFLICT).build();
     }
