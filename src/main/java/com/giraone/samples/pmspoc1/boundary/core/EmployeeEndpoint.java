@@ -9,6 +9,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -42,6 +43,7 @@ import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeePostalAddressDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeSummaryDTO;
+import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeWithPropertiesDTO;
 import com.giraone.samples.pmspoc1.entity.Employee;
 import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress;
 import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress_;
@@ -61,12 +63,12 @@ public class EmployeeEndpoint extends BaseEndpoint
 	/**
 	 * Find an employee by its object id.
 	 * @param id	The entity object id.
-	 * @return	A found {@link EmployeeDTO} object (status 200) or status "not found (404).
+	 * @return	A found {@link EmployeeWithPropertiesDTO} object (status 200) or status "not found (404).
 	 */
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}")
 	@Produces("application/json")
-	public Response findById(@PathParam("employeeId") Long employeeId)
+	public Response findById(@PathParam("employeeId") long employeeId)
 	{		
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
 		final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
@@ -83,7 +85,16 @@ public class EmployeeEndpoint extends BaseEndpoint
 			Employee_.SQL_NAME_oid);
 		if (entity != null)
 		{
-			EmployeeDTO dto = new EmployeeDTO(entity);
+			// Now we have to fetch the properties by accessing at least one fake key (this is a bit weird in JPA!)
+			entity.getProperties().get("");
+			// Now we have to fetch the postal addresses
+			entity.getPostalAddresses().size();
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("Employee.findById=isLoaded(addresses)" + Persistence.getPersistenceUtil().isLoaded(entity, "addresses"));
+			}
+			EmployeeWithPropertiesDTO dto = new EmployeeWithPropertiesDTO(entity);
+			
 			return Response.ok(dto).build();
 		}
 		else
@@ -95,7 +106,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	/**
 	 * Alternate find method to find an employee by its unique "personnelNumber".
      * @param personnelNumber (this path parameter prefixed with "pnr-")
-	 * @return	A found {@link EmployeeDTO} object (status 200) or status "not found (404).
+	 * @return	A found {@link EmployeeWithPropertiesDTO} object (status 200) or status "not found (404).
 	 */
     @GET
     @Path("/pnr-{personnelNumber:[0-9a-zA-Z][0-9a-zA-Z]*}")
@@ -117,7 +128,13 @@ public class EmployeeEndpoint extends BaseEndpoint
         	Employee_.SQL_NAME_personnelNumber);
         if (entity != null)
         {
-        	EmployeeDTO dto = new EmployeeDTO(entity);
+			// Now we have to fetch the properties by accessing at least one fake key (this is a bit weird in JPA!)
+			entity.getProperties().get("");
+			// Now we have to fetch the postal addresses
+			entity.getPostalAddresses().size();
+			
+			EmployeeWithPropertiesDTO dto = new EmployeeWithPropertiesDTO(entity);
+			
             return Response.ok(dto).build();
         }
         else
@@ -210,9 +227,9 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@POST
 	@Consumes("application/json")
 	@UserTransactional
-	public Response create(EmployeeDTO dto)
-	{    	
-		final Employee entity =  dto.entityFromDTO();
+	public Response create(EmployeeWithPropertiesDTO dto)
+	{  
+		final Employee entity = dto.entityFromDTO();
 		em.persist(entity);
 		
 		return Response
@@ -224,14 +241,14 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@Path("/{employeeId:[0-9][0-9]*}")
 	@Consumes("application/json")
 	@UserTransactional
-	public Response update(@PathParam("employeeId") Long employeeId, EmployeeDTO dto)
+	public Response update(@PathParam("employeeId") long employeeId, EmployeeWithPropertiesDTO dto)
 	{    	
-		if (dto == null || employeeId == null)
+		if (dto == null || employeeId == 0)
 		{
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
-		if (!employeeId.equals(dto.getOid()))
+		if (employeeId != dto.getOid())
 		{
 			logger.warn(LOG_TAG, "update CONFLICT employeeId=" + employeeId + ", employeeId2=" + dto.getOid());
 			return Response.status(Status.CONFLICT).entity(dto).build();
@@ -242,6 +259,12 @@ public class EmployeeEndpoint extends BaseEndpoint
 		{
 			return Response.status(Status.NOT_FOUND).build();
 		}
+		
+		// Now we have to fetch the properties by accessing at least one fake key (this is a bit weird in JPA!)
+		entity.getProperties().get("");
+		// Now we have to fetch the postal addresses
+		entity.getPostalAddresses().size();
+
 		entity = dto.mergeFromDTO(entity, em);
 		entity = em.merge(entity);
 		
@@ -256,7 +279,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@DELETE
 	@Path("/{employeeId:[0-9][0-9]*}")
 	@UserTransactional
-	public Response deleteById(@PathParam("employeeId") Long employeeId)
+	public Response deleteById(@PathParam("employeeId") long employeeId)
 	{    	
 		Employee entity = em.find(Employee.class, employeeId);
 		if (entity == null)
@@ -275,7 +298,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}/addresses/{addressId:[0-9][0-9]*}")
 	@Produces("application/json")
-	public Response findPostalAddressById(@PathParam("employeeId") Long employeeId, @PathParam("addressId") Long addressId)
+	public Response findPostalAddressById(@PathParam("employeeId") long employeeId, @PathParam("addressId") long addressId)
 	{
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
 		final CriteriaQuery<EmployeePostalAddress> c = cb.createQuery(EmployeePostalAddress.class);
@@ -307,7 +330,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}/addresses")
 	@Produces("application/json")
-    public List<EmployeePostalAddressDTO> listAll(@PathParam("employeeId") Long employeeId)
+    public List<EmployeePostalAddressDTO> listAll(@PathParam("employeeId") long employeeId)
     {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<EmployeePostalAddress> c = cb.createQuery(EmployeePostalAddress.class);
@@ -335,7 +358,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@Path("/{employeeId:[0-9][0-9]*}/addresses")
 	@Consumes("application/json")
 	@UserTransactional
-	public Response create(@PathParam("employeeId") Long employeeId, EmployeePostalAddressDTO dto)
+	public Response create(@PathParam("employeeId") long employeeId, EmployeePostalAddressDTO dto)
 	{    			
 		Employee employee = em.find(Employee.class, employeeId);
 		if (employee == null)
@@ -359,15 +382,15 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@Path("/{employeeId:[0-9][0-9]*}/addresses/{addressId:[0-9][0-9]*}")
 	@Consumes("application/json")
 	@UserTransactional
-	public Response update(@PathParam("employeeId") Long employeeId, @PathParam("addressId") Long addressId,
+	public Response update(@PathParam("employeeId") long employeeId, @PathParam("addressId") long addressId,
 		EmployeePostalAddressDTO dto)
 	{    	
-		if (dto == null || employeeId == null || addressId == null)
+		if (dto == null || employeeId == 0L || addressId == 0L)
 		{
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
-		if (!addressId.equals(dto.getOid()))
+		if (addressId != dto.getOid())
 		{
 			logger.warn(LOG_TAG, "update CONFLICT addressId=" + addressId + ", addressId2=" + dto.getOid());
 			return Response.status(Status.CONFLICT).entity(dto).build();
@@ -400,7 +423,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@DELETE
 	@Path("/{employeeId:[0-9][0-9]*}/addresses/{addressId:[0-9][0-9]*}")
 	@UserTransactional
-	public Response deleteById(@PathParam("employeeId") Long employeeId, @PathParam("addressId") Long addressId)
+	public Response deleteById(@PathParam("employeeId") long employeeId, @PathParam("addressId") long addressId)
 	{    	
 		EmployeePostalAddress entity = em.find(EmployeePostalAddress.class, addressId);
 		if (entity == null)

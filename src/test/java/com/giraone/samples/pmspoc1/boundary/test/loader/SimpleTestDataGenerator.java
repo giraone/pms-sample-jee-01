@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 import com.giraone.samples.common.StringUtil;
+import com.giraone.samples.pmspoc1.entity.PostalAddress;
 import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
 
 public class SimpleTestDataGenerator
@@ -31,19 +32,30 @@ public class SimpleTestDataGenerator
 		"Training", "Rechenzentrum", "Fuhrpark", "Service", "Datenschutz", "Security"  };
 	
 	static final String[] NATIONALITY = { "DEU", "DEU", "DEU", "DEU", "DEU", "ITA", "USA" };
-		
+	
+	static final String[] MAIL_PROVIDER = { "gmail.com", "yahoo.com", "aol.com", "gmx.de", "web.de", "hotmail.com" };
+	
 	static final HashSet<String> LAST_NAME_PREFIXES = new HashSet<String>();
 	
 	static final HashMap<String, ArrayList<String>> RANDOM_FROM_FILE = new HashMap<String, ArrayList<String>>();
 	static final HashMap<String, ArrayList<String>> RANDOM_FROM_WEIGHTED_FILE = new HashMap<String, ArrayList<String>>();
 	static final HashMap<String, HashMap<Integer, Integer>> WEIGHT_FROM_WEIGHTED_FILE = new HashMap<String, HashMap<Integer, Integer>>();
 	
+	public static Random random()
+	{		
+		return RANDOM;
+	}
 	
 	public static String randomDepartment()
 	{		
 		return DEPARTMENTS[RANDOM.nextInt(DEPARTMENTS.length)];
 	}
-		
+	
+	public static String randomMailProvider()
+	{		
+		return MAIL_PROVIDER[RANDOM.nextInt(MAIL_PROVIDER.length)];
+	}
+	
 	public static EnumGender randomGender()
 	{
 		return RANDOM.nextBoolean() ? EnumGender.M : EnumGender.F;
@@ -78,25 +90,22 @@ public class SimpleTestDataGenerator
 		return d;
 	}
 	
-	/*
-	static void fillRandomAddress(PostalAddress postalAddress)
+	public static void fillRandomAddress(PostalAddress postalAddress)
 	{
-		postalAddress.setCountryCode(Locale.GERMANY.getISO3Country());
+		postalAddress.setCountryCode("DE");
 		postalAddress.setCity(randomFromFile("deutsche-staedte.txt"));
 		postalAddress.setPostalCode(String.format("%05d", 10000 + RANDOM.nextInt(80000)));
 		postalAddress.setStreet(randomFromFile("strassen_osm.txt"));
 		postalAddress.setHouseNumber(1 + RANDOM.nextInt(20) + (RANDOM.nextInt(10) == 0 ? "a" : ""));
 	}
-	*/
 	
-	/*
 	private static String randomFromFile(String file)
 	{
 		ArrayList<String> valueList = RANDOM_FROM_FILE.get(file);
 		if (valueList == null)
 		{	
-			StopWatch stopWatch = new StopWatch();
-			stopWatch.start();
+			//StopWatch stopWatch = new StopWatch();
+			//stopWatch.start();
 			valueList = new ArrayList<String>();
 			Path path = FileSystems.getDefault().getPath(DATA_PATH + "/" + file);
 			try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
@@ -112,13 +121,13 @@ public class SimpleTestDataGenerator
 				io.printStackTrace();
 			}
 			RANDOM_FROM_FILE.put(file, valueList);
-			stopWatch.stop();
-			System.out.println("Reading data file \"" + file + "\" took " + stopWatch.getTime() + " milliseconds");
+			//stopWatch.stop();
+			//System.out.println("Reading data file \"" + file + "\" took " + stopWatch.getTime() + " milliseconds");
+			System.out.println("Reading data file \"" + file + "\"");
 			System.out.println("  nr of entries = " + valueList.size());
 		}
 		return valueList.get(RANDOM.nextInt(valueList.size()));
 	}
-	*/
 	
 	private static String randomFromWeightedFile(String file)
 	{

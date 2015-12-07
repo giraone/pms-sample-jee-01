@@ -12,7 +12,7 @@ public class CostCenterDTO implements Serializable
 {
 	private static final long serialVersionUID = 1L;
     
-	private Long oid;
+	private long oid;
 	private int versionNumber;
 	private String identification;
 	private String description;
@@ -43,42 +43,42 @@ public class CostCenterDTO implements Serializable
 		return entity;
 	}
 
-	public Long getOid()
+	public long getOid()
 	{
-		return this.oid;
+		return oid;
 	}
 
-	public void setOid(final Long oid)
+	public void setOid(long oid)
 	{
 		this.oid = oid;
 	}
 
 	public int getVersionNumber()
 	{
-		return this.versionNumber;
+		return versionNumber;
 	}
 
-	public void setVersionNumber(final int versionNumber)
+	public void setVersionNumber(int versionNumber)
 	{
 		this.versionNumber = versionNumber;
 	}
 
 	public String getIdentification()
 	{
-		return this.identification;
+		return identification;
 	}
 
-	public void setIdentification(final String identification)
+	public void setIdentification(String identification)
 	{
 		this.identification = identification;
 	}
 
 	public String getDescription()
 	{
-		return this.description;
+		return description;
 	}
 
-	public void setDescription(final String description)
+	public void setDescription(String description)
 	{
 		this.description = description;
 	}

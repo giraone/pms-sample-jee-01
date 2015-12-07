@@ -55,7 +55,7 @@ public class CostCenterEndpoint extends BaseEndpoint
     @GET
     @Path("/{id:[0-9][0-9]*}")
     @Produces("application/json")
-    public Response findById(@PathParam("id") Long id)
+    public Response findById(@PathParam("id") long id)
     {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<CostCenter> c = cb.createQuery(CostCenter.class);
@@ -168,14 +168,14 @@ public class CostCenterEndpoint extends BaseEndpoint
     @Path("/{id:[0-9][0-9]*}")
     @Consumes("application/json")
     @UserTransactional
-    public Response update(@PathParam("id") Long id, CostCenterDTO dto)
+    public Response update(@PathParam("id") long id, CostCenterDTO dto)
     {    	
-        if (dto == null || id == null)
+        if (dto == null || id == 0)
         {
             return Response.status(Status.BAD_REQUEST).build();
         }
 
-        if (!id.equals(dto.getOid()))
+        if (id != dto.getOid())
         {
         	logger.warn(LOG_TAG, "update CONFLICT id1=" + id + ", id2=" + dto.getOid());
             return Response.status(Status.CONFLICT).entity(dto).build();
@@ -194,7 +194,7 @@ public class CostCenterEndpoint extends BaseEndpoint
     @DELETE
     @Path("/{id:[0-9][0-9]*}")
     @UserTransactional
-    public Response deleteById(@PathParam("id") Long id)
+    public Response deleteById(@PathParam("id") long id)
     {    	 
         CostCenter entity = em.find(CostCenter.class, id);
         if (entity == null)

@@ -23,10 +23,9 @@ public class EmployeePostalAddress extends PostalAddress implements Serializable
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "Alloc50")
-	@TableGenerator(name = "Alloc50", allocationSize = 50)
+	@GeneratedValue
 	@Column(name = EmployeePostalAddress_.SQL_NAME_oid)
-	private Long oid;
+	private long oid;
 	
 	@Version
 	@Column(name = EmployeePostalAddress_.SQL_NAME_versionNumber)
@@ -44,12 +43,12 @@ public class EmployeePostalAddress extends PostalAddress implements Serializable
 		super();
 	}
 	
-	public Long getOid()
+	public long getOid()
 	{
 		return oid;
 	}
 
-	public void setOid(Long oid)
+	public void setOid(long oid)
 	{
 		this.oid = oid;
 	}

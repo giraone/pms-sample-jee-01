@@ -3,7 +3,9 @@ package com.giraone.samples.pmspoc1.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Persistence;
@@ -26,12 +29,29 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.giraone.samples.common.entity.EntityWithProperties;
+import com.giraone.samples.common.entity.enums.StringEnumeration;
 import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
 
+/**
+ * An employee in our sample application. Some details on the used object model:
+ * <ul>
+ * <li>Employees are assigned to 0 or 1 cost centers ({@link CostCenter}), but they exist independently
+ * - there is no cascade relation.</li>
+ * <li>Employees may have 0 to n postal addresses, which have an order. When an employee is
+ * removed, the postal addresses are removed also.</li>
+ * <li>Employees have two kinds of attributes:</li>
+ * <ul>
+ * <li>Those, that are stored in the "main" SQL table, because the attributes are primary keys, foreign keys,
+ * attributes that are used in queries or joins.</li>
+ * <li>Everything else. The other attributes are stored in a key value table.
+ * </ul>
+ * </ul>
+ */
 @Entity
 @Table(name = Employee_.SQL_NAME)
-// @EntityListeners(MyEntityListener.class) // DEVELOPMENT-HINT: Only for debugging JPA
-public class Employee implements Serializable
+// @EntityListeners(MyEntityListener.class) // DEVELOPMENT-HINT: Use this for debugging JPA
+public class Employee extends EntityWithProperties<EmployeeProperties> implements Serializable
 {
 	/** Default value included to remove warning. **/
 	private static final long serialVersionUID = 1L;
@@ -39,7 +59,7 @@ public class Employee implements Serializable
 	@Id
 	@GeneratedValue
 	@Column(name = Employee_.SQL_NAME_oid)
-	private Long oid;
+	private long oid;
 	
 	@Version
 	@Column(name = Employee_.SQL_NAME_versionNumber)
@@ -72,6 +92,7 @@ public class Employee implements Serializable
 	private String firstName;
 
 	@Enumerated(EnumType.STRING)
+	@StringEnumeration(enumClass = EnumGender.class)
 	@Column(name = Employee_.SQL_NAME_gender, nullable = false, length = 1)
 	@NotNull
 	private EnumGender gender;
@@ -80,34 +101,38 @@ public class Employee implements Serializable
 	@Temporal(TemporalType.DATE)
 	private Calendar dateOfBirth;
 
-	/** Nationality code system plus code separated by #, e.g. "ISO-3166-1-alpha-3#DEU" **/
-	@Column(name = Employee_.SQL_NAME_nationalityCode, nullable = true, length = 256)
-	@Size(max = 256)
-	private String nationalityCode;
-	
-	@Column(name = Employee_.SQL_NAME_dateOfEntry, nullable = false, length = 3)
-	@Temporal(TemporalType.DATE)
-	private Calendar dateOfEntry;
-
 	// (1) We may use this list, but it is fetched lazy
-	// (2) Cascade type is REMOVE and orphanRemoval = true. If the employee is removed, the postal postalAddresses are removed too
-	@OneToMany(mappedBy = EmployeePostalAddress_.SQL_NAME_employee, fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
-	// (3) The list is order by the postal address ranking
+	// (2) Cascade type is ALL and orphanRemoval = true.
+	//     Addresses may be given to create operations together with the employee data (CascadeType.PERSIST)
+	//     If the employee is removed, the postal postalAddresses are removed too (CascadeType.REMOVE)
+	@OneToMany(mappedBy = EmployeePostalAddress_.SQL_NAME_employee, fetch = FetchType.LAZY,
+		orphanRemoval = true, cascade = CascadeType.ALL)
+	// (3) The list is ordered by the postal addresses' ranking
     @OrderBy(PostalAddress_.SQL_NAME_ranking + " ASC")
 	//@CascadeOnDelete  // This is an EclipseLink only annotation, which leads to ON DELETE CASCADE on the database level
 	private List<EmployeePostalAddress> postalAddresses;
 	
+	// (1) Properties are also fetched lazy. They should not be fetched in list operations
+	// (2) Cascade type is ALL and orphanRemoval = true.
+	//     Properties may be given to create operations together with the employee data (CascadeType.PERSIST)
+    //     If the employee is removed, the properties are removed too (CascadeType.REMOVE)
+	@OneToMany(mappedBy = Employee_.SQL_NAME_PROPERTIES_employee, fetch = FetchType.LAZY,
+		orphanRemoval = true, cascade = CascadeType.ALL)
+	@MapKey(name = "name")
+	private Map<String, EmployeeProperties> properties;
+	
+	
 	public Employee()
 	{
-		super();
+		super(EmployeeProperties.class);
 	}
 
-	public Long getOid()
+	public long getOid()
 	{
 		return oid;
 	}
 
-	public void setOid(Long oid)
+	public void setOid(long oid)
 	{
 		this.oid = oid;
 	}
@@ -177,29 +202,188 @@ public class Employee implements Serializable
 		this.dateOfBirth = dateOfBirth;
 	}
 
+	//-- Properties START -----------------------------------------------------------------
+	
+	// Having these getter and setter is optional, but recommended, if the DTO to Entity
+	// mapping should be done generic.
+	
+	/** Nationality code system plus code separated by #, e.g. "ISO-3166-1-alpha-3#DEU" **/
 	public String getNationalityCode()
-	{
-		return nationalityCode;
+	{		
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_nationalityCode);
 	}
 
-	public void setNationalityCode(String nationalityCode)
+	public void setNationalityCode(String value)
 	{
-		this.nationalityCode = nationalityCode;
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_nationalityCode, value);
 	}
-
+	
 	public Calendar getDateOfEntry()
 	{
-		return dateOfEntry;
+		return this.getPropertyValueCalendar(Employee_.SQL_NAME_PROPERTY_dateOfEntry);
 	}
 
-	public void setDateOfEntry(Calendar dateOfEntry)
+	public void setDateOfEntry(Calendar value)
 	{
-		this.dateOfEntry = dateOfEntry;
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_dateOfEntry, value);
 	}
 
+	public String getReligion()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_religion);
+	}
+
+	public void setReligion(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_religion, value);
+	}
+
+	public int getNumberOfChildren()
+	{
+		return (int) this.getPropertyValueNumber(Employee_.SQL_NAME_PROPERTY_numberOfChildren, 0);
+	}
+
+	public void setNumberOfChildren(int value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_numberOfChildren, value);
+	}
+
+	public String getMaritalStatus()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_maritalStatus);
+	}
+
+	public void setMaritalStatus(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_maritalStatus, value);
+	}
+
+	public String getCountryOfBirth()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_countryOfBirth);
+	}
+
+	public void setCountryOfBirth(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_countryOfBirth, value);
+	}
+
+	public String getBirthPlace()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_birthPlace);
+	}
+
+	public void setBirthPlace(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_birthPlace, value);
+	}
+
+	public String getBirthName()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_birthName);
+	}
+
+	public void setBirthName(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_birthName, value);
+	}
+
+	public String getContactEmailAddress1()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_contactEmailAddress1);
+	}
+
+	public void setContactEmailAddress1(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_contactEmailAddress1, value);
+	}
+
+	public String getContactEmailAddress2()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_contactEmailAddress2);
+	}
+
+	public void setContactEmailAddress2(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_contactEmailAddress2, value);
+	}
+
+	public String getContactPhone1()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_contactPhone1);
+	}
+
+	public void setContactPhone1(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_contactPhone1, value);
+	}
+
+	public String getContactPhone2()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_contactPhone2);
+	}
+
+	public void setContactPhone2(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_contactPhone2, value);
+	}
+
+	public String getContactFax1()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_contactFax1);
+	}
+
+	public void setContactFax1(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_contactFax1, value);
+	}
+
+	public String getContactFax2()
+	{
+		return this.getPropertyValueString(Employee_.SQL_NAME_PROPERTY_contactFax2);
+	}
+
+	public void setContactFax2(String value)
+	{
+		this.createAndSetProperty(Employee_.SQL_NAME_PROPERTY_contactFax2, value);
+	}
+	
+	//-- Properties END -------------------------------------------------------------------
+	
+	//-- EmployeeProperties START ---------------------------------------------------------
+
+	@Override
+	public void setParent(EmployeeProperties properties)
+	{
+		properties.setEmployee(this);	
+	}
+
+	@Override
+	public Map<String, EmployeeProperties> getProperties()
+	{		
+		if (this.oid == 0L && this.properties == null)
+		{
+			this.properties = new HashMap<String, EmployeeProperties>();
+		}
+		return this.properties;
+	}
+
+	@Override
+	public void setProperties(Map<String, EmployeeProperties> properties)
+	{
+		for (EmployeeProperties property : properties.values())
+		{
+			property.setEmployee(this);
+		}
+		this.properties = properties;
+	}
+		
+	//-- EmployeeProperties END ------------------------------------------------------------
+	
+	
 	//-- PostalAddress START ---------------------------------------------------------------
 
-	public List<EmployeePostalAddress> getAddresses()
+	public List<EmployeePostalAddress> getPostalAddresses()
 	{
 		if (this.oid > 0 && this.postalAddresses == null && !Persistence.getPersistenceUtil().isLoaded(this.postalAddresses))
 			throw new IllegalStateException("You cannot access Mitarbeiter.getAddresses when it was not loaded!");
@@ -211,7 +395,7 @@ public class Employee implements Serializable
 		return postalAddresses;
 	}
 
-	public void setAddresses(List<EmployeePostalAddress> postalAddresses)
+	public void setPostalAddresses(List<EmployeePostalAddress> postalAddresses)
 	{
 		int i = 1;
 		for (EmployeePostalAddress address : postalAddresses)
@@ -224,16 +408,16 @@ public class Employee implements Serializable
 	
 	public void addAddress(EmployeePostalAddress address)
 	{
-		this.getAddresses().add(address);
+		this.getPostalAddresses().add(address);
 		address.setEmployee(this);
-		address.setRanking(this.getAddresses().size());
+		address.setRanking(this.getPostalAddresses().size());
 	}
 	
 	public void removeAddress(EmployeePostalAddress postalAddress)
 	{
-		this.getAddresses().remove(postalAddress);
+		this.getPostalAddresses().remove(postalAddress);
 		int i = 1;
-		for (EmployeePostalAddress address : this.getAddresses())
+		for (EmployeePostalAddress address : this.getPostalAddresses())
 		{
 			address.setRanking(i++);
 		}
@@ -242,7 +426,7 @@ public class Employee implements Serializable
 	public void removeAddress(long postalAddressId)
 	{
 		EmployeePostalAddress toBeRemoved = null;
-		for (EmployeePostalAddress address : this.getAddresses())
+		for (EmployeePostalAddress address : this.getPostalAddresses())
 		{
 			if (address.getOid() == postalAddressId)
 			{

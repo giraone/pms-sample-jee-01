@@ -12,7 +12,7 @@ public class EmployeePostalAddressDTO implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
-	protected Long oid;
+	protected long oid;
 	protected int versionNumber;
 	protected int ranking;
 	protected String countryCode;
@@ -50,12 +50,12 @@ public class EmployeePostalAddressDTO implements Serializable
 		return entity;
 	}
 	
-	public Long getOid()
+	public long getOid()
 	{
 		return this.oid;
 	}
 
-	public void setOid(final Long oid)
+	public void setOid(long oid)
 	{
 		this.oid = oid;
 	}
@@ -65,7 +65,7 @@ public class EmployeePostalAddressDTO implements Serializable
 		return this.versionNumber;
 	}
 
-	public void setVersionNumber(final int versionNumber)
+	public void setVersionNumber(int versionNumber)
 	{
 		this.versionNumber = versionNumber;
 	}

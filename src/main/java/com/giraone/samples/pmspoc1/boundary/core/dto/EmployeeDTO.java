@@ -2,7 +2,6 @@ package com.giraone.samples.pmspoc1.boundary.core.dto;
 
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -14,18 +13,14 @@ public class EmployeeDTO implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
-	private Long oid;
+	private long oid;
 	private int versionNumber;
 	private String personnelNumber;
 	private CostCenterDTO costCenter;
 	private String lastName;
 	private String firstName;
-	private String gender;
+	private String gender;	
 	private Calendar dateOfBirth;
-	private String nationalityCode;
-	private Calendar dateOfEntry;
-
-	private List<EmployeePostalAddressDTO> postalAddresses;
 	
 	public EmployeeDTO()
 	{
@@ -36,7 +31,6 @@ public class EmployeeDTO implements Serializable
 		if (entity != null)
 		{
 			EmployeeMapper.INSTANCE.updateDtoFromEntity(entity, this);
-			//this.costCenter = new NestedCostCenterDTO(entity.getCostCenter());
 		}
 	}
 
@@ -49,18 +43,17 @@ public class EmployeeDTO implements Serializable
 	
 	public Employee mergeFromDTO(Employee entity, EntityManager em)
 	{
-		// entity.setCostCenter(this.costCenter.fromDTO(entity.getCostCenter(), em));
 		EmployeeMapper.INSTANCE.updateEntityFromDto(this, entity);
 		entity = em.merge(entity);
 		return entity;
 	}
 
-	public Long getOid()
+	public long getOid()
 	{
 		return this.oid;
 	}
 
-	public void setOid(final Long oid)
+	public void setOid(long oid)
 	{
 		this.oid = oid;
 	}
@@ -70,7 +63,7 @@ public class EmployeeDTO implements Serializable
 		return this.versionNumber;
 	}
 
-	public void setVersionNumber(final int versionNumber)
+	public void setVersionNumber(int versionNumber)
 	{
 		this.versionNumber = versionNumber;
 	}
@@ -80,7 +73,7 @@ public class EmployeeDTO implements Serializable
 		return this.personnelNumber;
 	}
 
-	public void setPersonnelNumber(final String personnelNumber)
+	public void setPersonnelNumber(String personnelNumber)
 	{
 		this.personnelNumber = personnelNumber;
 	}
@@ -90,7 +83,7 @@ public class EmployeeDTO implements Serializable
 		return this.costCenter;
 	}
 
-	public void setCostCenter(final CostCenterDTO costCenter)
+	public void setCostCenter(CostCenterDTO costCenter)
 	{
 		this.costCenter = costCenter;
 	}
@@ -100,7 +93,7 @@ public class EmployeeDTO implements Serializable
 		return this.lastName;
 	}
 
-	public void setLastName(final String lastName)
+	public void setLastName(String lastName)
 	{
 		this.lastName = lastName;
 	}
@@ -110,7 +103,7 @@ public class EmployeeDTO implements Serializable
 		return this.firstName;
 	}
 
-	public void setFirstName(final String firstName)
+	public void setFirstName(String firstName)
 	{
 		this.firstName = firstName;
 	}
@@ -120,7 +113,7 @@ public class EmployeeDTO implements Serializable
 		return this.gender;
 	}
 
-	public void setGender(final String gender)
+	public void setGender(String gender)
 	{
 		this.gender = gender;
 	}
@@ -130,38 +123,8 @@ public class EmployeeDTO implements Serializable
 		return this.dateOfBirth;
 	}
 
-	public void setDateOfBirth(final Calendar dateOfBirth)
+	public void setDateOfBirth(Calendar dateOfBirth)
 	{
 		this.dateOfBirth = dateOfBirth;
-	}
-
-	public String getNationalityCode()
-	{
-		return this.nationalityCode;
-	}
-
-	public void setNationalityCode(final String nationalityCode)
-	{
-		this.nationalityCode = nationalityCode;
-	}
-
-	public Calendar getDateOfEntry()
-	{
-		return this.dateOfEntry;
-	}
-
-	public void setDateOfEntry(final Calendar dateOfEntry)
-	{
-		this.dateOfEntry = dateOfEntry;
-	}
-	
-	public List<EmployeePostalAddressDTO> getPostalAddresses()
-	{
-		return postalAddresses;
-	}
-
-	public void setPostalAddresses(List<EmployeePostalAddressDTO> postalAddresses)
-	{
-		this.postalAddresses = postalAddresses;
 	}
 }

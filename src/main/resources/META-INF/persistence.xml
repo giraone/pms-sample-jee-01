@@ -5,13 +5,11 @@
         http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 	<persistence-unit name="primary" transaction-type="JTA">
 	
-		<!--
-		This works for
-		- WLP:     Use jndiName="datasources/PmsSample1" in datasource element within server.sml
-		- WildFly: Use jndi-name="java:jboss/datasources/PmsSample1" in datasource element within standalone.xml
-		-->
+		<!-- This is for WLP: Use jndiName="datasources/PmsSample1" in datasource element within server.xml -->
 		<jta-data-source>datasources/PmsSample1</jta-data-source>
-		<!-- This is for OpenShift with PostgreSQL  -->
+		<!-- This is for WildFly: Use jndi-name="java:jboss/datasources/PmsSample1" in datasource element within standalone.xml -->
+		<!-- <jta-data-source>java:jboss/datasources/PmsSample1</jta-data-source> -->
+		<!-- This is for OpenShift with PostgreSQL -->
 		<!-- <jta-data-source>java:jboss/datasources/PostgreSQLDS</jta-data-source> -->
 		<!-- This is for Bluemix with sqldb and cloudAutowiring-1.0 -->
 		<!-- <jta-data-source>java:comp/env/jdbc/mydbdatasource</jta-data-source> -->
@@ -37,8 +35,9 @@
 
 
 			<!-- Properties for EclipseLink (ignored in non-EclipseLink environments) -->
-			<property name="eclipselink.ddl-generation" value="create-or-extend-tables" /> <!-- UPDATE tables, if needed -->		
-			<!-- property name="eclipselink.ddl-generation" value="create-tables" /> --> <!-- CREATE tables -->
+			<!-- <property name="eclipselink.ddl-generation" value="create-or-extend-tables" /> --><!-- UPDATE tables, if needed -->		
+			<!-- <property name="eclipselink.ddl-generation" value="create-tables" /> --> <!-- CREATE tables -->
+			<property name="eclipselink.ddl-generation" value="drop-and-create-tables" /> <!-- DROP and CREATE tables -->			
 			<property name="eclipselink.ddl-generation.output-mode" value="database" /> <!-- Needed for create-or-extend-tables -->			
 				
 			<!-- Optimization - statement caching -->
@@ -54,7 +53,7 @@
 
 			<!-- DEVELOPMENT LOGGING -->
 			<!-- See https://wiki.eclipse.org/EclipseLink/Examples/JPA/Logging -->
-			<property name="eclipselink.logging.file" value="logs/sql.log"/>
+			<!-- <property name="eclipselink.logging.file" value="logs/sql.log"/> -->
 			<!--  To enable java.util.logging the persistence unit property eclipselink.logging.logger can be set -->
 			<!-- <property name="eclipselink.logging.logger" value="JavaLogger"/> -->
 			<!--  Most Java EE application servers have their own logging. To integrate with an application servers logging set the server logger type too -->

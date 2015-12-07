@@ -22,7 +22,7 @@ public class CostCenter implements Serializable
 	@Id
 	@GeneratedValue
 	@Column(name = CostCenter_.SQL_NAME_oid)
-	private Long oid;
+	private long oid;
 	
 	@Version
 	@Column(name = CostCenter_.SQL_NAME_versionNumber)
@@ -44,12 +44,12 @@ public class CostCenter implements Serializable
 		super();
 	}
 	
-	public Long getOid()
+	public long getOid()
 	{
 		return oid;
 	}
 
-	public void setOid(Long oid)
+	public void setOid(long oid)
 	{
 		this.oid = oid;
 	}

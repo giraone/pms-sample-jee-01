@@ -19,6 +19,9 @@ public class Employee_ extends AbstractEntity_
 	
 	public static final String SQL_NAME = "Employee";
 	
+	public static final String SQL_NAME_PROPERTIES = "EmployeeProperties";
+	public static final String SQL_NAME_PROPERTIES_employee = "employee";
+	
 	public static final String SQL_NAME_oid = "oid";
 	public static final String SQL_NAME_personnelNumber = "personnelNumber";
 	public static final String SQL_NAME_costCenter = "costCenter";
@@ -27,8 +30,22 @@ public class Employee_ extends AbstractEntity_
 	public static final String SQL_NAME_dateOfBirth = "dateOfBirth";
 	public static final String SQL_NAME_gender = "gender";
 	
-	public static final String SQL_NAME_nationalityCode = "nationalityCode";
-	public static final String SQL_NAME_dateOfEntry = "dateOfEntry";
+	/** Nationality code system plus code separated by #, e.g. "ISO-3166-1-alpha-2#DE" **/
+	public static final String SQL_NAME_PROPERTY_nationalityCode = "nationalityCode";	
+	public static final String SQL_NAME_PROPERTY_religion = "religion";
+	public static final String SQL_NAME_PROPERTY_numberOfChildren = "numberOfChildren";
+	public static final String SQL_NAME_PROPERTY_dateOfEntry = "dateOfEntry";
+	public static final String SQL_NAME_PROPERTY_maritalStatus = "maritalStatus";
+	/** Nationality code system plus code separated by #, e.g. "ISO-3166-3#DDDE" for DDR **/
+	public static final String SQL_NAME_PROPERTY_countryOfBirth = "countryOfBirth";
+	public static final String SQL_NAME_PROPERTY_birthPlace = "birthPlace";
+	public static final String SQL_NAME_PROPERTY_birthName = "birthName";
+	public static final String SQL_NAME_PROPERTY_contactEmailAddress1 = "contactEmailAddress1";
+	public static final String SQL_NAME_PROPERTY_contactEmailAddress2 = "contactEmailAddress2";
+	public static final String SQL_NAME_PROPERTY_contactPhone1 = "contactPhone1";
+	public static final String SQL_NAME_PROPERTY_contactPhone2 = "contactPhone2";
+	public static final String SQL_NAME_PROPERTY_contactFax1 = "contactFax1";
+	public static final String SQL_NAME_PROPERTY_contactFax2 = "contactFax2";
 	
 	public static final String DTO_NAME = "Employee";
 	
@@ -40,23 +57,20 @@ public class Employee_ extends AbstractEntity_
 	public static final String DTO_NAME_dateOfBirth = "dateOfBirth";
 	public static final String DTO_NAME_gender = "gender";
 	
-	public static final String DTO_NAME_nationalityCode = "nationalityCode";
+	public static final String DTO_NAME_nationalityCode = "nationalityCode";	
+	public static final String DTO_NAME_religion = "religion";
+	public static final String DTO_NAME_numberOfChildren = "numberOfChildren";
 	public static final String DTO_NAME_dateOfEntry = "dateOfEntry";
+	public static final String DTO_NAME_maritalStatus = "maritalStatus";
+	public static final String DTO_NAME_countryOfBirth = "countryOfBirth";
+	public static final String DTO_NAME_birthPlace = "birthPlace";
+	public static final String DTO_NAME_birthName = "birthName";
+	public static final String DTO_NAME_contactEmailAddress1 = "contactEmailAddress1";
+	public static final String DTO_NAME_contactEmailAddress2 = "contactEmailAddress2";
+	public static final String DTO_NAME_contactPhone1 = "contactPhone1";
+	public static final String DTO_NAME_contactPhone2 = "contactPhone2";
+	public static final String DTO_NAME_contactFax1 = "contactFax1";
+	public static final String DTO_NAME_contactFax2 = "contactFax2";
 	
 	public static final String DTO_NAME_postalAddresses = "postalAddresses";
-	
-	/*
-	public static final String NAME_PROPERTY_familienstand = "familienstand";
-	public static final String NAME_PROPERTY_geburtsland = "geburtsland";
-	public static final String NAME_PROPERTY_geburtsname = "geburtsname";
-	
-	public static final String NAME_PROPERTY_emailAdresse = "emailAdresse";	
-	public static final String NAME_PROPERTY_telefon1 = "telefon1";	
-	public static final String NAME_PROPERTY_mobile1 = "mobile1";
-	public static final String NAME_PROPERTY_unfallverspflichtig = "unfallverspflichtig";
-	
-	public static final String NAME_PROPERTY_religion = "religion";	
-	public static final String NAME_PROPERTY_kinder = "kinder";
-	public static final String NAME_PROPERTY_eintrittsdatum = "eintrittsdatum";
-	*/
 }

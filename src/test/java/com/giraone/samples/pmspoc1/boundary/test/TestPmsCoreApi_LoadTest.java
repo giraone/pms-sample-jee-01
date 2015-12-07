@@ -18,6 +18,8 @@ import org.junit.runners.MethodSorters;
 
 import com.giraone.samples.pmspoc1.boundary.test.loader.SimpleTestDataGenerator;
 import com.giraone.samples.pmspoc1.entity.CostCenter_;
+import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress;
+import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress_;
 import com.giraone.samples.pmspoc1.entity.Employee_;
 import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
 import com.jayway.restassured.response.Response;
@@ -86,18 +88,36 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 		JsonObject costCenter = (JsonObject) allCostCenters.get(i % NR_OF_COST_CENTERS);
 		String personnelNumber = String.format("%05d", i);
 		EnumGender gender = SimpleTestDataGenerator.randomGender();
+		String country = SimpleTestDataGenerator.randomNationality();
+		String firstName = SimpleTestDataGenerator.randomFirstName(gender);
+		String lastName = SimpleTestDataGenerator.randomLastName();
+		String email = firstName.toLowerCase() + "." + lastName.toLowerCase() + "@" + SimpleTestDataGenerator.randomMailProvider();
+		EmployeePostalAddress p = new EmployeePostalAddress();
+		SimpleTestDataGenerator.fillRandomAddress(p);
 		
 		String jsonPayload = Json.createObjectBuilder()
 			.add(Employee_.DTO_NAME_costCenter, Json.createObjectBuilder()
 				.add(CostCenter_.DTO_NAME_oid, costCenter.getInt(CostCenter_.DTO_NAME_oid)))
 			.add(Employee_.DTO_NAME_personnelNumber, personnelNumber)
-			.add(Employee_.DTO_NAME_lastName, SimpleTestDataGenerator.randomLastName())
-			.add(Employee_.DTO_NAME_firstName, SimpleTestDataGenerator.randomFirstName(gender))
+			.add(Employee_.DTO_NAME_lastName, lastName)
+			.add(Employee_.DTO_NAME_firstName, firstName)
 			.add(Employee_.DTO_NAME_dateOfBirth, SimpleTestDataGenerator.randomDateOfBirth().getTime().getTime())
 			.add(Employee_.DTO_NAME_gender, gender.toString())
 			.add(Employee_.DTO_NAME_dateOfEntry, SimpleTestDataGenerator.randomDateOfEntry().getTime().getTime())
-			.add(Employee_.DTO_NAME_nationalityCode, SimpleTestDataGenerator.randomNationality())
-			.build().toString();
+			.add(Employee_.DTO_NAME_nationalityCode, country)
+			.add(Employee_.DTO_NAME_countryOfBirth, country)
+			.add(Employee_.DTO_NAME_contactEmailAddress1, email)
+			.add(Employee_.DTO_NAME_numberOfChildren, SimpleTestDataGenerator.random().nextInt(3))
+			.add(Employee_.DTO_NAME_postalAddresses, Json.createArrayBuilder().add(Json.createObjectBuilder()
+		    	.add(EmployeePostalAddress_.DTO_NAME_ranking, 1)
+		    	.add(EmployeePostalAddress_.DTO_NAME_countryCode, p.getCountryCode())
+				.add(EmployeePostalAddress_.DTO_NAME_postalCode, p.getPostalCode())
+				.add(EmployeePostalAddress_.DTO_NAME_city, p.getCity())
+				.add(EmployeePostalAddress_.DTO_NAME_street, p.getStreet())
+				.add(EmployeePostalAddress_.DTO_NAME_houseNumber, p.getHouseNumber())
+		    ))
+		    .build()
+		    .toString();
 		
 		given()
 	        .spec(requestSpecBuilder.build())

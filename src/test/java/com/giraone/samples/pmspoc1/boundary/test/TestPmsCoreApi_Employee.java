@@ -22,7 +22,11 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeDTO;
+import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeWithPropertiesDTO;
 import com.giraone.samples.pmspoc1.entity.CostCenter_;
+import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress_;
 import com.giraone.samples.pmspoc1.entity.Employee_;
 import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -30,9 +34,9 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 
 /*
- * TODO: .body("name": "value") in POST/PUT ==> Encoder for value!
+ * In this test, we use two JSON tools: javax.json.Json and additionally a Jackson2 object mapper
+ * for de-serialization and serialization of JSON data.
  */
-
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 {
@@ -42,6 +46,9 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	static final String ENTITY_NOT_EXISTING_domainKey = "fake98765";
 
 	static final Random RANDOM = new Random();
+	
+	// A Jackson2 object mapper
+	ObjectMapper mapper = new ObjectMapper();
 	
 	@BeforeClass
 	public static void setupConnection()
@@ -54,21 +61,6 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	{
 		super.setup();
 	}
-
-	// ------------------------------------------------------------------------------------------
-
-	/*
-	 * Use this structure for tests: given() .spec(requestSpecBuilder.build()) .pathParam("id", id) // if path parameter
-	 * with name "id" is needed .log().headers() // or .log().all() .when() .<get|post|put|delete>(PATH_TO_RESOURCE)
-	 * .<get|post|put|delete>(PATH_TO_RESOURCE + "/{id}") .then() .log().all() // or .log().body()
-	 * .statusCode(HttpURLConnection.HTTP_NOT_FOUND); .contentType(ContentType.JSON); // if content is returned
-	 * .body("attr", is(attr_value)); // if response has to be checked
-	 * 
-	 * Samples JSON generation: JsonObject model = Json.createObjectBuilder() .add("firstName", "Duke") .add("lastName",
-	 * "Java") .add("age", 18) .add("postalCode", "12345") .add("phoneNumbers", Json.createArrayBuilder()
-	 * .add(Json.createObjectBuilder() .add("type", "mobile") .add("number", "111-111-1111"))
-	 * .add(Json.createObjectBuilder() .add("type", "home") .add("number", "222-222-2222"))) .build();
-	 */
 
 	// ------------------------------------------------------------------------------------------
 
@@ -183,8 +175,16 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		String domainKey = ENTITY_VALID_domainKey;
 		int oid = this.createFreshEntityAndReturnOid(domainKey);
 
-		given().spec(requestSpecBuilder.build()).pathParam("id", oid).log().all().when().get(PATH_TO_RESOURCE + "/{id}")
-			.then().log().body().statusCode(HttpURLConnection.HTTP_OK).contentType(ContentType.JSON)
+		given()
+			.spec(requestSpecBuilder.build())
+				.pathParam("id", oid)
+				.log().all()
+		.when()
+			.get(PATH_TO_RESOURCE + "/{id}")
+		.then()
+			.log().body()
+			.statusCode(HttpURLConnection.HTTP_OK)
+			.contentType(ContentType.JSON)
 			.body("oid", is(oid));
 	}
 
@@ -224,10 +224,14 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 			.add(Employee_.DTO_NAME_dateOfBirth, "1966-12-31T00:00:00.000Z")
 			.add(Employee_.DTO_NAME_gender, EnumGender.F.toString())
 			.add(Employee_.DTO_NAME_dateOfEntry, "2014-01-01T00:00:00.000Z")
-			.add(Employee_.DTO_NAME_nationalityCode, "DEU")
+			.add(Employee_.DTO_NAME_nationalityCode, "DE")
+			.add(Employee_.DTO_NAME_countryOfBirth, "DE")
+			.add(Employee_.DTO_NAME_birthPlace, "Erlangen")
+			.add(Employee_.DTO_NAME_numberOfChildren, 2)
+			.add(Employee_.DTO_NAME_contactEmailAddress1, "jane.doe@mymail.com")
 			.build().toString();
 
-		System.err.println("######## " + jsonPayload);
+		System.err.println("######## jsonPayload " + jsonPayload);
 
 		Response response =
 			given()
@@ -243,6 +247,8 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		
 		// Now get header location, use it and check the values:
 		String getUri = response.header("location");
+		System.err.println("######## getUri " + getUri);
+		
 		given()
 			.spec(requestSpecBuilder.build())
 		.when()
@@ -252,7 +258,11 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 			.statusCode(HttpURLConnection.HTTP_OK)
 			.contentType(ContentType.JSON)
 			.body(Employee_.DTO_NAME_personnelNumber, is(ENTITY_VALID_domainKey))
-			.body(Employee_.DTO_NAME_lastName, is("Doe"));
+			.body(Employee_.DTO_NAME_costCenter + "." + CostCenter_.DTO_NAME_oid, is((int) costCenterId)) // TODO: cast!
+			.body(Employee_.DTO_NAME_lastName, is("Doe"))
+			//.body(Employee_.DTO_NAME_dateOfBirth, is("1966-12-31T00:00:00.000Z")) // TODO: not working!
+			.body(Employee_.DTO_NAME_numberOfChildren, is(2))
+			.body(Employee_.DTO_NAME_contactEmailAddress1, is("jane.doe@mymail.com"));
 	}
 
 	@Test
@@ -271,10 +281,14 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 			.add(Employee_.DTO_NAME_dateOfBirth, (new Date()).getTime() - 3600*24*365*40)
 			.add(Employee_.DTO_NAME_gender, EnumGender.M.toString())
 			.add(Employee_.DTO_NAME_dateOfEntry, (new Date()).getTime() - 3600*24*365*2)
-			.add(Employee_.DTO_NAME_nationalityCode, "DEU")
+			.add(Employee_.DTO_NAME_nationalityCode, "DE")
+			.add(Employee_.DTO_NAME_countryOfBirth, "DE")
+			.add(Employee_.DTO_NAME_birthPlace, "Hof")
+			.add(Employee_.DTO_NAME_numberOfChildren, 2)
+			.add(Employee_.DTO_NAME_contactEmailAddress1, "john.date@mymail.com")
 			.build().toString();
 
-		System.err.println("######## " + jsonPayload);
+		System.err.println("######## jsonPayload " + jsonPayload);
 
 		Response response =
 			given()
@@ -290,6 +304,8 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		
 		// Now get header location, use it and check the values:
 		String getUri = response.header("location");
+		System.err.println("######## getUri " + getUri);
+		
 		given()
 			.spec(requestSpecBuilder.build())
 		.when()
@@ -299,21 +315,98 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 			.statusCode(HttpURLConnection.HTTP_OK)
 			.contentType(ContentType.JSON)
 			.body(Employee_.DTO_NAME_personnelNumber, is(ENTITY_VALID_domainKey))
-			.body(Employee_.DTO_NAME_lastName, is("Doe"));
+			.body(Employee_.DTO_NAME_costCenter + "." + CostCenter_.DTO_NAME_oid, is((int) costCenterId)) // TODO: cast!
+			.body(Employee_.DTO_NAME_lastName, is("Date"))
+			.body(Employee_.DTO_NAME_numberOfChildren, is(2))
+			.body(Employee_.DTO_NAME_contactEmailAddress1, is("john.date@mymail.com"));
 	}
 	
-	/*
+	@Test
+	public void t_202_POST_newValidDataWithAddresses_shouldReturnStatusCreatedWithLocation() throws Exception
+	{
+		this.deleteEntityByIdentificationAndIgnoreStatus(ENTITY_VALID_domainKey);
+		
+		long costCenterId = this.createFreshCostCenterAndReturnOid("CO1234");
+		
+		String jsonPayload = Json.createObjectBuilder()
+			.add(Employee_.DTO_NAME_costCenter, Json.createObjectBuilder()
+				.add(CostCenter_.DTO_NAME_oid, costCenterId))
+			.add(Employee_.DTO_NAME_personnelNumber, ENTITY_VALID_domainKey)
+			.add(Employee_.DTO_NAME_lastName, "Date")
+			.add(Employee_.DTO_NAME_firstName, "John")
+			.add(Employee_.DTO_NAME_dateOfBirth, (new Date()).getTime() - 3600*24*365*40)
+			.add(Employee_.DTO_NAME_gender, EnumGender.M.toString())
+			.add(Employee_.DTO_NAME_dateOfEntry, (new Date()).getTime() - 3600*24*365*2)
+			.add(Employee_.DTO_NAME_nationalityCode, "DE")
+			.add(Employee_.DTO_NAME_countryOfBirth, "DE")
+			.add(Employee_.DTO_NAME_birthPlace, "Hof")
+			.add(Employee_.DTO_NAME_numberOfChildren, 2)
+			.add(Employee_.DTO_NAME_contactEmailAddress1, "john.date@mymail.com")
+			.add(Employee_.DTO_NAME_postalAddresses, Json.createArrayBuilder().add(Json.createObjectBuilder()		
+				.add(EmployeePostalAddress_.DTO_NAME_city, "city")
+				.add(EmployeePostalAddress_.DTO_NAME_countryCode, "DE")
+				.add(EmployeePostalAddress_.DTO_NAME_houseNumber, "1")
+				.add(EmployeePostalAddress_.DTO_NAME_postalCode, "12345")
+				.add(EmployeePostalAddress_.DTO_NAME_street, "street")
+				.add(EmployeePostalAddress_.DTO_NAME_ranking, 1)))
+			.build().toString();
+
+		System.err.println("######## jsonPayload " + jsonPayload);
+
+		Response response =
+			given()
+				.spec(requestSpecBuilder.build())
+				.body(jsonPayload)
+				.log().all()
+			.when()
+				.post(PATH_TO_RESOURCE)
+			.then()
+				.statusCode(HttpURLConnection.HTTP_CREATED)
+				.headers("location", containsString(PATH_TO_RESOURCE + "/"))
+				.and().extract().response();
+		
+		// Now get header location, use it and check the values:
+		String getUri = response.header("location");
+		System.err.println("######## getUri " + getUri);
+		
+		given()
+			.spec(requestSpecBuilder.build())
+		.when()
+			.get(getUri)
+		.then()
+			.log().body()
+			.statusCode(HttpURLConnection.HTTP_OK)
+			.contentType(ContentType.JSON)
+			.body(Employee_.DTO_NAME_personnelNumber, is(ENTITY_VALID_domainKey))
+			.body(Employee_.DTO_NAME_costCenter + "." + CostCenter_.DTO_NAME_oid, is((int) costCenterId)) // TODO: cast!
+			.body(Employee_.DTO_NAME_lastName, is("Date"))
+			.body(Employee_.DTO_NAME_numberOfChildren, is(2))
+			.body(Employee_.DTO_NAME_contactEmailAddress1, is("john.date@mymail.com"))
+			.body(Employee_.DTO_NAME_postalAddresses + "." + EmployeePostalAddress_.DTO_NAME_ranking, is(1))
+			.body(Employee_.DTO_NAME_postalAddresses + "." + EmployeePostalAddress_.DTO_NAME_street, is("street"));
+	}
+	
 	@Test
 	public void t_200_POST_duplicateValidData_shouldReturnStatusConflict() throws Exception
 	{
-		this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
-
-		given().spec(requestSpecBuilder.build())
-			.body("{" + "\"" + Employee_.DTO_NAME_personnelNumber + "\":\"" + ENTITY_VALID_domainKey + "\"," + "\""
-				+ Employee_.DTO_NAME_lastName + "\":\"" + "Doe" + "\"" + "}")
-			.when().post(PATH_TO_RESOURCE).then().log().all().statusCode(HttpURLConnection.HTTP_CONFLICT);
+		int oid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
+		String getUri = PATH_TO_RESOURCE + "/" + oid;
+		Response oldResponse = given().spec(requestSpecBuilder.build()).get(getUri);
+		
+		EmployeeDTO employee = mapper.readValue(oldResponse.asString(), EmployeeDTO.class);		
+		System.err.println("######## " + employee);
+		String jsonPayload = mapper.writeValueAsString(employee);
+		
+		given()
+			.spec(requestSpecBuilder.build())
+			.body(jsonPayload)
+			.pathParam("id", oid)
+		.when()
+			.post(PATH_TO_RESOURCE)
+		.then()
+			.log().all()
+			.statusCode(HttpURLConnection.HTTP_CONFLICT);
 	}
-	*/
 	
 	@Test
 	public void t_300_PUT_validData_shouldReturnStatusNoContent() throws Exception
@@ -321,27 +414,45 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		int oid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
 		String getUri = PATH_TO_RESOURCE + "/" + oid;
 		Response oldResponse = given().spec(requestSpecBuilder.build()).get(getUri);
-		int oldVersionNumber = oldResponse.path(Employee_.DTO_NAME_versionNumber);
-		String oldPersonnelNumber = oldResponse.path(Employee_.DTO_NAME_personnelNumber);
-
+		
+		EmployeeWithPropertiesDTO employee = mapper.readValue(oldResponse.asString(), EmployeeWithPropertiesDTO.class);		
+		System.err.println("######## " + employee);
+		
+		int oldVersionNumber = employee.getVersionNumber();
+		String oldPersonnelNumber = employee.getPersonnelNumber();
+		int oldNumberOfChildren = employee.getNumberOfChildren();
+		
 		String newLastName = "Miller";
-
+		employee.setLastName(newLastName);
+		int newNumberOfChildren = oldNumberOfChildren + 1;
+		employee.setNumberOfChildren(newNumberOfChildren);
+		
+		String jsonPayload = mapper.writeValueAsString(employee);
+		
 		ResponseSpecBuilder noContentInResponse = new ResponseSpecBuilder();
 		noContentInResponse.expectBody(is("")).expectContentType("");
 
-		given().spec(requestSpecBuilder.build())
-			.body("{" + "\"" + Employee_.DTO_NAME_oid + "\":" + oid + "," + "\"" + Employee_.DTO_NAME_personnelNumber
-				+ "\":\"" + oldPersonnelNumber + "\"," + "\"" + Employee_.DTO_NAME_lastName + "\":\"" + newLastName
-				+ "\"" + "}")
-			.pathParam("id", oid).when().put(PATH_TO_RESOURCE + "/{id}").then()
+		given()
+			.spec(requestSpecBuilder.build())
+			.body(jsonPayload)
+			.pathParam("id", oid)
+		.when()
+			.put(PATH_TO_RESOURCE + "/{id}")
+		.then()
 			.statusCode(HttpURLConnection.HTTP_NO_CONTENT).spec(noContentInResponse.build());
 
 		// Now use the GET URI again and check the new values:
-		given().spec(requestSpecBuilder.build()).when().get(getUri).then().statusCode(HttpURLConnection.HTTP_OK)
+		given()
+			.spec(requestSpecBuilder.build())
+		.when()
+			.get(getUri)
+		.then()
+			.statusCode(HttpURLConnection.HTTP_OK)
 			.contentType(ContentType.JSON).body(Employee_.DTO_NAME_oid, is(oid))
 			.body(Employee_.DTO_NAME_versionNumber, greaterThan(oldVersionNumber))
 			.body(Employee_.DTO_NAME_personnelNumber, is(oldPersonnelNumber))
-			.body(Employee_.DTO_NAME_lastName, is(newLastName));
+			.body(Employee_.DTO_NAME_lastName, is(newLastName))
+			.body(Employee_.DTO_NAME_numberOfChildren, is(newNumberOfChildren));
 	}
 
 	@Test
@@ -366,8 +477,14 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		// ... and delete it, to force "NOT FOUND"
 		this.deleteEntityByOidAndIgnoreStatus(oid);
 
-		given().spec(requestSpecBuilder.build()).pathParam("id", oid).log().headers().when()
-			.delete(PATH_TO_RESOURCE + "/{id}").then().statusCode(HttpURLConnection.HTTP_NOT_FOUND);
+		given()
+			.spec(requestSpecBuilder.build())
+			.pathParam("id", oid)
+			.log().headers()
+		.when()
+			.delete(PATH_TO_RESOURCE + "/{id}")
+		.then()
+			.statusCode(HttpURLConnection.HTTP_NOT_FOUND);
 	}
 
 	// ------------------------------------------------------------------------------------------
@@ -386,7 +503,6 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 
 		if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND)
 		{
-			System.err.println("deleteEntityByIdentificationAndIgnoreStatus NOT_FOUND: " + domainKey);
 			return;
 		}
 
@@ -417,7 +533,8 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 			.add(Employee_.DTO_NAME_dateOfBirth, "1966-12-31T00:00:00.000Z")
 			.add(Employee_.DTO_NAME_gender, EnumGender.F.toString())
 			.add(Employee_.DTO_NAME_dateOfEntry, "2014-01-01T00:00:00.000Z")
-			.add(Employee_.DTO_NAME_nationalityCode, "DEU")
+			.add(Employee_.DTO_NAME_nationalityCode, "DE")
+			.add(Employee_.DTO_NAME_numberOfChildren, 2)
 			.build().toString();
 		
 		Response response = given()

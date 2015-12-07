@@ -78,7 +78,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	        .body("attr", is(attr_value)); // if response has to be checked
 	        .body("any { it.key == 'attr' }", is(true)); // attr must be defined (no value check)
 	        
-	  * Samples JSON generation:
+	  * Samples for JSON generation with javax.json.JsonObject:
 	  	JsonObject model = Json.createObjectBuilder()
 		   .add("firstName", "Duke")
 		   .add("lastName", "Java")

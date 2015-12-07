@@ -12,13 +12,16 @@ import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress;
 public interface EmployeeMapper
 {
 	EmployeeMapper INSTANCE = Mappers.getMapper(EmployeeMapper.class);
-	
-    void updateDtoFromEntity(Employee entity, @MappingTarget EmployeeDTO dto);
-    void updateEntityFromDto(EmployeeDTO dto, @MappingTarget Employee entity);
-    
+   
     void updateDtoFromEntity(CostCenter entity, @MappingTarget CostCenterDTO dto);
     void updateEntityFromDto(CostCenterDTO dto, @MappingTarget CostCenter entity);
     
+    void updateDtoFromEntity(Employee entity, @MappingTarget EmployeeWithPropertiesDTO dto);
+    void updateEntityFromDto(EmployeeWithPropertiesDTO dto, @MappingTarget Employee entity);
+    
+    void updateDtoFromEntity(Employee entity, @MappingTarget EmployeeDTO dto);
+    void updateEntityFromDto(EmployeeDTO dto, @MappingTarget Employee entity);
+  
     void updateDtoFromEntity(EmployeePostalAddress entity, @MappingTarget EmployeePostalAddressDTO dto);
     void updateEntityFromDto(EmployeePostalAddressDTO dto, @MappingTarget EmployeePostalAddress entity);
 }
