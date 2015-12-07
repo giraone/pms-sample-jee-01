@@ -1,11 +1,12 @@
 # Kickstart 1 for JEE (JAX-RS/EJB/JPA) Web Application #
 
-This project is indented to show the basic modules of a modern REST-based web application with a ***back-end based on core JEE technology***, like JPA, EJB and JAX-RS and a ***front-end based on HTML5/JS/CSS3*** using the "main stream frameworks" *Google Angular 2* and *Twitter Bootstrap*. From a functional perspective, it is designed to be a CRUD application with some more features, than a typical TODO list application normally has. The starter project should be easily understandable for everybody and comes with only two entities
+This project is indented to show the basic modules of a modern REST-based web application with a ***back-end based on core JEE technology***, like JPA, EJB and JAX-RS and a ***front-end based on HTML5/JS/CSS3*** using the "main stream frameworks" *Google Angular 2* and *Twitter Bootstrap*. From a functional perspective, it is designed to be a CRUD application with some more features, than a typical TODO list application normally has. The starter project should be easily understandable for everybody and comes with only three entities
 
-- Cost center
-- Employee
+- Cost centers
+- Employees
+- Postal addresses of an employee
 
-building an owner-member relationship. An employee entity is related to 0 or 1 cost center. From the perspective of the cost center it is a one-to-may relationship. 
+An employee entity is related to 0 or 1 cost center. An employee may have multiple postal addresses. Addresses cannot live without an employee and are deleted together with the employee.
 
 **Back-end:** This GitHub projects is the back-end application. It exposes a REST based API under `/api/costcenters` and `api/employees` with GET, POST, PUT and DELETE HTTP verbs. But it also hold a `webapp` folder, which comes with a release build of the **Front-end:** (see below), so it can be tested together with a browser front-end.
 
@@ -31,13 +32,13 @@ The complete solution is hosted on
 
 ## Prerequisites to develop locally and run the project ##
 - Maven 3
-- An Eclipse based IDE (I used JBoss Dev Studio 9.0)
+- An Eclipse based IDE
 - A JEE6 compliant application server. In detail, we need:
   - JPA 2.0
   - EJB 3.2
   - JAX-RS 2.0
-- For development I used *JBoss Wildfly 9.1* with [Resteasy](http://resteasy.jboss.org/) for JAX-RS and [Hibernate](http://hibernate.org/orm/) for JPA. But it should run on any other JEE6 application server - the only dependencies in the source code for JBoss are in [pom.xml](pom.xml) and [persistence.xml](src/main/resources/META-INF/persistence.xml).
-- A relational database supported by the JPA implementation. For development I used *Apache Derby Network Server 10.X* and *PostgresQL 9.4*. Others may work also with slight adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml). For the different environments, there are Maven profiles in the [pom.xml](pom.xml)
+  For development *JBoss Wildfly 9.1* with [Resteasy](http://resteasy.jboss.org/) for JAX-RS and [Hibernate](http://hibernate.org/orm/) for JPA was used. But the application should run on any other JEE6 application server - the only implementation specific dependencies in the source code are in [pom.xml](pom.xml) and [persistence.xml](src/main/resources/META-INF/persistence.xml).
+- A relational database supported by the JPA implementation. For development *Apache Derby Network Server 10.X* and *PostgresQL 9.4* was used. Others databases may work also with slight adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml).
 - In the hosting environment the following components are used:
 
 |               | OPENSHIFT           | BLUEMIX                       |
@@ -59,8 +60,8 @@ The complete solution is hosted on
 
 ## Conventions and design decisions in the project ##
 
-### Logging framework ###
-In the project we use [Apache Log4j 2](http://logging.apache.org/log4j/2.x/). Despite the fact, that Java has a basic logging implementation in `java.util.logging`, most developers are used to the *log4J* or *slf4j* style logging API syntax, therefore this is our logging API. The loggers are always injected by CDI (`@Inject`).
+### Logging and logging framework ###
+In the project we use [Apache Log4j 2](http://logging.apache.org/log4j/2.x/) as the logging framework. Despite the fact, that Java has a basic logging implementation in `java.util.logging`, most developers are used to the *log4J* or *slf4j* style logging API syntax. Log4j2 is a modern framework (concurrency features, possibilities for asynchronous logging, markers) and therefore this it is our chosen logging API. The loggers are always injected by CDI (`@Inject`). In the log statement we use *Markers*, to be able to filter logs later. Additionally we use interceptors (`@AroundInvoke`) to achieve method logging without boilerpate code at certains layers, e.g. for all REST end points.
 
 ### Entity ID generation (surrogate keys) ###
 In the project we use surrogate keys generated with the default JPA method by simply annotating ```@GeneratedValue```. All surrogate keys are named ```oid``` and of the type ```Long```.
@@ -107,12 +108,7 @@ For detecting parallel changes of entities by users of the API, we use plain van
 These version numbers are also exposed at the REST APIs!
 
 ### Transaction management type ###
-Despite the fact, that the standard JEE method is to use *container based transaction management* (`TransactionManagementType.CONTAINER`), we use `TransactionManagementType.BEAN` in the project. The reason for this, is the usage of the mentioned **database constraints** in the projects. Constraints on a database level are robust restrictions and cannot by-passed by tools or batch programs operating directly on the database. They are a **MUST-HAVE**! But with container transaction management, we cannot catch exceptions like `java.sql.SQLIntegrityConstraintViolationException`, thrown on `tx.commit()` operations called by the container, e.g. when a new cost center is created with an already existing *identification*. Therefore we do our own transaction management using
-
-```
-    @Resource
-    UserTransaction tx;
-```
+Despite the fact, that the standard JEE method is to use *container based transaction management* (`TransactionManagementType.CONTAINER`), we use `TransactionManagementType.BEAN` in the project. The reason for this, is the usage of the mentioned **database constraints** in the projects. Constraints on a database level are robust restrictions and cannot by-passed by tools or batch programs operating directly on the database. They are a **MUST-HAVE**! But with container transaction management, we cannot catch exceptions like `java.sql.SQLIntegrityConstraintViolationException`, thrown on `tx.commit()` operations called by the container, e.g. when a new cost center is created with an already existing *identification*. Therefore we do our own transaction management using user transactions. To avoid boilerplate code, we use `@UserTransactional` annotations (for implementation details see `com.giraone.samples.common.entity.UserTransactionInterceptor`) for methods that need transaction handling and constraint violation detection.
 
 If somebody has a better idea to solve this, let us know!
 
@@ -125,37 +121,58 @@ Field validation at the JPA level is based on [Java Bean Validation (JSR 303)](h
 	@Pattern(regexp = "[0-9A-Za-z]*", message = "Only numbers and ASCII letters are allowed") 
 ```
 
+### Storage of data attributes ###
+To have the flexibility of schema-less noSQL database also in relational storage, we use two different storage approaches for attributes of entities.
+<ul>
+<li>The important attributes, like primary keys, foreign keys, important query parameters and import sort attributes are store as normal SQL columns.</li>
+<li>All other attributes are stored in key value tables. There is one key value table per entity. If the name of
+the table is Xyz, the key value table is named `MyWellDefined`, the key value table is named `MyWellDefinedProperty`. the key value table is type safety to some extend. It distinguishes between numeric data, temporal data (date/time) and string data, to use the databases sort and comparison operators for these data types. This approach is cloned from the approaches used by [Salesforce](https://developer.salesforce.com/page/Multi_Tenant_Architecture) and [Workday](http://www.dbms2.com/2010/08/22/workday-technology-stack/), but it is not yet such revolutionary - it uses a normal database layout for the key attributes and for relationships.
+</ul>
+Currently this approach is used only for the "Employee" entity.
+
+### DTOs and Mapping ###
+
+Despite the fact, that this is currently a CRUD application, JPA entities are not used at the REST interfaces. We use Data Transfer Objects (DTOs). These DTOs are currently transformed using the brand new [MapStruct](http://mapstruct.org/) code generator using its Maven plugin. This approach looks much more promising, than using reflection based bean mappers like [Dozer](http://dozer.sourceforge.net/). 
+
+### REST APIs ###
+
+The base for our REST services is plain vanilla *JAX-RS*. Currently with an annotation first approach - no contract first approach yet. For cross-cutting features at the REST layer, like injecting a `"Access-Control-Allow-Origin"` header, we use the JAX-RS 2.0 feature `@Provider`.
+
 ### OData style query options for filtering and sorting ###
 
-The base for the implementation of $filter and $orderby query options in REST APIs for lists is [Apache Olingo](https://olingo.apache.org/) - currently the only useful Java-based OData implementation. For the current basic requirements OData V2.0 seems to be *good enough*.
+The base for the implementation of OData $filter and $orderby query options in REST APIs for lists is [Apache Olingo](https://olingo.apache.org/) - currently the only useful Java-based OData implementation. For the current basic requirements OData V2.0 seems to be *good enough*.
 
 ----------
 
-
 ## Open issues and TODOs for the current goals ##
 
-- Currently the solution must use *olingo-odata2-core 2.0.6-SNAPSHOT*, because of this bug: [OLINGO-761](https://issues.apache.org/jira/browse/OLINGO-761?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel)
+- We need performance checks for the ID generation. It may be better to use a specific kind of generation, e.g.
+```
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "Alloc100")
+	@TableGenerator(name = "Alloc100", allocationSize = 100)
+```
 
-- The unit tests with *REST-assured* aren't currently real unit tests - they need a server with a well known configuration. See [TestPmsCoreApi](src/com/giraone/samples/pmspoc1/boundary/test/TestPmsCoreApi.java) in the source to see, what I mean.
+- Currently the solution must use *olingo-odata2-core 2.0.6-SNAPSHOT* in JBoss environments, because of this bug: [OLINGO-761](https://issues.apache.org/jira/browse/OLINGO-761?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel)
 
-- OData filtering (lt, gt) for Date fields
-
-- Unit tests for the OData implementation are missed. There is only a test page `webapp/test/index.html`.
+- OData filtering (lt, gt) for Date fields is not yet implemented
 
 - Bean validation together with I18N is not yet perfect. Currently the code uses sth. like:
 
 ```
 	@Pattern(regexp = "[0-9A-Za-z]*", message = "Only numbers and ASCII letters are allowed")
-
 ```
 
 This is not a good idea together with I18N! Best solution would be to separate the field validation definitions together with their messages in separate configurations.
 
-- Usage of `@XmlRootElement` vs. `@JsonSerialize` to serialize the JAX-RS DTOs. This includes some decisions, e.g.
-  - How to serialize date and time values: ISO strings vs. long values?
+- Usage of `@XmlRootElement` vs. `@JsonSerialize` to serialize the JAX-RS DTOs is an open issues. This includes some decisions, e.g. how to serialize date and time values: ISO strings vs. long values? This should be addressed together with the contract-first approach.
+
+- Build/Deploy improvements
+  - For the different environments, we should use Maven profiles in the [pom.xml](pom.xml).
 
 - Test improvement
   - Using JSON schema validation of REST-assured in the API tests.
+  - Unit tests for the OData implementation are missed. There is only a test page `webapp/test/index.html`.
+  - The unit tests with *REST-assured* aren't real unit tests - they need a server with a well known configuration. See [TestPmsCoreApi](src/com/giraone/samples/pmspoc1/boundary/test/TestPmsCoreApi.java) in the source to see, what we mean.
   
 ## Future goals of the project ##
 
@@ -163,7 +180,7 @@ This is not a good idea together with I18N! Best solution would be to separate t
 - Storing attributes of entities, which are not used in queries or joins in ***key value tables***, to get a more stable data model without the need of schema changes, when new attributes are needed.
 - Extension of the REST API by using **OData** `$expand`. E.g. an expand parameter for employee to show the cost center's description.
 - Additional relationship types for the entities.
-- Usage of **Swagger** (or RAML) for the API definition to have a **contract-first approach**.
+- Usage of **Swagger** (or **RAML**) for the REST API definition to have a **contract-first approach**.
 - Usage of [swagger-js-codegen](https://github.com/wcandillon/swagger-js-codegen) or similar to generate JavaScript/Angular code from the Swagger definition.
 - Usage of [swagger-codegen](https://github.com/swagger-api/swagger-codegen) to generate JAX-RS skeletons and the Java DTO classes from the Swagger definition.
 - Catalog tables for offering typical **lookup tables**, like ISO country codes, ZIP codes, ... 
