@@ -13,7 +13,7 @@
 		<!-- <jta-data-source>java:jboss/datasources/PostgreSQLDS</jta-data-source> -->
 		<!-- This is for Bluemix with sqldb and cloudAutowiring-1.0 -->
 		<!-- <jta-data-source>java:comp/env/jdbc/mydbdatasource</jta-data-source> -->
-		<!-- This is for Bluemix with sqldb and WLP 8.5.5.7 without autowiring -->
+		<!-- This is for Cloud Foundry (Bluemix or Pivotal) and WLP 8.5.5.7 without autowiring -->
 		<!-- <jta-data-source>jdbc/pmssamplejee1sqldb</jta-data-source> -->
 		
 		<properties>
@@ -35,9 +35,9 @@
 
 
 			<!-- Properties for EclipseLink (ignored in non-EclipseLink environments) -->
-			<!-- <property name="eclipselink.ddl-generation" value="create-or-extend-tables" /> --><!-- UPDATE tables, if needed -->		
+			<property name="eclipselink.ddl-generation" value="create-or-extend-tables" /> <!-- UPDATE tables, if needed -->		
 			<!-- <property name="eclipselink.ddl-generation" value="create-tables" /> --> <!-- CREATE tables -->
-			<property name="eclipselink.ddl-generation" value="drop-and-create-tables" /> <!-- DROP and CREATE tables -->			
+			<!-- <property name="eclipselink.ddl-generation" value="drop-and-create-tables" /> --> <!-- DROP and CREATE tables -->			
 			<property name="eclipselink.ddl-generation.output-mode" value="database" /> <!-- Needed for create-or-extend-tables -->			
 				
 			<!-- Optimization - statement caching -->
