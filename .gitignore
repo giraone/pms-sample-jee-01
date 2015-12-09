@@ -27,6 +27,9 @@ dist/
 node_modules/
 .temp/
 
+# Bluemix
+launchConfigurations/
+
 # Windows Installer files
 *.cab
 *.msi
