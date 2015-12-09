@@ -17,17 +17,21 @@
 	<applicationMonitor dropinsEnabled='false' updateTrigger='mbean' />
 	<config updateTrigger='mbean' />
 
-	<dataSource id='postgresql-pmssamplejee1sqldb' jdbcDriverRef='postgresql-driver' jndiName='jdbc/pmssamplejee1sqldb'>
-		<properties.db2.jcc databaseName='${cloud.services.pmssamplejee1sqldb.connection.db}' id='db2-pmssamplejee1sqldb-props'
-			password='${cloud.services.pmssamplejee1sqldb.connection.password}' portNumber='${cloud.services.pmssamplejee1sqldb.connection.port}'
-			serverName='${cloud.services.pmssamplejee1sqldb.connection.host}' user='${cloud.services.pmssamplejee1sqldb.connection.username}' />
+	<dataSource id='pmssamplejee1sqldb' jdbcDriverRef='postgresql-driver' jndiName='jdbc/pmssamplejee1sqldb'
+		transactional='true' type='javax.sql.ConnectionPoolDataSource'>
+		<properties id='postgresql-props' 
+			serverName='pellefant-01.db.elephantsql.com' portNumber='5432'
+			databaseName='NAME'	user='NAME'	password='PASSWORD'		
+		/>
 	</dataSource>
 
-	<jdbcDriver id='postgresql-driver' libraryRef='postgresql-library'>  
-		<library id='postgresql-library'>
-			<fileset dir='${server.config.dir}/lib' id='postgresql-fileset' includes='postgresql-9.4-1204.jdbc42.jar'/>   
-		</library>
-	</jdbcDriver>
-</server>
+	<jdbcDriver id='postgresql-driver' 
+            javax.sql.XADataSource='org.postgresql.xa.PGXADataSource'
+            javax.sql.ConnectionPoolDataSource='org.postgresql.ds.PGConnectionPoolDataSource'            
+            libraryRef='postgresql-library'/>  
 
- "uri": "postgres://woerkjzg:rokkpBqsROPYIlGGXtxNNY4KaG-lQ446@pellefant-01.db.elephantsql.com:5432/woerkjzg",
+	<library id='postgresql-library'>       
+        <fileset id='postgresql-fileset' dir='${server.config.dir}/lib'
+			includes='postgresql-jdbc-9.4.1206.jar'/>   
+	</library>
+</server>
