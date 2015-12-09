@@ -34,10 +34,14 @@
 <li><a href="../api/employees?skip=10&top=10&orderby=oid asc">Block 1 (10-20) of employees - orderBy oid ASC</a></li>
 <li><a href="../api/employees?skip=20&top=10&orderby=oid asc">Block 2 (20-30) of employees - orderBy oid ASC</a></li>
 <li><a href="../api/employees?orderby=oid desc">Block 0 of employees - orderBy oid DESC</a></li>
+<li><a href="../api/employees?orderby=lastName asc">Block 0 of employees - orderBy lastName ASC</a></li>
+<li><a href="../api/employees?orderby=lastName desc">Block 0 of employees - orderBy lastName DESC</a></li>
+<li><a href="../api/employees?orderby=costCenter.oid desc">Block 0 of employees - orderBy costCenter.oid desc</a></li>
+<li><a href="../api/employees?orderby=costCenter.identification asc">Block 0 of employees - orderBy costCenter.identification asc</a></li>
 <li><a href="../api/employees?filter=personnelNumber eq '00012'">Employees - filter=personnelNumber eq '00012'</a></li>
 <li><a href="../api/employees?filter=dateOfBirth eq '19500227'">Employees - filter=dateOfBirth eq '19500227'</a></li>
 <li><a href="../api/employees?filter=dateOfBirth eq 165538800000">Employees - filter=dateOfBirth eq 165538800000</a></li>
-<li><a href="../api/employees?filter=costCenter eq '13'">Employees - filter=costCenter eq '13'</a></li>
+<li><a href="../api/employees?filter=costCenter.oid eq 13">Employees - filter=costCenter.oid eq 13</a></li>
 <li><a href="../api/employees?filter=costCenter.identification eq 'K00012'">Employees - filter=costCenter.identification eq 'K00012'</a></li>
 <li><a href="../api/employees?orderby=oid asc&filter=startswith(lastName, 'S') eq true">Employees - filter=startswith(lastName, 'S') eq true</a></li>
 <li><a href="../api/employees?orderby=oid asc&filter=startswith(lastName, 'S') eq true or startswith(lastName, 'S') eq true">Employees - filter=startswith(lastName, 'S') eq true or startswith(lastName, 'S') eq true</a></li>
