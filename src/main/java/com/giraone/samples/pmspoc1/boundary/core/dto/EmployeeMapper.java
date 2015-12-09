@@ -17,9 +17,10 @@ public interface EmployeeMapper
 	void updateDtoFromEntity(Employee entity, @MappingTarget EmployeeDTO dto);
 
 	@Mappings({
-		@Mapping(target = "postalAddresses", ignore = true), // Is performed manually
+		@Mapping(target = "postalAddresses", ignore = true), // Is performed manually		
+		@Mapping(target = "costCenter", ignore = true),      // Is performed manually
 		@Mapping(target = "properties", ignore = true),      // Ignore warning from properties member
-
+		
 		// These mappings are only to ignore warnings from setter/getter detection of MapStruct
 		@Mapping(target = Employee_.DTO_NAME_nationalityCode, ignore = true),
 		@Mapping(target = Employee_.DTO_NAME_dateOfEntry, ignore = true),
@@ -41,8 +42,10 @@ public interface EmployeeMapper
 	})
 	void updateDtoFromEntity(Employee entity, @MappingTarget EmployeeWithPropertiesDTO dto);
 
-	@Mappings({ @Mapping(target = "properties", ignore = true), // Ignore warning from properties member
-		@Mapping(target = "postalAddresses", ignore = true),    // Is performed manually
+	@Mappings({
+		@Mapping(target = "postalAddresses", ignore = true), // Is performed manually		
+		@Mapping(target = "costCenter", ignore = true),      // Is performed manually
+		@Mapping(target = "properties", ignore = true),      // Ignore warning from properties member
 	})
 	void updateEntityFromDto(EmployeeWithPropertiesDTO dto, @MappingTarget Employee entity);
 }

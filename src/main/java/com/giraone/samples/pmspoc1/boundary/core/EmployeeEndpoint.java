@@ -233,11 +233,11 @@ public class EmployeeEndpoint extends BaseEndpoint
 	{  
 		final Employee entity = dto.entityFromDTO();
 		
-		// If cost center is given without versionNumber, it cannot be updated! It is fetched fresh from the database.
-		final CostCenter costCenter = entity.getCostCenter();
-		if (costCenter != null && costCenter.getOid() > 0 && costCenter.getVersionNumber() < 0)
+		// If cost center is given with an oid, it is not updated! It is fetched always fresh from the database.
+		final CostCenterDTO costCenterDto = dto.getCostCenter();
+		if (costCenterDto != null && costCenterDto.getOid() > 0)
 		{
-			entity.setCostCenter(fetchCostCenterOfEmployeeByOid(costCenter.getOid(), "personnelNumber" + dto.getPersonnelNumber()));
+			entity.setCostCenter(fetchCostCenterOfEmployeeByOid(costCenterDto.getOid(), "personnelNumber" + dto.getPersonnelNumber()));
 		}
 		em.persist(entity);
 		
@@ -268,20 +268,40 @@ public class EmployeeEndpoint extends BaseEndpoint
 		{
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		
-		// If cost center is given regardless of the version number, it cannot be updated! It is always fetched fresh from the database.
-		final CostCenterDTO costCenterDto = dto.getCostCenter();
-		if (costCenterDto != null && costCenterDto.getOid() > 0)
-		{
-			entity.setCostCenter(fetchCostCenterOfEmployeeByOid(costCenterDto.getOid(), "employeeId=" + employeeId));
-		}
 				
 		// Now we have to fetch the properties by accessing at least one fake key (this is a bit weird in JPA!)
 		entity.getProperties().get("");
 		// Now we have to fetch the postal addresses
 		entity.getPostalAddresses().size();
-		// And now we merge changed data from the DTO
+		// Now we have to fetch the existing cost center
+		CostCenter existingCostCenter = entity.getCostCenter();
+		
+		// And now we merge changed data from the DTO (no cost center, no postal addresses)
 		entity = dto.mergeFromDTO(entity, em);
+				
+		// If cost center is given, it cannot be updated! It is always fetched fresh from the database.
+		final CostCenterDTO costCenterDto = dto.getCostCenter();
+		if (costCenterDto != null)
+		{
+			if (costCenterDto.getOid() > 0)
+			{
+				// Was the cost center changed?
+				if (existingCostCenter == null || costCenterDto.getOid() != existingCostCenter.getOid())
+				{
+					entity.setCostCenter(fetchCostCenterOfEmployeeByOid(costCenterDto.getOid(), "employeeId=" + employeeId));
+				}
+			}
+			else
+			{
+				throw new IllegalArgumentException("CostCenter oid is null for employeeId=" + employeeId);
+			}
+		}
+		else
+		{
+			// Currently, we do not remove cost centers from the employee.
+			//entity.setCostCenter(null); // Remove the cost center
+		}
+		
 		// and persist everything
 		entity = em.merge(entity);
 		
