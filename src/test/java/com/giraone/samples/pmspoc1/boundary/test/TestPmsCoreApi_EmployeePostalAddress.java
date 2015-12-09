@@ -178,7 +178,7 @@ public class TestPmsCoreApi_EmployeePostalAddress extends TestPmsCoreApi
 		return getUriAddress;
 	}
 	
-	private int createFreshEmployeeAndReturnOid()
+	private long createFreshEmployeeAndReturnOid()
 	{
 		TestPmsCoreApi_Employee employeeTest = new TestPmsCoreApi_Employee();
 		try

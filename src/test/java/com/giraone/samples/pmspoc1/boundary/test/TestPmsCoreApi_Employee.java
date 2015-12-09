@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeWithPropertiesDTO;
 import com.giraone.samples.pmspoc1.entity.CostCenter_;
@@ -43,6 +44,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	static final String PATH_TO_RESOURCE = "/employees";
 
 	static final String ENTITY_VALID_domainKey = "123456";
+	static final String ENTITY_VALID_domainKey2 = "123457";
 	static final String ENTITY_NOT_EXISTING_domainKey = "fake98765";
 
 	static final Random RANDOM = new Random();
@@ -117,7 +119,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	public void t_113_GET_listAll_filters_shouldWork() throws Exception
 	{
 		// Create an entity, to get a valid oid ...
-		int oid = this.createFreshEntityAndReturnOid();
+		long oid = this.createFreshEntityAndReturnOid();
 		String getUri = PATH_TO_RESOURCE + "/" + oid;
 		Response response1 = given().spec(requestSpecBuilder.build()).get(getUri);
 		String personnelNumber = response1.path(Employee_.DTO_NAME_personnelNumber);
@@ -130,7 +132,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		        .queryParam("filter", CostCenter_.DTO_NAME_oid + " eq " + oid)
 				.get(PATH_TO_RESOURCE).asString();
 
-			int fetchedOid = from(response).getInt("blockItems[0].oid");
+			long fetchedOid = from(response).getInt("blockItems[0].oid");
 			assertThat(fetchedOid, equalTo(oid));
 		}
 		
@@ -139,7 +141,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		        .spec(requestSpecBuilder.build())
 		        .queryParam("filter", Employee_.DTO_NAME_personnelNumber + " eq '" + personnelNumber + "'")
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("blockItems[0].oid");
+			long fetchedOid = from(response).getInt("blockItems[0].oid");
 			assertThat(fetchedOid, equalTo(oid));
 		}
 		
@@ -148,7 +150,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		        .spec(requestSpecBuilder.build())
 		        .queryParam("filter", Employee_.DTO_NAME_oid + " eq " + oid + " and " + Employee_.DTO_NAME_personnelNumber + " eq '" + personnelNumber + "'")
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("blockItems[0].oid");
+			long fetchedOid = from(response).getInt("blockItems[0].oid");
 			assertThat(fetchedOid, equalTo(oid));
 		}
 		
@@ -157,7 +159,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		        .spec(requestSpecBuilder.build())
 		        .queryParam("filter", Employee_.DTO_NAME_lastName + " eq '" + lastName + "'")
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("blockItems[0].oid");
+			long fetchedOid = from(response).getInt("blockItems[0].oid");
 			assertThat(fetchedOid, equalTo(oid));
 		}
 	}
@@ -173,7 +175,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	public void t_101_GET_byExistingId_shouldReturnCorrectStatusHeaderAndBody() throws Exception
 	{
 		String domainKey = ENTITY_VALID_domainKey;
-		int oid = this.createFreshEntityAndReturnOid(domainKey);
+		long oid = this.createFreshEntityAndReturnOid(domainKey);
 
 		given()
 			.spec(requestSpecBuilder.build())
@@ -193,7 +195,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	{
 		// Create an entity, to get a valid oid ...
 		String domainKey = ENTITY_NOT_EXISTING_domainKey;
-		int oid = this.createFreshEntityAndReturnOid(domainKey);
+		long oid = this.createFreshEntityAndReturnOid(domainKey);
 		// ... and delete it, to force "NOT FOUND"
 		this.deleteEntityByOidAndIgnoreStatus(oid);
 
@@ -323,7 +325,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	
 	@Test
 	public void t_202_POST_newValidDataWithAddresses_shouldReturnStatusCreatedWithLocation() throws Exception
-	{
+	{		
 		this.deleteEntityByIdentificationAndIgnoreStatus(ENTITY_VALID_domainKey);
 		
 		long costCenterId = this.createFreshCostCenterAndReturnOid("CO1234");
@@ -389,7 +391,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	@Test
 	public void t_200_POST_duplicateValidData_shouldReturnStatusConflict() throws Exception
 	{
-		int oid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
+		long oid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
 		String getUri = PATH_TO_RESOURCE + "/" + oid;
 		Response oldResponse = given().spec(requestSpecBuilder.build()).get(getUri);
 		
@@ -407,11 +409,11 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 			.log().all()
 			.statusCode(HttpURLConnection.HTTP_CONFLICT);
 	}
-	
+
 	@Test
 	public void t_300_PUT_validData_shouldReturnStatusNoContent() throws Exception
 	{
-		int oid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
+		long oid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
 		String getUri = PATH_TO_RESOURCE + "/" + oid;
 		Response oldResponse = given().spec(requestSpecBuilder.build()).get(getUri);
 		
@@ -454,11 +456,92 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 			.body(Employee_.DTO_NAME_lastName, is(newLastName))
 			.body(Employee_.DTO_NAME_numberOfChildren, is(newNumberOfChildren));
 	}
+	
+	@Test
+	public void t_300_PUT_costCenterChange_shouldReturnStatusNoContent() throws Exception
+	{
+		String domainKey = ENTITY_VALID_domainKey;
+		this.deleteEntityByIdentificationAndIgnoreStatus(domainKey);
+		
+		String costCenterId1 = "CO3331";
+		String costCenterId2 = "CO3332";
+		long c1 = createFreshCostCenterAndReturnOid(costCenterId1);
+		long c2 = createFreshCostCenterAndReturnOid(costCenterId2);
+		
+		System.err.println("######## c1 = " + costCenterId1 + " " + c1);
+		System.err.println("######## c2 = " + costCenterId2 + " " + c2);
+		
+		String jsonPayload1 = Json.createObjectBuilder()
+			.add(Employee_.DTO_NAME_costCenter, Json.createObjectBuilder()
+				.add(CostCenter_.DTO_NAME_oid, c1))
+			.add(Employee_.DTO_NAME_personnelNumber, domainKey)
+			.add(Employee_.DTO_NAME_lastName, "Date")
+			.add(Employee_.DTO_NAME_firstName, "John")
+			.add(Employee_.DTO_NAME_dateOfBirth, (new Date()).getTime() - 3600*24*365*40)
+			.add(Employee_.DTO_NAME_gender, EnumGender.M.toString())
+			.add(Employee_.DTO_NAME_dateOfEntry, (new Date()).getTime() - 3600*24*365*2)
+			.add(Employee_.DTO_NAME_nationalityCode, "DE")
+			.add(Employee_.DTO_NAME_countryOfBirth, "DE")
+			.add(Employee_.DTO_NAME_birthPlace, "Hof")
+			.add(Employee_.DTO_NAME_numberOfChildren, 2)
+			.add(Employee_.DTO_NAME_contactEmailAddress1, "john.date@mymail.com")
+			.add(Employee_.DTO_NAME_postalAddresses, Json.createArrayBuilder().add(Json.createObjectBuilder()		
+				.add(EmployeePostalAddress_.DTO_NAME_city, "city")
+				.add(EmployeePostalAddress_.DTO_NAME_countryCode, "DE")
+				.add(EmployeePostalAddress_.DTO_NAME_houseNumber, "1")
+				.add(EmployeePostalAddress_.DTO_NAME_postalCode, "12345")
+				.add(EmployeePostalAddress_.DTO_NAME_street, "street")
+				.add(EmployeePostalAddress_.DTO_NAME_ranking, 1)))
+			.build().toString();
+
+		Response postResponse =
+			given()
+				.spec(requestSpecBuilder.build())
+				.body(jsonPayload1)
+			.when()
+				.post(PATH_TO_RESOURCE)
+			.then()
+				.statusCode(HttpURLConnection.HTTP_CREATED)
+				.headers("location", containsString(PATH_TO_RESOURCE + "/"))
+				.and().extract().response();		
+		String uri = postResponse.getHeader("location");
+		
+		System.err.println("######## uri = " + uri);
+		
+		Response getResponse1 = given().spec(requestSpecBuilder.build()).get(uri);	
+		EmployeeWithPropertiesDTO employee1 = mapper.readValue(getResponse1.asString(), EmployeeWithPropertiesDTO.class);		
+		System.err.println("######## employee1 " + employee1.getOid() + " " + employee1.getCostCenter().getIdentification());
+		
+		CostCenterDTO costCenter2 = new CostCenterDTO();
+		costCenter2.setOid(c2);
+		employee1.setCostCenter(costCenter2);
+		
+		String jsonPayload2 = mapper.writeValueAsString(employee1);
+		System.err.println("######## " + jsonPayload2);
+		
+		ResponseSpecBuilder noContentInResponse = new ResponseSpecBuilder();
+		noContentInResponse.expectBody(is("")).expectContentType("");
+
+		given()
+			.spec(requestSpecBuilder.build())
+			.body(jsonPayload2)
+		.when()
+			.put(uri)
+		.then()
+			.statusCode(HttpURLConnection.HTTP_NO_CONTENT).spec(noContentInResponse.build());
+
+		Response getResponse2 = given().spec(requestSpecBuilder.build()).get(uri);	
+		EmployeeWithPropertiesDTO employee2 = mapper.readValue(getResponse2.asString(), EmployeeWithPropertiesDTO.class);		
+		System.err.println("######## employee2 " + employee2.getOid() + " " + employee2.getCostCenter().getIdentification());
+		
+		assertThat(employee2.getCostCenter().getOid(), equalTo(c2));
+		assertThat(employee2.getCostCenter().getIdentification(), equalTo(costCenterId2));
+	}
 
 	@Test
 	public void t_400_DELETE_existing_shouldReturnStatusNoContent() throws Exception
 	{
-		int newOid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
+		long newOid = this.createFreshEntityAndReturnOid(ENTITY_VALID_domainKey);
 
 		ResponseSpecBuilder noContentInResponse = new ResponseSpecBuilder();
 		noContentInResponse.expectBody(is("")).expectContentType("");
@@ -473,7 +556,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	{
 		// Create an entity, to get a valid oid ...
 		String domainKey = ENTITY_NOT_EXISTING_domainKey;
-		int oid = this.createFreshEntityAndReturnOid(domainKey);
+		long oid = this.createFreshEntityAndReturnOid(domainKey);
 		// ... and delete it, to force "NOT FOUND"
 		this.deleteEntityByOidAndIgnoreStatus(oid);
 
@@ -489,7 +572,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 
 	// ------------------------------------------------------------------------------------------
 
-	private void deleteEntityByOidAndIgnoreStatus(int oid)
+	private void deleteEntityByOidAndIgnoreStatus(long oid)
 	{
 		given().spec(requestSpecBuilder.build()).pathParam("id", oid).delete(PATH_TO_RESOURCE + "/{id}");
 	}
@@ -522,7 +605,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		this.deleteEntityByOidAndIgnoreStatus(oid);
 	}
 
-	private int createFreshEntityAndReturnOid(String domainKey)
+	private long createFreshEntityAndReturnOid(String domainKey)
 	{
 		this.deleteEntityByIdentificationAndIgnoreStatus(domainKey);
 		
@@ -552,16 +635,16 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 	    	throw new IllegalStateException("No location header in HTTP POST response!");
 	    }
 
-    	return Integer.parseInt(entityLocation.substring(
+    	return Long.parseLong(entityLocation.substring(
     		entityLocation.lastIndexOf("/") + 1, entityLocation.length()));
 	}
 
-	int createFreshEntityAndReturnOid()
+	long createFreshEntityAndReturnOid()
 	{
 		return this.createFreshEntityAndReturnOid("R" + RANDOM.nextInt(100000));
 	}
 	
-	private int createFreshCostCenterAndReturnOid(String domainKey)
+	private long createFreshCostCenterAndReturnOid(String domainKey)
 	{
 		TestPmsCoreApi_CostCenter costCenterTest = new TestPmsCoreApi_CostCenter();
 		try

@@ -99,7 +99,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	@Test
 	public void t_100_GET_byExistingId_shouldReturnCorrectStatusHeaderAndBody() throws Exception
 	{	
-		int oid = this.createFreshEntityAndReturnOid();
+		long oid = this.createFreshEntityAndReturnOid();
 		
 	    given()
 	        .spec(requestSpecBuilder.build())
@@ -120,7 +120,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	public void t_101_GET_byNonExistingId_shouldReturnStatusNotFound() throws Exception
 	{
 		// Create an entity, to get a valid oid ...
-	    int oid = this.createFreshEntityAndReturnOid();
+		long oid = this.createFreshEntityAndReturnOid();
 	    // ... and delete it, to force "NOT FOUND"
 	    this.deleteEntityByOidAndIgnoreStatus(oid);
 		
@@ -189,7 +189,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	public void t_113_GET_listAll_filters_shouldWork() throws Exception
 	{
 		// Create an entity, to get a valid oid ...
-		int oid = this.createFreshEntityAndReturnOid();
+		long oid = this.createFreshEntityAndReturnOid();
 		String getUri = PATH_TO_RESOURCE + "/" + oid;
 		Response response1 = given().spec(requestSpecBuilder.build()).get(getUri);
 		String identification = response1.path(CostCenter_.DTO_NAME_identification);
@@ -200,7 +200,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		        .spec(requestSpecBuilder.build())
 		        .queryParam("filter", CostCenter_.DTO_NAME_oid + " eq " + oid)
 				.get(PATH_TO_RESOURCE).asString();
-			int fetchedOid = from(response).getInt("[0]." + CostCenter_.DTO_NAME_oid);
+			long fetchedOid = from(response).getInt("[0]." + CostCenter_.DTO_NAME_oid);
 			assertThat(fetchedOid, equalTo(oid));
 		}
 		
@@ -396,7 +396,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	public void t_300_PUT_validData_shouldReturnStatusNoContent() throws Exception
 	{
 		final String domainKey = this.getRandomOid();
-	    int oid = this.createFreshEntityAndReturnOid(domainKey);
+	    long oid = this.createFreshEntityAndReturnOid(domainKey);
 	    
 	    String getUri = PATH_TO_RESOURCE + "/" + oid;
 	    Response oldResponse = given().spec(requestSpecBuilder.build()).get(getUri);
@@ -442,7 +442,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	@Test
 	public void t_300_PUT_orginalData_shouldReturnStatusNoContentAndNoVersionChange() throws Exception
 	{
-	    int oid = this.createFreshEntityAndReturnOid();
+		long oid = this.createFreshEntityAndReturnOid();
 	    String getUri = PATH_TO_RESOURCE + "/" + oid;
 	    Response oldResponse = given().spec(requestSpecBuilder.build()).get(getUri);
 	    int oldVersionNumber = oldResponse.path(CostCenter_.DTO_NAME_versionNumber);
@@ -485,7 +485,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	@Test
 	public void t_400_DELETE_existing_shouldReturnStatusNoContent() throws Exception
 	{
-		int newOid = this.createFreshEntityAndReturnOid();
+		long newOid = this.createFreshEntityAndReturnOid();
 	     
 	    ResponseSpecBuilder noContentInResponse = new ResponseSpecBuilder();
 	    noContentInResponse.expectBody(is("")).expectContentType("");
@@ -505,7 +505,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	public void t_401_DELETE_nonExisting_shouldReturnStatusNotFound() throws Exception
 	{
 		// Create an entity, to get a valid oid ...
-	    int oid = this.createFreshEntityAndReturnOid();
+		long oid = this.createFreshEntityAndReturnOid();
 	    // ... and delete it, to force "NOT FOUND"
 	    this.deleteEntityByOidAndIgnoreStatus(oid);
 	    
@@ -521,7 +521,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		
 	//------------------------------------------------------------------------------------------
 
-	private void deleteEntityByOidAndIgnoreStatus(int oid)
+	private void deleteEntityByOidAndIgnoreStatus(long oid)
 	{		
 	    given()
 	        .spec(requestSpecBuilder.build())
@@ -561,12 +561,12 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 		return "R" + RANDOM.nextInt(100000);
 	}
 	
-	int createFreshEntityAndReturnOid()
+	long createFreshEntityAndReturnOid()
 	{
 		return this.createFreshEntityAndReturnOid(this.getRandomOid());
 	}
 	
-	int createFreshEntityAndReturnOid(String domainKey)
+	long createFreshEntityAndReturnOid(String domainKey)
 	{	
 		this.deleteEntityByIdentificationAndIgnoreStatus(domainKey);
 		
@@ -588,7 +588,7 @@ public class TestPmsCoreApi_CostCenter extends TestPmsCoreApi
 	    	throw new IllegalStateException("No location header in HTTP POST response!");
 	    }
 
-    	return Integer.parseInt(entityLocation.substring(
+    	return Long.parseLong(entityLocation.substring(
     		entityLocation.lastIndexOf("/") + 1, entityLocation.length()));
 	}
 }

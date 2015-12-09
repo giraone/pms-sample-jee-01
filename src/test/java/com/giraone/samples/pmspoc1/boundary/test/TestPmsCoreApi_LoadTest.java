@@ -88,7 +88,8 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 		JsonObject costCenter = (JsonObject) allCostCenters.get(i % NR_OF_COST_CENTERS);
 		String personnelNumber = String.format("%05d", i);
 		EnumGender gender = SimpleTestDataGenerator.randomGender();
-		String country = SimpleTestDataGenerator.randomNationality();
+		String nationality = SimpleTestDataGenerator.randomNationalityCode();
+		String country = SimpleTestDataGenerator.randomCountryCode();
 		String firstName = SimpleTestDataGenerator.randomFirstName(gender);
 		String lastName = SimpleTestDataGenerator.randomLastName();
 		String email = firstName.toLowerCase() + "." + lastName.toLowerCase() + "@" + SimpleTestDataGenerator.randomMailProvider();
@@ -104,7 +105,7 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 			.add(Employee_.DTO_NAME_dateOfBirth, SimpleTestDataGenerator.randomDateOfBirth().getTime().getTime())
 			.add(Employee_.DTO_NAME_gender, gender.toString())
 			.add(Employee_.DTO_NAME_dateOfEntry, SimpleTestDataGenerator.randomDateOfEntry().getTime().getTime())
-			.add(Employee_.DTO_NAME_nationalityCode, country)
+			.add(Employee_.DTO_NAME_nationalityCode, nationality)
 			.add(Employee_.DTO_NAME_countryOfBirth, country)
 			.add(Employee_.DTO_NAME_contactEmailAddress1, email)
 			.add(Employee_.DTO_NAME_numberOfChildren, SimpleTestDataGenerator.random().nextInt(3))
