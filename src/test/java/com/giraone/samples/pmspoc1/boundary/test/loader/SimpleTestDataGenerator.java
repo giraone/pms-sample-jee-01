@@ -31,7 +31,8 @@ public class SimpleTestDataGenerator
 		"Forschung", "Software", "IT", "Qualitätskontrolle", "Logistik", "Ausbildung",
 		"Training", "Rechenzentrum", "Fuhrpark", "Service", "Datenschutz", "Security"  };
 	
-	static final String[] NATIONALITY = { "DEU", "DEU", "DEU", "DEU", "DEU", "ITA", "USA" };
+	static final String[] NATIONALITY2 = { "DE", "DE", "DE", "DE", "DE", "IT", "US" };
+	static final String[] COUNTRY3 = { "DEU", "DEU", "DEU", "DEU", "DEU", "ITA", "USA" };
 	
 	static final String[] MAIL_PROVIDER = { "gmail.com", "yahoo.com", "aol.com", "gmx.de", "web.de", "hotmail.com" };
 	
@@ -71,9 +72,14 @@ public class SimpleTestDataGenerator
 		return randomFromWeightedFile("nachnamen.txt");
 	}
 	
-	public static String randomNationality()
+	public static String randomNationalityCode()
 	{		
-		return NATIONALITY[RANDOM.nextInt(NATIONALITY.length)];
+		return NATIONALITY2[RANDOM.nextInt(NATIONALITY2.length)];
+	}
+	
+	public static String randomCountryCode()
+	{		
+		return COUNTRY3[RANDOM.nextInt(COUNTRY3.length)];
 	}
 	
 	public static Calendar randomDateOfBirth()
