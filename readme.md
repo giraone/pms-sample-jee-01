@@ -6,7 +6,7 @@ This project is indented to show the basic modules of a modern REST-based web ap
 - Employees
 - Postal addresses of an employee
 
-An employee entity is related to 0 or 1 cost center. An employee may have multiple postal addresses. Addresses cannot live without an employee and are deleted together with the employee.
+An employee entity is related to 0 or 1 cost center. An employee may have multiple postal addresses. Addresses cannot live without an employee and are deleted together with the employee. At the database level, the employee data is stored in two tables. One table holds the basic and important attributes in columns, the other tables is a key value store. See *Storage of data attributes* section below for more information.
 
 **Back-end:** This GitHub projects is the back-end application. It exposes a REST based API under `/api/costcenters` and `api/employees` with GET, POST, PUT and DELETE HTTP verbs. But it also hold a `webapp` folder, which comes with a release build of the **Front-end:** (see below), so it can be tested together with a browser front-end.
 
@@ -125,8 +125,8 @@ Field validation at the JPA level is based on [Java Bean Validation (JSR 303)](h
 To have the flexibility of schema-less noSQL database also in relational storage, we use two different storage approaches for attributes of entities.
 <ul>
 <li>The important attributes, like primary keys, foreign keys, important query parameters and import sort attributes are store as normal SQL columns.</li>
-<li>All other attributes are stored in key value tables. There is one key value table per entity. If the name of
-the table is Xyz, the key value table is named `MyWellDefined`, the key value table is named `MyWellDefinedProperty`. the key value table is type safety to some extend. It distinguishes between numeric data, temporal data (date/time) and string data, to use the databases sort and comparison operators for these data types. This approach is cloned from the approaches used by [Salesforce](https://developer.salesforce.com/page/Multi_Tenant_Architecture) and [Workday](http://www.dbms2.com/2010/08/22/workday-technology-stack/), but it is not yet such revolutionary - it uses a normal database layout for the key attributes and for relationships.
+<li>All other attributes are stored in ***key value tables***. There is one key value table per entity. If the name of
+the table is Xyz, the key value table is named `MyWellDefined`, the key value table is named `MyWellDefinedProperty`. the key value table is type safety to some extend. It distinguishes between numeric data, temporal data (date/time) and string data, to use the databases sort and comparison operators for these data types. This approach is cloned from the approaches used by [Salesforce](https://developer.salesforce.com/page/Multi_Tenant_Architecture) and [Workday](http://www.dbms2.com/2010/08/22/workday-technology-stack/), but it is not yet such revolutionary - it uses a normal database layout for the key attributes and for relationships. But generally this leads to a more stable data model without the need of schema changes, when new attributes are needed.
 </ul>
 Currently this approach is used only for the "Employee" entity.
 
@@ -177,7 +177,6 @@ This is not a good idea together with I18N! Best solution would be to separate t
 ## Future goals of the project ##
 
 - Storing **BLOBS**, e.g. an image for each *employee*.
-- Storing attributes of entities, which are not used in queries or joins in ***key value tables***, to get a more stable data model without the need of schema changes, when new attributes are needed.
 - Extension of the REST API by using **OData** `$expand`. E.g. an expand parameter for employee to show the cost center's description.
 - Additional relationship types for the entities.
 - Usage of **Swagger** (or **RAML**) for the REST API definition to have a **contract-first approach**.
