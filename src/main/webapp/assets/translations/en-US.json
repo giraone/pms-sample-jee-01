@@ -113,15 +113,22 @@
     "nationalityCode": {
       "label": "Nationality",
       "placeholder": "Select nationality",
-      "value_DEU": "Germany",
-      "value_AUT": "Austria",
-      "value_CHE": "Switzerland",
-      "value_ITA": "Italy",
-      "value_USA": "USA"
+      "value_DE": "Germany",
+      "value_AT": "Austria",
+      "value_CH": "Switzerland",
+      "value_IT": "Italy",
+      "value_US": "USA"
     },
     "costCenter": {
       "label": "Cost center",
       "placeholder": "Select an existing cost center"
+    },
+    "maritalStatus": {
+      "label": "Martital status",
+      "placeholder": "Select martital status",
+      "value_U": "unmarried",
+      "value_M": "married",
+      "value_W": "widowed"
     }
   }
 }

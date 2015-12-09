@@ -113,15 +113,22 @@
     "nationalityCode": {
       "label": "Nationalität",
       "placeholder": "Nationalität auswählen",
-      "value_DEU": "Deutschland",
-      "value_AUT": "Österreich",
-      "value_CHE": "Schweiz",
-      "value_ITA": "Italien",
-      "value_USA": "USA"
+      "value_DE": "Deutschland",
+      "value_AT": "Österreich",
+      "value_CH": "Schweiz",
+      "value_IT": "Italien",
+      "value_US": "USA"
     },
     "costCenter": {
       "label": "Kostenstelle",
       "placeholder": "Existierende Kostenstelle auswählen"
+    },
+    "maritalStatus": {
+      "label": "Familienstand",
+      "placeholder": "Familienstand auswählen",
+      "value_U": "ledig",
+      "value_M": "verheirat",
+      "value_W": "verwitwet"
     }
   }
 }
