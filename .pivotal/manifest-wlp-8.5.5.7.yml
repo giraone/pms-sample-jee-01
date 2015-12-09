@@ -1,0 +1,12 @@
+applications:
+- buildpack: https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
+  env:
+    IBM_JVM_LICENSE: L-JWOD-9SYNCP 
+    IBM_LIBERTY_LICENSE: L-MCAO-9SYMVC
+  memory: 512M
+  instances: 1
+  name: pmssamplejee1
+  host: pmssamplejee1
+  path: target/PmsSample.war
+  services:
+  - pmssamplejee1sqldb
