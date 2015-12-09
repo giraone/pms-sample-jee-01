@@ -26,7 +26,7 @@
 
 	<jdbcDriver id='db2-driver' libraryRef='db2-library'>  
 		<library id='db2-library'>
-			<fileset dir='${server.config.dir}/lib' id='db2-fileset' includes='db2jcc4.jar db2jcc_license_cu.jar'/>   
+			<fileset dir='${server.config.dir}/lib' id='db2-fileset' includes='db2jcc4.jar'/>   
 		</library>
 	</jdbcDriver>
 </server>
