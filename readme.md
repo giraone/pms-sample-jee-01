@@ -12,9 +12,10 @@ An employee entity is related to 0 or 1 cost center. An employee may have multip
 
 **Front-end:** The front-end is a separate [GitHub project giraone/pms-sample-jee-01-ajs1](https://github.com/giraone/pms-sample-jee-01-ajs1)
 
-The complete solution is hosted on
+The solution is hosted currently on 3 PaaS provider sites:
 
 - [IBM's BLUEMIX PaaS](https://www.bluemix.net) under the URL [http://pmssamplejee1.eu-gb.mybluemix.net/].
+- [Pivotal's Web Services PaaS](https://run.pivotal.io) under the URL [http://pmssamplejee1.cfapps.io/].
 - [RedHat's OPENSHIFT PaaS](https://www.openshift.com) under the URL [http://pmssamplejee01-giraone.rhcloud.com/PmsSample] - Not the latest version!
 
 ## Goals of this project ##
@@ -41,12 +42,12 @@ The complete solution is hosted on
 - A relational database supported by the JPA implementation. For development *Apache Derby Network Server 10.X* and *PostgresQL 9.4* was used. Others databases may work also with slight adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml).
 - In the hosting environment the following components are used:
 
-|               | OPENSHIFT           | BLUEMIX                       |
-| ------------- |:-------------------:| -----------------------------:|
-| JEE container | JBoss Wildfly 9.0.1 | IBM WebSphere Liberty 8.5.5.7 |
-| Database      | PostgreSQL 9.2      | IBM DB2                       |
-| JPA provider  | Hibernate           | EclipseLink                   |
-| JAX-RS        | Resteasy            | IBM?                          |
+|               | OPENSHIFT           | BLUEMIX                       | PIVOTAL                       |
+|:--------------|:-------------------:|:-----------------------------:|------------------------------:|
+| JEE container | JBoss Wildfly 9.0.1 | IBM WebSphere Liberty 8.5.5.7 | IBM WebSphere Liberty 8.5.5.7 |
+| Database      | PostgreSQL 9.2      | IBM DB2                       | ElephantSQL (PostgreSQL 9.4.4)|
+| JPA provider  | Hibernate           | EclipseLink                   | EclipseLink                   |
+| JAX-RS        | Resteasy            | IBM?                          | IBM?                          |
   
 - In local development environments the code was tested with:
   - JEE container:
