@@ -6,7 +6,7 @@ import org.mapstruct.factory.Mappers;
 
 import com.giraone.samples.pmspoc1.entity.CostCenter;
 
-@Mapper(componentModel = "cdi")
+@Mapper
 public interface CostCenterMapper
 {
 	CostCenterMapper INSTANCE = Mappers.getMapper(CostCenterMapper.class);

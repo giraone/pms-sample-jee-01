@@ -20,7 +20,6 @@ public class Employee_ extends AbstractEntity_
 	public static final String SQL_NAME = "Employee";
 	
 	public static final String SQL_NAME_PROPERTIES = "EmployeeProperties";
-	public static final String SQL_NAME_PROPERTIES_employee = "employee";
 	
 	public static final String SQL_NAME_oid = "oid";
 	public static final String SQL_NAME_personnelNumber = "personnelNumber";

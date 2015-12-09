@@ -19,6 +19,8 @@ public class CostCenterDTO implements Serializable
 
 	public CostCenterDTO()
 	{
+		this.oid = 0L;				// A value of 0L indicates: not from the database!
+		this.versionNumber = -1;	// A value of -1 indicates: not from the database!
 	}
 
 	public CostCenterDTO(final CostCenter entity)

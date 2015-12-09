@@ -24,10 +24,13 @@ public class EmployeeDTO implements Serializable
 	
 	public EmployeeDTO()
 	{
+		this.oid = 0L;				// A value of 0L indicates: not from the database!
+		this.versionNumber = -1;	// A value of -1 indicates: not from the database!
 	}
 
 	public EmployeeDTO(final Employee entity)
 	{
+		this();
 		if (entity != null)
 		{
 			EmployeeMapper.INSTANCE.updateDtoFromEntity(entity, this);

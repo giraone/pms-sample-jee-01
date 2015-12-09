@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -14,7 +13,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.apache.olingo.odata2.api.edm.Edm;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.exception.ODataMessageException;
@@ -34,10 +36,9 @@ import org.apache.olingo.odata2.api.uri.expression.UnaryOperator;
 
 import com.giraone.samples.common.StringUtil;
 
-@Stateless
 public class ODataToJpaQueryBuilder<T>
 {
-	public static final String LOG_TAG = "OData";
+	public static final Marker LOG_TAG = MarkerManager.getMarker("OData");
 	
 	// TODO: Logger is not always injected on problems with CDI!
 	@Inject
@@ -48,6 +49,7 @@ public class ODataToJpaQueryBuilder<T>
 
 	public ODataToJpaQueryBuilder()
 	{
+		logger = LogManager.getLogger(ODataToJpaQueryBuilder.class);
 	}
 
 	public void setCriteriaTable(CriteriaBuilder cb, Root<T> table)
@@ -108,9 +110,9 @@ public class ODataToJpaQueryBuilder<T>
 			return;
 		}
 
-		Edm edm = null;
-		EdmEntityType edmType = null;
-		OrderByExpression orderByExpression;
+		final Edm edm = null;
+		final EdmEntityType edmType = null;
+		final OrderByExpression orderByExpression;
 		try
 		{
 			orderByExpression = UriParser.parseOrderBy(edm, edmType, oDataOrder);
@@ -120,16 +122,23 @@ public class ODataToJpaQueryBuilder<T>
 			throw new IllegalArgumentException("Cannot parse OData order \"" + oDataOrder + "\"", e);
 		}
 
-		ArrayList<Order> orderList = new ArrayList<Order>();
+		final ArrayList<Order> orderList = new ArrayList<Order>();
 		for (OrderExpression orderExpression : orderByExpression.getOrders())
 		{
-			CommonExpression commonExpression = orderExpression.getExpression();
+			final CommonExpression commonExpression = orderExpression.getExpression();
 			if (commonExpression == null || !(commonExpression instanceof PropertyExpression))
 				continue;
-			PropertyExpression propertyExpression = (PropertyExpression) commonExpression;
-			String propertyName = propertyExpression.getUriLiteral();
-			orderList.add(SortOrder.desc == orderExpression.getSortOrder() ? cb.desc(this.table.get(propertyName))
-				: cb.asc(this.table.get(propertyName)));
+			final PropertyExpression propertyExpression = (PropertyExpression) commonExpression;
+			final String propertyName = propertyExpression.getUriLiteral();
+			@SuppressWarnings("rawtypes")
+			final Path propertyPath = this.getPropertyPathByDotName(propertyName);
+			if (propertyPath != null)
+			{
+				final Order order = SortOrder.desc == orderExpression.getSortOrder() ? cb.desc(propertyPath) : cb.asc(propertyPath);
+				if (logger != null && logger.isDebugEnabled())
+					logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.parseOrderExpression order=" + order);			
+				orderList.add(order);
+			}
 		}
 		select.orderBy(orderList);
 		return;
@@ -153,9 +162,9 @@ public class ODataToJpaQueryBuilder<T>
 
 	private Predicate processFilterExpression(BinaryExpression binaryExpression)
 	{
-		CommonExpression leftOperand = binaryExpression.getLeftOperand();
-		CommonExpression rightOperand = binaryExpression.getRightOperand();
-		BinaryOperator binaryOperator = binaryExpression.getOperator();
+		final CommonExpression leftOperand = binaryExpression.getLeftOperand();
+		final CommonExpression rightOperand = binaryExpression.getRightOperand();
+		final BinaryOperator binaryOperator = binaryExpression.getOperator();
 
 		if (logger != null && logger.isDebugEnabled())
 			logger.debug(LOG_TAG + 
@@ -173,7 +182,7 @@ public class ODataToJpaQueryBuilder<T>
 		}
 		else
 		{
-			MethodOrPropertyExpression methodOrPropertyExpression = this.getLeftOperand(leftOperand);
+			final MethodOrPropertyExpression methodOrPropertyExpression = this.getLeftOperand(leftOperand);
 			String leftPropertyName, methodName = null;
 			Object rightValue = null; boolean rightMethodBoolean = true;
 			
@@ -193,22 +202,23 @@ public class ODataToJpaQueryBuilder<T>
 				rightValue = this.getValue(rightLiteralExpression.getUriLiteral());
 			}
 					
-			// TODO: Very ugly and not fully correct, but type safe (hs).
+			// TODO: A bit ugly and not fully correct, but type safe (hs).
 			Path<String> propertyPathString = null;
 			Path<Date> propertyPathDate = null;
 			Path<Integer> propertyPathInteger = null;
-			Path<Object> p = this.table.get(leftPropertyName);
+			@SuppressWarnings("rawtypes")
+			final Path p = this.getPropertyPathByDotName(leftPropertyName);
 			if (p.getJavaType() == Calendar.class)
 			{
-				propertyPathDate = this.table.get(leftPropertyName);
+				propertyPathDate = p;
 			}
 			else if (rightValue instanceof Integer)
 			{
-				propertyPathInteger = this.table.get(leftPropertyName);
+				propertyPathInteger = p;
 			}
 			else
 			{
-				propertyPathString = this.table.get(leftPropertyName);
+				propertyPathString = p;
 			}
 			
 			switch (binaryOperator)
@@ -448,5 +458,38 @@ public class ODataToJpaQueryBuilder<T>
 			else
 				return this.propertyExpression.getUriLiteral();
 		}
+	}
+	
+	private Path getPropertyPathByDotName(String propertyName)
+	{
+		if (logger != null && logger.isDebugEnabled())
+		{
+			logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.getPropertyPathByDotName \"" + propertyName + "\"");
+		}
+		
+		Path<Object> ret = null;
+		int i = 0;
+		while (propertyName.length() > 0 && ((i = propertyName.indexOf('.')) > 0))
+		{
+			final String nextProperty = propertyName.substring(0, i);
+			if (logger != null && logger.isDebugEnabled())
+			{
+				logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.getPropertyPathByDotName nextProperty=\"" + nextProperty + "\"");
+			}
+			if (ret == null)
+			{
+				ret = this.table.get(nextProperty);
+			}
+			else
+			{
+				ret = ret.get(nextProperty);
+			}
+			propertyName = propertyName.substring(i+1);
+		}
+		if (logger != null && logger.isDebugEnabled())
+		{
+			logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.getPropertyPathByDotName ret=" + ret);
+		}
+		return ret == null ? this.table.get(propertyName) : ret.get(propertyName);
 	}
 }

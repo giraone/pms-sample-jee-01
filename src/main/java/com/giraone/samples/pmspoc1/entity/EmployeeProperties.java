@@ -18,7 +18,7 @@ import com.giraone.samples.common.entity.EntityKeyValueStore;
  */
 @Entity
 @Table(name = Employee_.SQL_NAME_PROPERTIES)
-public class EmployeeProperties extends EntityKeyValueStore implements Serializable
+public class EmployeeProperties extends EntityKeyValueStore<Employee> implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -29,7 +29,7 @@ public class EmployeeProperties extends EntityKeyValueStore implements Serializa
 	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = Employee.class)
 	@JoinColumn(name = DEFAULT_SQL_PARENT_ID_NAME, nullable = false)
-	private Employee employee;
+	private Employee parent;
 		
 	public EmployeeProperties()
 	{
@@ -47,13 +47,13 @@ public class EmployeeProperties extends EntityKeyValueStore implements Serializa
 	}
 	
 	@ManyToOne()
-	public Employee getEmployee()
+	public Employee getParent()
 	{
-		return employee;
+		return parent;
 	}
 
-	public void setEmployee(Employee employee)
+	public void setParent(Employee parent)
 	{
-		this.employee = employee;
+		this.parent = parent;
 	}	
 }

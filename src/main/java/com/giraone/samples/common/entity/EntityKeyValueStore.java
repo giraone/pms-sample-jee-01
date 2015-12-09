@@ -20,17 +20,21 @@ import com.giraone.samples.common.entity.enums.EnumValueType;
 import com.giraone.samples.common.entity.enums.StringEnumeration;
 
 /**
- * Am abstract JPA entity to store properties of an entity (or resource in REST terms) not in
+ * An abstract JPA entity to store properties of an entity (or resource in REST terms) not in
  * columns of the corresponding SQL table, but in key value rows of an associated key value table.
  */
 @MappedSuperclass
-public abstract class EntityKeyValueStore
+public abstract class EntityKeyValueStore<T>
 {
+	public static final String DEFAULT_SQL_PARENT_NAME = "parent";
 	public static final String DEFAULT_SQL_PARENT_ID_NAME = "parentId";
 	
 	private static final Long BOOLEAN_FALSE = new Long(0);
 	private static final Long BOOLEAN_TRUE = new Long(1);
 	
+	public abstract void setParent(T parent);
+	public abstract T getParent();
+
 	/** Name of the key/value entry */
 	@Column(name = EntityKeyValueStore_.SQL_NAME_name, nullable = false, length = 128)
 	@Size(max = 64)
@@ -62,6 +66,13 @@ public abstract class EntityKeyValueStore
 	@Column(name = EntityKeyValueStore_.SQL_NAME_typeModifier, nullable = true, length = 256)
 	@Size(max = 256)
 	protected String typeModifier;
+
+	
+	public EntityKeyValueStore()
+	{
+		super();
+	}
+	
 	
 	public String getName()
 	{

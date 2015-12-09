@@ -29,6 +29,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.giraone.samples.common.entity.EntityKeyValueStore;
 import com.giraone.samples.common.entity.EntityWithProperties;
 import com.giraone.samples.common.entity.enums.StringEnumeration;
 import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
@@ -51,7 +52,7 @@ import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
 @Entity
 @Table(name = Employee_.SQL_NAME)
 // @EntityListeners(MyEntityListener.class) // DEVELOPMENT-HINT: Use this for debugging JPA
-public class Employee extends EntityWithProperties<EmployeeProperties> implements Serializable
+public class Employee extends EntityWithProperties<Employee, EmployeeProperties> implements Serializable
 {
 	/** Default value included to remove warning. **/
 	private static final long serialVersionUID = 1L;
@@ -116,7 +117,7 @@ public class Employee extends EntityWithProperties<EmployeeProperties> implement
 	// (2) Cascade type is ALL and orphanRemoval = true.
 	//     Properties may be given to create operations together with the employee data (CascadeType.PERSIST)
     //     If the employee is removed, the properties are removed too (CascadeType.REMOVE)
-	@OneToMany(mappedBy = Employee_.SQL_NAME_PROPERTIES_employee, fetch = FetchType.LAZY,
+	@OneToMany(mappedBy = EntityKeyValueStore.DEFAULT_SQL_PARENT_NAME, fetch = FetchType.LAZY,
 		orphanRemoval = true, cascade = CascadeType.ALL)
 	@MapKey(name = "name")
 	private Map<String, EmployeeProperties> properties;
@@ -124,7 +125,7 @@ public class Employee extends EntityWithProperties<EmployeeProperties> implement
 	
 	public Employee()
 	{
-		super(EmployeeProperties.class);
+		super(Employee.class, EmployeeProperties.class);
 	}
 
 	public long getOid()
@@ -353,11 +354,11 @@ public class Employee extends EntityWithProperties<EmployeeProperties> implement
 	//-- EmployeeProperties START ---------------------------------------------------------
 
 	@Override
-	public void setParent(EmployeeProperties properties)
+	public void defineParentInProperty(EmployeeProperties property)
 	{
-		properties.setEmployee(this);	
+		property.setParent(this);
 	}
-
+	
 	@Override
 	public Map<String, EmployeeProperties> getProperties()
 	{		
@@ -373,7 +374,7 @@ public class Employee extends EntityWithProperties<EmployeeProperties> implement
 	{
 		for (EmployeeProperties property : properties.values())
 		{
-			property.setEmployee(this);
+			property.setParent(this);
 		}
 		this.properties = properties;
 	}

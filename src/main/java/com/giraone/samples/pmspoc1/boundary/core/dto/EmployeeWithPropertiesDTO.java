@@ -34,6 +34,7 @@ public class EmployeeWithPropertiesDTO extends EmployeeDTO
 	
 	public EmployeeWithPropertiesDTO()
 	{
+		super();
 	}
 
 	public EmployeeWithPropertiesDTO(final Employee entity)
@@ -63,7 +64,7 @@ public class EmployeeWithPropertiesDTO extends EmployeeDTO
 			for (EmployeePostalAddressDTO p : this.getPostalAddresses())
 			{
 				EmployeePostalAddress employeePostalAddress = new EmployeePostalAddress();
-				EmployeeMapper.INSTANCE.updateEntityFromDto(p, employeePostalAddress);
+				EmployeePostalAddressMapper.INSTANCE.updateEntityFromDto(p, employeePostalAddress);
 				postalAddressesList.add(employeePostalAddress);
 			}
 			entity.setPostalAddresses(postalAddressesList);

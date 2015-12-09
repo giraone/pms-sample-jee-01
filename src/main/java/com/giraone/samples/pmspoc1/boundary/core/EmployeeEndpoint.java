@@ -40,10 +40,12 @@ import com.giraone.samples.common.entity.UserTransactionConstraintViolationExcep
 import com.giraone.samples.common.entity.UserTransactionException;
 import com.giraone.samples.common.entity.UserTransactional;
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
+import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeePostalAddressDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeSummaryDTO;
 import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeWithPropertiesDTO;
+import com.giraone.samples.pmspoc1.entity.CostCenter;
 import com.giraone.samples.pmspoc1.entity.Employee;
 import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress;
 import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress_;
@@ -230,6 +232,13 @@ public class EmployeeEndpoint extends BaseEndpoint
 	public Response create(EmployeeWithPropertiesDTO dto)
 	{  
 		final Employee entity = dto.entityFromDTO();
+		
+		// If cost center is given without versionNumber, it cannot be updated! It is fetched fresh from the database.
+		final CostCenter costCenter = entity.getCostCenter();
+		if (costCenter != null && costCenter.getOid() > 0 && costCenter.getVersionNumber() < 0)
+		{
+			entity.setCostCenter(fetchCostCenterOfEmployeeByOid(costCenter.getOid(), "personnelNumber" + dto.getPersonnelNumber()));
+		}
 		em.persist(entity);
 		
 		return Response
@@ -260,12 +269,20 @@ public class EmployeeEndpoint extends BaseEndpoint
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		
+		// If cost center is given regardless of the version number, it cannot be updated! It is always fetched fresh from the database.
+		final CostCenterDTO costCenterDto = dto.getCostCenter();
+		if (costCenterDto != null && costCenterDto.getOid() > 0)
+		{
+			entity.setCostCenter(fetchCostCenterOfEmployeeByOid(costCenterDto.getOid(), "employeeId=" + employeeId));
+		}
+				
 		// Now we have to fetch the properties by accessing at least one fake key (this is a bit weird in JPA!)
 		entity.getProperties().get("");
 		// Now we have to fetch the postal addresses
 		entity.getPostalAddresses().size();
-
+		// And now we merge changed data from the DTO
 		entity = dto.mergeFromDTO(entity, em);
+		// and persist everything
 		entity = em.merge(entity);
 		
 		return Response.noContent().build();
@@ -459,5 +476,16 @@ public class EmployeeEndpoint extends BaseEndpoint
     		return Response.status(HTTP_UNPROCESSABLE).build();
     	else
     		return Response.status(Status.CONFLICT).build();
+    }
+    
+    private CostCenter fetchCostCenterOfEmployeeByOid(long costCenterOid, String employeeContext)
+    {
+    	final CostCenter costCenter = em.find(CostCenter.class, costCenterOid);
+		if (costCenter == null)
+		{
+			logger.warn(LOG_TAG, "INVALID costCenterOid=" + costCenterOid + " for " + employeeContext);
+			throw new IllegalArgumentException("No costcenter with oid=" + costCenterOid + " found!");
+		}
+		return costCenter;
     }
 }

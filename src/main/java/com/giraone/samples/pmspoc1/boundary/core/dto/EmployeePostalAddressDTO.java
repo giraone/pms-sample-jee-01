@@ -26,6 +26,8 @@ public class EmployeePostalAddressDTO implements Serializable
 
 	public EmployeePostalAddressDTO()
 	{
+		this.oid = 0L;				// A value of 0L indicates: not from the database!
+		this.versionNumber = -1;	// A value of -1 indicates: not from the database!
 	}
 
 	public EmployeePostalAddressDTO(final EmployeePostalAddress entity)
@@ -45,7 +47,7 @@ public class EmployeePostalAddressDTO implements Serializable
 
 	public EmployeePostalAddress mergeFromDTO(EmployeePostalAddress entity, EntityManager em)
 	{
-		EmployeeMapper.INSTANCE.updateEntityFromDto(this, entity);
+		EmployeePostalAddressMapper.INSTANCE.updateEntityFromDto(this, entity);
 		entity = em.merge(entity);
 		return entity;
 	}

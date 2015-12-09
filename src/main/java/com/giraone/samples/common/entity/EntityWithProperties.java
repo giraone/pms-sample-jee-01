@@ -8,26 +8,28 @@ import java.util.Map;
 /**
  * An abstract generic class to be used as the base class for JPA entity classes that
  * want to store some of their attributes not as columns in SQL, but in key value tables.
- * @param <T>
+ * @param <S>	The JPA parent class that wants to store key value attributes.
+ * @param <T>	The JPA key value store class, where the attributes are stored.
  */
-public abstract class EntityWithProperties<T extends EntityKeyValueStore>
+public abstract class EntityWithProperties<S, T extends EntityKeyValueStore<S>>
 {
-	Class<T> cls;
+	Class<S> parentClass;
+	Class<T> keyValueClass;
 	
-	public abstract void setParent(T properties);
+	public abstract void defineParentInProperty(T property);
 	public abstract Map<String, T> getProperties();
 	public abstract void setProperties(Map<String, T> properties);
 	
-	public EntityWithProperties(Class<T> cls)
+	public EntityWithProperties(Class<S> parentClass, Class<T> keyValueClass)
 	{
-		this.cls = cls;
+		this.keyValueClass = keyValueClass;
 	}
 	
 	public T createProperties()
 	{
 		try
 		{
-			return (T) this.cls.newInstance();
+			return (T) this.keyValueClass.newInstance();
 		}
 		catch (Exception e)
 		{			
@@ -48,7 +50,7 @@ public abstract class EntityWithProperties<T extends EntityKeyValueStore>
 		if ((property = properties.get(key)) == null)
 		{			
 			property = this.createProperties();			
-			this.setParent(property);
+			this.defineParentInProperty(property);
 			properties.put(key, property);
 			//System.err.println("createAndSetProperty create " + key + " " + property.type + " " + value);
 		}
@@ -172,7 +174,7 @@ public abstract class EntityWithProperties<T extends EntityKeyValueStore>
 		}
 	}
 	
-	public void addPropertyValues(Map<String, Object> values)
+	public void addPropertiesFromMap(Map<String, Object> values)
 	{
 		for (Iterator<String> iter = values.keySet().iterator(); iter.hasNext(); )
 		{
@@ -182,9 +184,9 @@ public abstract class EntityWithProperties<T extends EntityKeyValueStore>
 		}		
 	}
 	
-	public void setPropertyValues(Map<String, Object> values)
+	public void replacePropertiesFromMap(Map<String, Object> values)
 	{
 		this.getProperties().clear();
-		this.addPropertyValues(values);
+		this.addPropertiesFromMap(values);
 	}
 }
