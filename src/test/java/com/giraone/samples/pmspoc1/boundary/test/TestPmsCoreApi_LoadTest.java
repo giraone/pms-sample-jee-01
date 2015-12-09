@@ -108,6 +108,7 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 			.add(Employee_.DTO_NAME_nationalityCode, nationality)
 			.add(Employee_.DTO_NAME_countryOfBirth, country)
 			.add(Employee_.DTO_NAME_contactEmailAddress1, email)
+			.add(Employee_.DTO_NAME_maritalStatus, SimpleTestDataGenerator.randomMaritalStatus())
 			.add(Employee_.DTO_NAME_numberOfChildren, SimpleTestDataGenerator.random().nextInt(3))
 			.add(Employee_.DTO_NAME_postalAddresses, Json.createArrayBuilder().add(Json.createObjectBuilder()
 		    	.add(EmployeePostalAddress_.DTO_NAME_ranking, 1)
@@ -119,6 +120,8 @@ public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 		    ))
 		    .build()
 		    .toString();
+		
+		System.err.println(jsonPayload);
 		
 		given()
 	        .spec(requestSpecBuilder.build())

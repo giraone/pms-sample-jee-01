@@ -36,6 +36,10 @@ public class SimpleTestDataGenerator
 	
 	static final String[] MAIL_PROVIDER = { "gmail.com", "yahoo.com", "aol.com", "gmx.de", "web.de", "hotmail.com" };
 	
+	static final String[] MARITAL_STATUS = { "U", "U", "U", "M", "M", "M", "M", "W" };
+	
+	
+	
 	static final HashSet<String> LAST_NAME_PREFIXES = new HashSet<String>();
 	
 	static final HashMap<String, ArrayList<String>> RANDOM_FROM_FILE = new HashMap<String, ArrayList<String>>();
@@ -60,6 +64,11 @@ public class SimpleTestDataGenerator
 	public static EnumGender randomGender()
 	{
 		return RANDOM.nextBoolean() ? EnumGender.M : EnumGender.F;
+	}
+	
+	public static String randomMaritalStatus()
+	{		
+		return MARITAL_STATUS[RANDOM.nextInt(MARITAL_STATUS.length)];
 	}
 	
 	public static String randomFirstName(EnumGender geschlecht)
