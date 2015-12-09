@@ -43,7 +43,7 @@ The solution is hosted currently on 3 PaaS provider sites:
 - In the hosting environment the following components are used:
 
 |               | OPENSHIFT           | BLUEMIX                       | PIVOTAL                       |
-|:--------------|:-------------------:|:-----------------------------:|------------------------------:|
+|:--------------|:-------------------:|:-----------------------------:|:-----------------------------:|
 | JEE container | JBoss Wildfly 9.0.1 | IBM WebSphere Liberty 8.5.5.7 | IBM WebSphere Liberty 8.5.5.7 |
 | Database      | PostgreSQL 9.2      | IBM DB2                       | ElephantSQL (PostgreSQL 9.4.4)|
 | JPA provider  | Hibernate           | EclipseLink                   | EclipseLink                   |
