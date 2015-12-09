@@ -43,7 +43,6 @@ public interface EmployeeMapper
 
 	@Mappings({ @Mapping(target = "properties", ignore = true), // Ignore warning from properties member
 		@Mapping(target = "postalAddresses", ignore = true),    // Is performed manually
-		@Mapping(target = "costCenter", ignore = true),         // Is performed manually
 	})
 	void updateEntityFromDto(EmployeeWithPropertiesDTO dto, @MappingTarget Employee entity);
 }
