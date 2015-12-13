@@ -17,17 +17,17 @@
 	</organization>
 
 	<properties>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jackson.version>2.6.3</jackson.version>
 		<olingo.version>2.0.5</olingo.version>
 		<log4j.version>2.4.1</log4j.version>
 		<org.mapstruct.version>1.0.0.Final</org.mapstruct.version>
 	</properties>
-	
-	<!-- Because of Olingo SNAPSHOT -->
-	<repositories>		
+		
+	<repositories>
+		<!-- Because of Olingo SNAPSHOT -->		
 	    <repository>
 	      <id>apache.org</id>
 	      <url>http://repo.maven.apache.org/maven2/</url>
