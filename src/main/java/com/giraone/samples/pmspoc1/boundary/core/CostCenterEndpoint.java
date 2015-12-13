@@ -54,7 +54,7 @@ public class CostCenterEndpoint extends BaseEndpoint
 
     @GET
     @Path("/{id:[0-9][0-9]*}")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response findById(@PathParam("id") long id)
     {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -86,7 +86,7 @@ public class CostCenterEndpoint extends BaseEndpoint
      */
     @GET
     @Path("/id-{identification:[0-9a-zA-Z][0-9a-zA-Z]*}")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response findByIdentification(@PathParam("identification") String identification)
     {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -119,7 +119,7 @@ public class CostCenterEndpoint extends BaseEndpoint
      * @return List of {link @CostCenterDTO} objects.
      */
     @GET
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public List<CostCenterDTO> listAll(
     	@QueryParam("filter") @DefaultValue("") String filter,
 		@QueryParam("orderby") @DefaultValue("") String orderby,
@@ -177,7 +177,7 @@ public class CostCenterEndpoint extends BaseEndpoint
 
         if (id != dto.getOid())
         {
-        	logger.warn(LOG_TAG, "update CONFLICT id1=" + id + ", id2=" + dto.getOid());
+        	logger.warn(LOG_TAG, "update: costCenter CONFLICT put.oid=" + id + " does not match dto.oid=" + dto.getOid());
             return Response.status(Status.CONFLICT).entity(dto).build();
         }
 
@@ -207,7 +207,7 @@ public class CostCenterEndpoint extends BaseEndpoint
     
     @GET
     @Path("/summary")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response summary()
     {
     	CriteriaBuilder cb = em.getCriteriaBuilder();

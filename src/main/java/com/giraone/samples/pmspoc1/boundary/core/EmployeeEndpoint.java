@@ -34,6 +34,7 @@ import javax.ws.rs.core.UriBuilder;
 import com.giraone.samples.common.StringUtil;
 import com.giraone.samples.common.boundary.BaseEndpoint;
 import com.giraone.samples.common.boundary.PagingBlock;
+import com.giraone.samples.common.boundary.model.ErrorInformation;
 import com.giraone.samples.common.boundary.odata.ODataToJpaQueryBuilder;
 import com.giraone.samples.common.entity.PersistenceUtil;
 import com.giraone.samples.common.entity.UserTransactionConstraintViolationException;
@@ -69,7 +70,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	 */
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces("application/json; charset=UTF-8")
 	public Response findById(@PathParam("employeeId") long employeeId)
 	{		
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -112,7 +113,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	 */
     @GET
     @Path("/pnr-{personnelNumber:[0-9a-zA-Z][0-9a-zA-Z]*}")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response findByPersonnelNumber(@PathParam("personnelNumber") String personnelNumber)
     {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -154,7 +155,7 @@ public class EmployeeEndpoint extends BaseEndpoint
      * @return a {@link PagingBlock} object with {@link EmployeeDTO} object.
      */
 	@GET
-	@Produces("application/json")
+	@Produces("application/json; charset=UTF-8")
 	public Response listBlock(
 		@QueryParam("filter") @DefaultValue("") String filter,
 		@QueryParam("orderby") @DefaultValue("") String orderby,
@@ -231,7 +232,19 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@UserTransactional
 	public Response create(EmployeeWithPropertiesDTO dto)
 	{  
-		final Employee entity = dto.entityFromDTO();
+		final Employee entity;
+		try
+		{
+			entity = dto.entityFromDTO();
+		}
+		catch (IllegalArgumentException iae)
+		{
+			logger.warn(LOG_TAG, "create: invalid data for employee with personnelNumber=" + dto.getPersonnelNumber(), iae);
+			ErrorInformation errorInformation = new ErrorInformation();
+			errorInformation.setCode(ErrorInformation.FIELD_VALIDATION_FAILED);
+			errorInformation.setMessage("invalid arguments");
+			return Response.status(Status.BAD_REQUEST).entity(errorInformation).build();
+		}
 		
 		// If cost center is given with an oid, it is not updated! It is fetched always fresh from the database.
 		final CostCenterDTO costCenterDto = dto.getCostCenter();
@@ -259,8 +272,10 @@ public class EmployeeEndpoint extends BaseEndpoint
 
 		if (employeeId != dto.getOid())
 		{
-			logger.warn(LOG_TAG, "update CONFLICT employeeId=" + employeeId + ", employeeId2=" + dto.getOid());
-			return Response.status(Status.CONFLICT).entity(dto).build();
+			logger.warn(LOG_TAG, "update: CONFLICT for employee with put.oid=" + employeeId + " not matching dto.oid=" + dto.getOid());
+			ErrorInformation errorInformation = new ErrorInformation();
+			errorInformation.setMessage("CONFLICT for employee with put.oid=" + employeeId + " not matching dto.oid=" + dto.getOid());
+			return Response.status(Status.CONFLICT).entity(errorInformation).build();
 		}
 
 		Employee entity = em.find(Employee.class, employeeId);
@@ -277,7 +292,18 @@ public class EmployeeEndpoint extends BaseEndpoint
 		CostCenter existingCostCenter = entity.getCostCenter();
 		
 		// And now we merge changed data from the DTO (no cost center, no postal addresses)
-		entity = dto.mergeFromDTO(entity, em);
+		try
+		{
+			entity = dto.mergeFromDTO(entity, em);
+		}
+		catch (IllegalArgumentException iae)
+		{
+			logger.warn(LOG_TAG, "update: invalid data for employee with oid=" + employeeId, iae);
+			ErrorInformation errorInformation = new ErrorInformation();
+			errorInformation.setCode(ErrorInformation.FIELD_VALIDATION_FAILED);
+			errorInformation.setMessage("invalid arguments");
+			return Response.status(Status.BAD_REQUEST).entity(dto).build();
+		}
 				
 		// If cost center is given, it cannot be updated! It is always fetched fresh from the database.
 		final CostCenterDTO costCenterDto = dto.getCostCenter();
@@ -293,7 +319,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 			}
 			else
 			{
-				throw new IllegalArgumentException("CostCenter oid is null for employeeId=" + employeeId);
+				throw new IllegalArgumentException("update: employee costCenter oid is null for employeeId=" + employeeId);
 			}
 		}
 		else
@@ -334,7 +360,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	 */
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}/addresses/{addressId:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces("application/json; charset=UTF-8")
 	public Response findPostalAddressById(@PathParam("employeeId") long employeeId, @PathParam("addressId") long addressId)
 	{
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -366,7 +392,7 @@ public class EmployeeEndpoint extends BaseEndpoint
      */
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}/addresses")
-	@Produces("application/json")
+	@Produces("application/json; charset=UTF-8")
     public List<EmployeePostalAddressDTO> listAll(@PathParam("employeeId") long employeeId)
     {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -429,7 +455,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 
 		if (addressId != dto.getOid())
 		{
-			logger.warn(LOG_TAG, "update CONFLICT addressId=" + addressId + ", addressId2=" + dto.getOid());
+			logger.warn(LOG_TAG, "update: CONFLICT PostalAddress put.addressId=" + addressId + " does not match dto.addressId=" + dto.getOid());
 			return Response.status(Status.CONFLICT).entity(dto).build();
 		}
 
@@ -473,7 +499,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	
     @GET
     @Path("/summary")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response summary()
     {    	
     	CriteriaBuilder cb = em.getCriteriaBuilder();
