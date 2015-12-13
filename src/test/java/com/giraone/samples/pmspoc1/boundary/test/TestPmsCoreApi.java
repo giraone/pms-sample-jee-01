@@ -12,6 +12,7 @@ public class TestPmsCoreApi
 	static final String BASE_URI = "http://localhost/PmsSample";
 	//static final String BASE_URI = "http://pmssamplejee01-giraone.rhcloud.com/PmsSample";
 	//static final String BASE_URI = "http://pmssamplejee1.eu-gb.mybluemix.net";
+	//static final String BASE_URI = "http://pmssamplejee1.cfapps.io";
 	static final int PORT = 8080;
 	//static final int PORT = 80;
 	static final String PATH_API = "/api";
