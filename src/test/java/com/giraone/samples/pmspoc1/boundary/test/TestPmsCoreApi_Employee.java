@@ -572,12 +572,12 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 
 	// ------------------------------------------------------------------------------------------
 
-	private void deleteEntityByOidAndIgnoreStatus(long oid)
+	void deleteEntityByOidAndIgnoreStatus(long oid)
 	{
 		given().spec(requestSpecBuilder.build()).pathParam("id", oid).delete(PATH_TO_RESOURCE + "/{id}");
 	}
 
-	private void deleteEntityByIdentificationAndIgnoreStatus(String domainKey)
+	void deleteEntityByIdentificationAndIgnoreStatus(String domainKey)
 	{
 		Response response = given()
 			.spec(requestSpecBuilder.build())
@@ -605,7 +605,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		this.deleteEntityByOidAndIgnoreStatus(oid);
 	}
 
-	private long createFreshEntityAndReturnOid(String domainKey)
+	long createFreshEntityAndReturnOid(String domainKey)
 	{
 		this.deleteEntityByIdentificationAndIgnoreStatus(domainKey);
 		
@@ -644,7 +644,7 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		return this.createFreshEntityAndReturnOid("R" + RANDOM.nextInt(100000));
 	}
 	
-	private long createFreshCostCenterAndReturnOid(String domainKey)
+	long createFreshCostCenterAndReturnOid(String domainKey)
 	{
 		TestPmsCoreApi_CostCenter costCenterTest = new TestPmsCoreApi_CostCenter();
 		try

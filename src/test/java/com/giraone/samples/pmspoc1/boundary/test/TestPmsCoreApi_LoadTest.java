@@ -27,7 +27,7 @@ import com.jayway.restassured.response.Response;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestPmsCoreApi_LoadTest extends TestPmsCoreApi
 {	
-	private static final int NR_OF_COST_CENTERS = 25;
+	private static final int NR_OF_COST_CENTERS = 50;
 	private static final int NR_OF_EMPLOYEES = 200;
 	
 	@BeforeClass
