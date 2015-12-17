@@ -1,5 +1,6 @@
 package com.giraone.samples.common.boundary;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
@@ -22,7 +23,7 @@ import com.giraone.samples.common.StringUtil;
 /**
  * Base class for REST services. Features:
  * <ul>
- * <li>Adds support for CORSpre-flight requests.</li>
+ * <li>Adds support for CORS pre-flight requests.</li>
  * <li>Adds support for logging of all REST calls.</li>
  * <li>Adds support for throttling feature</li>
  * </ul>
@@ -35,6 +36,8 @@ public class BaseEndpoint
 	protected static final Marker LOG_TAG = MarkerManager.getMarker("API");
 
 	protected final static String DEFAULT_PAGING_SIZE = "20";
+	
+	private final static int STRING_LOG_LIMIT = 80;
 
 	private static final String CORS_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
 	private static final String CORS_ALLOW_METHODS_HEADER = "Access-Control-Allow-Methods";
@@ -93,7 +96,7 @@ public class BaseEndpoint
 				logger.debug(LOG_TAG, "Entering: " + invocationContext.getTarget().getClass().getSimpleName() + "."
 					+ invocationContext.getMethod().getName());
 				
-				// Logs all parameters with their annotations
+				// Logs all parameters except file uploads with their annotations
 				StringBuilder sb = new StringBuilder();
 				Annotation[][] annotations = method.getParameterAnnotations();
 				Object[] params = invocationContext.getParameters();
@@ -114,9 +117,18 @@ public class BaseEndpoint
 					sb.append("=");
 					Object param = params[i];
 					if (param instanceof String)
-						sb.append(StringUtil.serializeAsJavaString((String) param));
+					{
+						sb.append(StringUtil.serializeAsJavaString(limitString((String) param)));
+					}
+					else if (param instanceof File)
+					{
+						final File file = (File) param;
+						sb.append("FILE[path=" + limitString(file.getAbsolutePath()) + ", size=" + file.length() + "]");
+					}
 					else
+					{
 						sb.append(param);
+					}
 				}
 				logger.debug(LOG_TAG, "  Params: " + (sb == null ? "null" : sb.toString()));				
 			}
@@ -132,5 +144,13 @@ public class BaseEndpoint
 		}
 
 		return obj;
+	}
+	
+	private static String limitString(String in)
+	{
+		if (in.length() > STRING_LOG_LIMIT)
+			return in.substring(0, STRING_LOG_LIMIT) + "...(len=" + in.length() + ")";
+		else
+			return in;
 	}
 }
