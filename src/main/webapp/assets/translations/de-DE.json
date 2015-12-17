@@ -76,7 +76,9 @@
     "personnelNumberShort": "PNR",
     "name": "Name",
     "dateOfBirth": "Geburtsdatum",
-    "costCenter": "Kostenstelle"
+    "dateOfBirthShort": "Geb.dat.",
+    "costCenter": "Kostenstelle",
+    "costCenterShort": "KNR"
   },
   "employeeDetails": {
     "title": "Mitarbeiter",
@@ -110,15 +112,6 @@
       "label": "Eintrittsdatum",
       "placeholder": "Eintrittsdatum im Format TT.MM.JJJJ (z.B. 30.09.2015)"
     },
-    "nationalityCode": {
-      "label": "Nationalität",
-      "placeholder": "Nationalität auswählen",
-      "value_DE": "Deutschland",
-      "value_AT": "Österreich",
-      "value_CH": "Schweiz",
-      "value_IT": "Italien",
-      "value_US": "USA"
-    },
     "costCenter": {
       "label": "Kostenstelle",
       "placeholder": "Existierende Kostenstelle auswählen"
@@ -129,6 +122,40 @@
       "value_U": "ledig",
       "value_M": "verheirat",
       "value_W": "verwitwet"
+    },
+    "numberOfChildren": {
+      "label": "Anzahl der Kinder",
+      "placeholder": "Anzahl der Kinder auswählen",
+      "value_unknown": "unbekannt",
+      "value_0": "0",
+      "value_1": "1",
+      "value_2": "2",
+      "value_3": "3",
+      "value_4": "4",
+      "value_5": "5",
+      "value_6": "6",
+      "value_7": "7",
+      "value_8": "8",
+      "value_9": "9"
+    },
+    "nationalityCode": {
+      "label": "Nationalität",
+      "placeholder": "Nationalität auswählen",
+      "value_DE": "Deutschland",
+      "value_AT": "Österreich",
+      "value_CH": "Schweiz",
+      "value_IT": "Italien",
+      "value_US": "USA"
+    },
+    "countryOfBirth": {
+      "label": "Geburtsland",
+      "placeholder": "Geburtsland auswählen",
+      "value_DE": "Deutschland",
+      "value_DDDE": "DDR (ehemalige Deutsche Demokratische Republik)",
+      "value_AT": "Österreich",
+      "value_CH": "Schweiz",
+      "value_IT": "Italien",
+      "value_US": "USA"
     }
   }
 }

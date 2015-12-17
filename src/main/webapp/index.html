@@ -127,6 +127,28 @@
 <script src="app.js"></script>
 <!-- endinject -->
 
+<!-- for bootstrap device size detection -->
+<div class="device-xs visible-xs"></div>
+<div class="device-sm visible-sm"></div>
+<div class="device-md visible-md"></div>
+<div class="device-lg visible-lg"></div>
+<script>
+function isBootstrapDeviceSize(alias) {
+    var d = document.getElementsByClassName('device-' + alias);
+    return d && (d.length > 0) && d[0].offsetParent != null;
+}
+function getBootstrapDeviceSize() {
+    var d;
+    d = document.getElementsByClassName('device-xs');
+    if (d && (d.length > 0) && d[0].offsetParent != null) return 'xs';
+    d = document.getElementsByClassName('device-sm');
+    if (d && (d.length > 0) && d[0].offsetParent != null) return 'sm';
+    d = document.getElementsByClassName('device-md');
+    if (d && (d.length > 0) && d[0].offsetParent != null) return 'md';
+    d = document.getElementsByClassName('device-lg');
+    if (d && (d.length > 0) && d[0].offsetParent != null) return 'lg';
+}
+</script>
 
 <script>
   if (window.require) {
