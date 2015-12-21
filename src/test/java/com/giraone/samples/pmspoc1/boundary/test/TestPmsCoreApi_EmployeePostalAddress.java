@@ -45,13 +45,15 @@ public class TestPmsCoreApi_EmployeePostalAddress extends TestPmsCoreApi
 
 	@Test
 	public void t_200_POST_addSinglePostalAddress_ShouldWork() throws Exception
-	{		
+	{	
+		//long employeeId = this.getEmployeeOidByIdentification("00000");
 		long employeeId = this.createFreshEmployeeAndReturnOid();
 		this.addSinglePostalAddress(employeeId, 1);
 		
 		String response = given()
 	        .spec(requestSpecBuilder.build())
-	        .get(PATH_TO_EMPLOYEE_RESOURCE + "/" + employeeId + PATH_TO_ADDRESS_RESOURCE).asString();
+	        .get(PATH_TO_EMPLOYEE_RESOURCE + "/" + employeeId + PATH_TO_ADDRESS_RESOURCE)
+	        .asString();
 		int count = from(response).getList("").size();
 		assertThat(count, equalTo(1));
 	}
@@ -191,5 +193,20 @@ public class TestPmsCoreApi_EmployeePostalAddress extends TestPmsCoreApi
 			e.printStackTrace();
 		}
 		return employeeTest.createFreshEntityAndReturnOid();
+	}
+	
+	private long getEmployeeOidByIdentification(String personnelNumber)
+	{
+		TestPmsCoreApi_Employee employeeTest = new TestPmsCoreApi_Employee();
+		try
+		{
+			TestPmsCoreApi_Employee.setupConnection();
+			employeeTest.setup();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return employeeTest.getOidByIdentification(personnelNumber);
 	}
 }

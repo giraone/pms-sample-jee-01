@@ -577,6 +577,33 @@ public class TestPmsCoreApi_Employee extends TestPmsCoreApi
 		given().spec(requestSpecBuilder.build()).pathParam("id", oid).delete(PATH_TO_RESOURCE + "/{id}");
 	}
 
+	int getOidByIdentification(String domainKey)
+	{
+		Response response = given()
+			.spec(requestSpecBuilder.build())
+			.pathParam("domainKey", domainKey)
+			.get(PATH_TO_RESOURCE + "/pnr-{domainKey}");
+
+		if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND)
+		{
+			return -1;
+		}
+
+		int oid;
+		try
+		{
+			oid = from(response.body().asString()).getInt("oid");
+		}
+		catch (Exception e)
+		{
+			System.err.println("----- Invalid body is  -----");
+			System.err.println(response.body().asString());
+			System.err.println("----- Invalid body end -----");
+			throw e;
+		}
+		return oid;
+	}
+	
 	void deleteEntityByIdentificationAndIgnoreStatus(String domainKey)
 	{
 		Response response = given()
