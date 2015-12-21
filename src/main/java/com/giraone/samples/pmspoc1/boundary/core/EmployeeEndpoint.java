@@ -429,6 +429,11 @@ public class EmployeeEndpoint extends BaseEndpoint
 			return Response.status(Status.NOT_FOUND).build();
 		}		
 		final EmployeePostalAddress entity = dto.entityFromDTO();
+		// TODO: Concept for setting defaults is needed
+		if (entity.getCountryCode() == null)
+		{
+			entity.setCountryCode("DE");
+		}
 		entity.setEmployee(employee);
 		em.persist(entity);
 		
