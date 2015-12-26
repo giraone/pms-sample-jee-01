@@ -1,0 +1,33 @@
+<server description="WLP Server for PmsSample (with PostgreSQL)">
+
+	<!-- Enable features -->
+	<featureManager>
+		<feature>jsp-2.3</feature>
+		<feature>jndi-1.0</feature>
+		<feature>jpa-2.1</feature>
+		<feature>jaxrs-2.0</feature>
+		<feature>cdi-1.2</feature>
+		<feature>ejb-3.2</feature>
+		<feature>localConnector-1.0</feature>
+	</featureManager>
+
+	<httpEndpoint host="*" httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint">
+	</httpEndpoint>
+		
+	<dataSource id="PmsSample1" jdbcDriverRef="PostgreSqlJDBCDriver" jndiName="datasources/PmsSample1" type="javax.sql.XADataSource">
+		<properties serverName="${env.POSTGRESQL_PMSSAMPLE_PORT_5432_TCP_ADDR}"
+		            portNumber="${env.POSTGRESQL_PMSSAMPLE_PORT_5432_TCP_PORT}"
+		            user="pms" password="pms" databaseName="PmsSample1" />
+	</dataSource>
+	<jdbcDriver id="PostgreSqlJDBCDriver" javax.sql.XADataSource="org.postgresql.xa.PGXADataSource">
+		<library name="PostgreSqlLib">
+			<fileset dir="${shared.resource.dir}/postgresql" includes="*.jar"/>           
+		</library>
+	</jdbcDriver>
+	
+	<logging/>
+
+	<applicationMonitor updateTrigger="mbean"/>
+
+	<webApplication id="PmsSample" location="PmsSample.war" name="PmsSample"/>
+</server>
