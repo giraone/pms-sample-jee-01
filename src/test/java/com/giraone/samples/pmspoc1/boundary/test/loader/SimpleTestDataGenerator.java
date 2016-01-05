@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-import com.giraone.samples.common.StringUtil;
 import com.giraone.samples.pmspoc1.entity.PostalAddress;
 import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
 
@@ -162,7 +161,7 @@ public class SimpleTestDataGenerator
 			    while ((line = reader.readLine()) != null)
 			    {
 			    	String[] pieces = line.split("[|]");
-			    	if (pieces.length == 2 && StringUtil.isNotNullOrEmpty(pieces[0]) && StringUtil.isNotNullOrEmpty(pieces[1]))
+			    	if (pieces.length == 2 && isNotNullOrEmpty(pieces[0]) && isNotNullOrEmpty(pieces[1]))
 			    	{
 			    		int valuePos = valueList.size();
 			    		int weight = Integer.parseInt(pieces[1]);
@@ -191,5 +190,10 @@ public class SimpleTestDataGenerator
 		}
 		
 		return valueList.get(weightMap.get(RANDOM.nextInt(weightMap.size())));
+	}
+	
+	private static boolean isNotNullOrEmpty(String s)
+	{
+		return s != null && s.length() > 0;
 	}
 }
