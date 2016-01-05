@@ -1,4 +1,5 @@
 {
+  "language": "en",
   "mainApp": {
     "shortTitle": "PMS",
     "title": "PMS App"
@@ -8,10 +9,12 @@
     "showAll": "Show all",
     "noNotifications": "No notification!",
     "back": "Back",
+    "delete": "Delete",
     "requestError": "Request failed! Please try again later.",
     "requestErrorUnprocessable": "Cannot store data! Duplicate key attributes.",
     "requestErrorConflict": "Cannot store data! Data was modified by somebody else and is not up-to-date.",
-    "showMoreButton": "Show more - Currently {{from}} to {{to}} of {{total}}"
+    "showMoreButton": "Show more - Currently {{from}} to {{to}} of {{total}}",
+    "listRefresh": "Refresh the list"
   },
   "globals": {
     "dateFormatMedium": "{{date|date:'MM/dd/yyyy'}}",
@@ -59,6 +62,8 @@
     "title": "Cost center",
     "successCreate": "New cost center has been created!",
     "successUpdate": "Cost center has been updated!",
+    "tab0Title": "Master Data",
+    "tab1Title": "Postal Addresses",
     "identification": "Unique identification",
     "identification_placeholder": "Enter a unique identification",
     "description": "Description",
@@ -75,6 +80,8 @@
     "personnelNumber": "Personnel Number",
     "personnelNumberShort": "P#",
     "name": "Name",
+    "firstName": "First Name",
+    "lastName": "Last Name",
     "dateOfBirth": "Date of Birth",
     "dateOfBirthShort": "DoB",
     "costCenter": "Cost center",
@@ -156,6 +163,51 @@
       "value_CH": "Switzerland",
       "value_IT": "Italy",
       "value_US": "USA"
+    }
+  },
+  "employeePostalAddress": {
+    "add": "Add new address",
+    "save": "Save changes",
+    "refresh": "Omit changes",
+    "addSuccess": "New address was created. Please specify correct address information!",
+    "updateSuccess": "Changes of the address have been saved.",
+    "deleteSuccess": "Selected address of employee was deleted.",
+    "noAddresses": "No addresses stored yet!",
+    "ranking": {
+      "label": "Order",
+      "labelShort": "#"
+    },
+    "address": {
+      "label": "Postal Addresses"
+    },
+    "countryCode": {
+      "label": "Country",
+      "placeholder": "Select country of address",
+      "value_DE": "Germany",
+      "value_AT": "Austria",
+      "value_CH": "Switzerland",
+      "value_IT": "Italy",
+      "value_US": "USA"
+    },
+    "postalCode": {
+      "label": "Postal Code",
+      "placeholder": "Enter the postal code"
+    },
+    "city": {
+      "label": "City",
+      "placeholder": "Enter the city"
+    },
+    "street": {
+      "label": "Street",
+      "placeholder": "Enter the street name without house number"
+    },
+    "houseNumber": {
+      "label": "House number",
+      "placeholder": "e.g. 10, 47A"
+    },
+    "poBoxNumber": {
+      "label": "P.O. Box Number",
+      "placeholder": "P.O. Box Number for post box addresses"
     }
   }
 }

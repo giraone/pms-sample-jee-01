@@ -1,4 +1,5 @@
 {
+  "language": "de",
   "mainApp": {
     "shortTitle": "PMS",
     "title": "PMS App"
@@ -8,10 +9,12 @@
     "showAll": "Alle anzeigen",
     "noNotifications": "Keine Hinweise!",
     "back": "Zurück",
-    "requestError": "Anfrage konnte nicht ausgeführt werden! Bitte probiere es später noch einmal.",
+    "delete": "Löschen",
+    "requestError": "Anfrage konnte nicht ausgeführt werden! Bitte probieren Sie es später noch einmal.",
     "requestErrorUnprocessable": "Speichern konnte nicht ausgeführt werden! Schlüssel nicht eindeutig.",
     "requestErrorConflict": "Speichern konnte nicht ausgeführt werden! Daten wurde von einem anderen Anwender geändert und sind nicht mehr aktuell.",
-    "showMoreButton": "Mehr anzeigen - Aktuell {{from}} bis {{to}} von {{total}}"
+    "showMoreButton": "Mehr anzeigen - Aktuell {{from}} bis {{to}} von {{total}}",
+    "listRefresh": "Liste aktualisieren"
   },
   "globals": {
     "dateFormatMedium": "{{date|date:'dd.MM.yyyy'}}",
@@ -75,6 +78,8 @@
     "personnelNumber": "Personalnummer",
     "personnelNumberShort": "PNR",
     "name": "Name",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
     "dateOfBirth": "Geburtsdatum",
     "dateOfBirthShort": "Geb.dat.",
     "costCenter": "Kostenstelle",
@@ -84,6 +89,8 @@
     "title": "Mitarbeiter",
     "successCreate": "Mitarbeiter wurde angelegt!",
     "successUpdate": "Mitarbeiter wurde geändert!",
+    "tab0Title": "Stammdaten",
+    "tab1Title": "Postadressen",
     "personnelNumber": {
       "label": "Personalnummer",
       "placeholder": "Geben Sie eine eindeutige Personalnummer ein"
@@ -156,6 +163,52 @@
       "value_CH": "Schweiz",
       "value_IT": "Italien",
       "value_US": "USA"
+    }
+  },
+  "employeePostalAddress": {
+    "add": "Adresse hinzufügen",
+    "save": "Änderung speichern",
+    "refresh": "Änderungen verwerfen",
+    "addSuccess": "Neue Adresse wurde angelegt. Bitte vervollständigen!",
+    "updateSuccess": "Änderungen der Adresse wurden gespeichert.",
+    "deleteSuccess": "Ausgewählte Adresse des Mitarbeiters wurde gelöscht.",
+    "noAddresses": "Keine Adressen hinterlegt!",
+    "ranking": {
+      "label": "Reihenfolge",
+      "labelShort": "#"
+    },
+    "address": {
+      "label": "Adresse"
+    },
+    "countryCode": {
+      "label": "Land",
+      "placeholder": "Land der Adresse auswählen",
+      "value_DE": "Deutschland",
+      "value_DDDE": "DDR (ehemalige Deutsche Demokratische Republik)",
+      "value_AT": "Österreich",
+      "value_CH": "Schweiz",
+      "value_IT": "Italien",
+      "value_US": "USA"
+    },
+    "postalCode": {
+      "label": "Postleitzahl",
+      "placeholder": "Geben Sie die Postleitzahl ein"
+    },
+    "city": {
+      "label": "Stadt",
+      "placeholder": "Geben Sie den Wohnort ein"
+    },
+    "street": {
+      "label": "Straße",
+      "placeholder": "Geben Sie die Straße (ohne Hausnummer) ein"
+    },
+    "houseNumber": {
+      "label": "Hausnummer",
+      "placeholder": "z.B. 10, 47A"
+    },
+    "poBoxNumber": {
+      "label": "Postfachnummer",
+      "placeholder": "Postfach bei Postfachadressen"
     }
   }
 }
