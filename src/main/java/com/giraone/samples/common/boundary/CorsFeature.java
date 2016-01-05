@@ -44,7 +44,7 @@ public class CorsFeature implements Feature, ContainerResponseFilter
 		}
 		if (logger != null && logger.isDebugEnabled())
 		{
-			logger.debug(LOG_TAG, "Access-Control-Allow-Origin=" + headers.get("Access-Control-Allow-Origin"));
+			logger.debug(LOG_TAG, CORS_ALLOW_HEADER + "=" + headers.get(CORS_ALLOW_HEADER));
 		}
 	}
 }
