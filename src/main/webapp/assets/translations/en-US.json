@@ -53,7 +53,8 @@
     "title": "Cost Center List",
     "error": "Unable to retrieve list of cost centers.",
     "noEntities": "No cost centers were found.",
-    "add": "Add new cost centers",
+    "add": "Add cost center",
+    "addShort": "Add",
     "oid": "ID",
     "identification": "Identification",
     "description": "Description"
@@ -91,6 +92,8 @@
     "title": "Employee",
     "successCreate": "New employee data has been created!",
     "successUpdate": "Employee data has been updated!",
+    "tab0Title": "Master Data",
+    "tab1Title": "Post Addresses",
     "personnelNumber": {
       "label": "Personnel Number",
       "placeholder": "Personnel Number"
@@ -166,7 +169,7 @@
     }
   },
   "employeePostalAddress": {
-    "add": "Add new address",
+    "add": "Add address",
     "save": "Save changes",
     "refresh": "Omit changes",
     "addSuccess": "New address was created. Please specify correct address information!",

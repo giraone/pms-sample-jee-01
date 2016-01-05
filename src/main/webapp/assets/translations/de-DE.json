@@ -53,7 +53,8 @@
     "title": "Liste der Kostenstellen",
     "error": "Fehler beim Abrufen der Kostenstellen.",
     "noEntities": "Es konnten keine Kostenstellen gefunden werden.",
-    "add": "Neue Kostenstelle hinzufügen",
+    "add": "Kostenstelle hinzufügen",
+    "addShort": "Hinzufügen",
     "oid": "ID",
     "identification": "Bezeichnung",
     "description": "Beschreibung"
