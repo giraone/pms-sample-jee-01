@@ -15,9 +15,7 @@
 <div class="wrapper">
   <header class="main-header">
     <!-- Logo -->
-    <a ui-sref="dashboard" class="logo">
-      <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini" translate="mainApp.shortTitle"></span>
+    <a ui-sref="dashboard" class="logo hidden-xs">
       <!-- logo for regular state and mobile devices -->
       <span class="logo-lg" translate="mainApp.title"></span>
     </a>
@@ -27,7 +25,7 @@
       <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
         <span class="sr-only" translate="common.toggleNavigation"></span>
       </a>
-
+      <span class="logo logo-lg visible-xs-inline" style="background-color: #605ca8;" translate="mainApp.title"></span>
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           <li ng-controller="navigationController as navigation" ng-show="navigation.showBackButton">
