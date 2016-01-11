@@ -34,7 +34,7 @@ The solution is hosted currently on 3 PaaS provider sites:
 ## Prerequisites to develop locally and run the project ##
 - Maven 3
 - An Eclipse based IDE
-- A JEE6 compliant application server. In detail, we need:
+- A JEE7 compliant application server. In detail, we need:
   - JPA 2.0
   - EJB 3.2
   - JAX-RS 2.0
