@@ -14,8 +14,6 @@ public class Employee_ extends AbstractEntity_
 	public static volatile SingularAttribute<Employee, String> firstName;
 	public static volatile SingularAttribute<Employee, Date> dateOfBirth;
 	public static volatile SingularAttribute<Employee, String> gender;
-	public static volatile SingularAttribute<Employee, String> nationality;
-	public static volatile SingularAttribute<Employee, Date> dateOfEntry;
 	
 	public static final String SQL_NAME = "Employee";
 	
