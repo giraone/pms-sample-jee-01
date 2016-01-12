@@ -211,12 +211,12 @@ public class CostCenterEndpoint extends BaseEndpoint
     public Response summary()
     {
     	CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Long> c = cb.createQuery(Long.class);
-		Root<CostCenter> table = c.from(CostCenter.class);
-		c.select(cb.count(table));
-		TypedQuery<Long> tq = em.createQuery(c);
+		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+		Root<CostCenter> table = countQuery.from(CostCenter.class);
+		countQuery.select(cb.count(table));
+		TypedQuery<Long> tq = em.createQuery(countQuery);
 		long count = tq.getSingleResult().longValue();
-        Calendar lastUpdate = new GregorianCalendar();
+        Calendar lastUpdate = new GregorianCalendar(); // Currently a simple time stamp is returned 
         CostCenterSummaryDTO dto = new CostCenterSummaryDTO(count, lastUpdate);
         return Response.ok(dto).build();
     }

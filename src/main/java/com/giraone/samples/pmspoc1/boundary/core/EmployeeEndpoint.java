@@ -196,7 +196,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 		
 		// Calculating the total count value - START
 		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-		countQuery.select(cb.count(table));
+		countQuery.select(cb.count(countQuery.from(Employee.class)));
 		if (predicate != null) { countQuery.where(predicate); }
 		int totalCount = em.createQuery(countQuery).getSingleResult().intValue();
 		// Calculating the total count value - END
@@ -508,12 +508,11 @@ public class EmployeeEndpoint extends BaseEndpoint
     public Response summary()
     {    	
     	CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Long> c = cb.createQuery(Long.class);
-		Root<Employee> table = c.from(Employee.class);
-		c.select(cb.count(table));
-		TypedQuery<Long> tq = em.createQuery(c);
-		long count = tq.getSingleResult().longValue();
-        Calendar lastUpdate = new GregorianCalendar();
+		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+		Root<Employee> table = countQuery.from(Employee.class);
+		countQuery.select(cb.count(table));
+		long count = em.createQuery(countQuery).getSingleResult().longValue();
+        Calendar lastUpdate = new GregorianCalendar(); // Currently a simple time stamp is returned 
         EmployeeSummaryDTO dto = new EmployeeSummaryDTO(count, lastUpdate);
         return Response.ok(dto).build();
     }
