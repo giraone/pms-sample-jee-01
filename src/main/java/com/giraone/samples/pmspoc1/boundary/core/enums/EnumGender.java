@@ -1,4 +1,4 @@
-package com.giraone.samples.pmspoc1.entity.enums;
+package com.giraone.samples.pmspoc1.boundary.core.enums;
 
 import java.util.HashMap;
 import java.util.Map;

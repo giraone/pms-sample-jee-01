@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.giraone.samples.common.entity.EntityKeyValueStore;
+import com.giraone.samples.common.entity.EntityKeyValueStore_;
 import com.giraone.samples.common.entity.EntityWithProperties;
 import com.giraone.samples.common.entity.enums.StringEnumeration;
 import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
@@ -117,9 +117,9 @@ public class Employee extends EntityWithProperties<Employee, EmployeeProperties>
 	// (2) Cascade type is ALL and orphanRemoval = true.
 	//     Properties may be given to create operations together with the employee data (CascadeType.PERSIST)
     //     If the employee is removed, the properties are removed too (CascadeType.REMOVE)
-	@OneToMany(mappedBy = EntityKeyValueStore.DEFAULT_SQL_PARENT_NAME, fetch = FetchType.LAZY,
+	@OneToMany(mappedBy = EntityKeyValueStore_.DEFAULT_SQL_PARENT_NAME, fetch = FetchType.LAZY,
 		orphanRemoval = true, cascade = CascadeType.ALL)
-	@MapKey(name = "name")
+	@MapKey(name = EntityKeyValueStore_.SQL_NAME_name)
 	private Map<String, EmployeeProperties> properties;
 	
 	

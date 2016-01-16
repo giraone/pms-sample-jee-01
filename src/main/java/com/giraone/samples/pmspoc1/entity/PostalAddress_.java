@@ -3,6 +3,8 @@ package com.giraone.samples.pmspoc1.entity;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
+import com.giraone.samples.common.entity.AbstractEntity_;
+
 @StaticMetamodel(PostalAddress.class)
 public class PostalAddress_ extends AbstractEntity_
 {
@@ -23,13 +25,4 @@ public class PostalAddress_ extends AbstractEntity_
 	public static final String SQL_NAME_street = "street";
 	public static final String SQL_NAME_houseNumber = "houseNumber";
 	public static final String SQL_NAME_poBoxNumber = "poBoxNumber";
-	
-	public static final String DTO_NAME_ranking = "ranking";
-	public static final String DTO_NAME_countryCode = "countryCode";
-	public static final String DTO_NAME_postalCode = "postalCode";
-	public static final String DTO_NAME_city = "city";
-	public static final String DTO_NAME_secondaryAddressLine = "secondaryAddressLine";
-	public static final String DTO_NAME_street = "street";
-	public static final String DTO_NAME_houseNumber = "houseNumber";
-	public static final String DTO_NAME_poBoxNumber = "poBoxNumber";
 }

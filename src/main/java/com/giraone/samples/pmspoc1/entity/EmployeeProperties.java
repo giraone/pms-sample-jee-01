@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.giraone.samples.common.entity.EntityKeyValueStore;
+import com.giraone.samples.common.entity.EntityKeyValueStore_;
 
 /**
  * JPA entity to store key/value properties of employees ({@link Employee}).
@@ -28,7 +29,7 @@ public class EmployeeProperties extends EntityKeyValueStore<Employee> implements
 	protected long id;
 	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = Employee.class)
-	@JoinColumn(name = DEFAULT_SQL_PARENT_ID_NAME, nullable = false)
+	@JoinColumn(name = EntityKeyValueStore_.DEFAULT_SQL_PARENT_ID_NAME, nullable = false)
 	private Employee parent;
 		
 	public EmployeeProperties()

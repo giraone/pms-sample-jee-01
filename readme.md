@@ -12,7 +12,10 @@ An employee entity is related to 0 or 1 cost center. An employee may have multip
 
 **Front-end:** The front-end is a separate [GitHub project giraone/pms-sample-jee-01-ajs1](https://github.com/giraone/pms-sample-jee-01-ajs1)
 
-The solution is hosted currently on 3 PaaS provider sites:
+**Test project** There is an additional test project which uses [REST-assured](https://github.com/jayway/rest-assured) to test the backe-end's REST API.
+
+
+The running solution is hosted currently on 3 PaaS provider sites:
 
 - [IBM's BLUEMIX PaaS](https://www.bluemix.net) under the URL [http://pmssamplejee1.eu-gb.mybluemix.net/].
 - [Pivotal's Web Services PaaS](https://run.pivotal.io) under the URL [http://pmssamplejee1.cfapps.io/].
@@ -25,11 +28,12 @@ The solution is hosted currently on 3 PaaS provider sites:
 - The usage of *JPA static meta models* and *JPA Criteria API* in the entity definition and the Java code of the *"business logic"*. JPA criteria API is perhaps not easy to learn, but it is more robust, due to being type safe and more flexible in code refactorings.
 - The usage of *optimistic locking* support from JPA. 
 - Creation and implementation of JAX-RS end-points using JAX-RS annotations.
+- A general internal project separation (package naming conventions) based on the *Boundary Control Entity* model (See [http://www.adam-bien.com/roller/abien/entry/java_ee_7_java_8](http://www.adam-bien.com/roller/abien/entry/java_ee_7_java_8)).
 - The usage of [OData style query options](http://www.odata.org/documentation/odata-version-2-0/uri-conventions/) for filtering and sorting data in JAX-RS endpoints for list data.
-- The usage of *Data Transfer Objects* (*DTOs*) to decouple the "*Boundary*" code from the "*Entity*" code in terms of the *Boundary Control Entity* model (See [http://www.adam-bien.com/roller/abien/entry/java_ee_7_java_8](http://www.adam-bien.com/roller/abien/entry/java_ee_7_java_8)).
-- Testing the REST end-points using [REST-assured](https://github.com/jayway/rest-assured) and its "fluent" API.
-- The creation of a HTML5/JS/CSS3 user interface based on *Angular 2* and *Boostrap 3*.
-- The usage of the REST API from the Angular 2 JavaScript code.
+- The usage of *Data Transfer Objects* (*DTOs*) to decouple the "*Boundary*" code from the "*Entity*" code.
+- The usage of *DTO* from/to *Entity* mapping techniques to simplify this transfer.
+- The creation of a HTML5/JS/CSS3 user interface based on *AngularJS 1* / *Angular 2* and *Boostrap 3*.
+- The usage of the REST API from the *AngularJS 1 / Angular 2* JavaScript code.
 
 ## Prerequisites to develop locally and run the project ##
 - Maven 3
@@ -38,16 +42,16 @@ The solution is hosted currently on 3 PaaS provider sites:
   - JPA 2.0
   - EJB 3.2
   - JAX-RS 2.0
-  For development *JBoss Wildfly 9.1* with [Resteasy](http://resteasy.jboss.org/) for JAX-RS and [Hibernate](http://hibernate.org/orm/) for JPA was used. But the application should run on any other JEE6 application server - the only implementation specific dependencies in the source code are in [pom.xml](pom.xml) and [persistence.xml](src/main/resources/META-INF/persistence.xml).
+  For initial development *JBoss Wildfly 9.1* with [Resteasy](http://resteasy.jboss.org/) for JAX-RS and [Hibernate](http://hibernate.org/orm/) for JPA was used. But the application should run on any other JEE6/JEE7 application server - the only implementation specific dependencies in the source code are in [pom.xml](pom.xml) and [persistence.xml](src/main/resources/META-INF/persistence.xml).
 - A relational database supported by the JPA implementation. For development *Apache Derby Network Server 10.X* and *PostgresQL 9.4* was used. Others databases may work also with slight adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml).
 - In the hosting environment the following components are used:
 
 |               | OPENSHIFT           | BLUEMIX                       | PIVOTAL                       |
 |:--------------|:-------------------:|:-----------------------------:|:-----------------------------:|
-| JEE container | JBoss Wildfly 9.0.1 | IBM WebSphere Liberty 8.5.5.7 | IBM WebSphere Liberty 8.5.5.7 |
+| JEE container | JBoss Wildfly 9.0.1 | IBM WebSphere Liberty 8.5.5.8 | IBM WebSphere Liberty 8.5.5.7 |
 | Database      | PostgreSQL 9.2      | IBM DB2                       | ElephantSQL (PostgreSQL 9.4.4)|
 | JPA provider  | Hibernate           | EclipseLink                   | EclipseLink                   |
-| JAX-RS        | Resteasy            | IBM?                          | IBM?                          |
+| JAX-RS        | Resteasy/Jersey     | ?/Jackson                     | ?/Jackson                     |
   
 - In local development environments the code was tested with:
   - JEE container:
@@ -137,7 +141,7 @@ Despite the fact, that this is currently a CRUD application, JPA entities are no
 
 ### REST APIs ###
 
-The base for our REST services is plain vanilla *JAX-RS*. Currently with an annotation first approach - no contract first approach yet. For cross-cutting features at the REST layer, like injecting a `"Access-Control-Allow-Origin"` header, we use the JAX-RS 2.0 feature `@Provider`.
+The base for our REST services is plain vanilla *JAX-RS*. Currently with an annotation first approach - no contract first approach yet! For cross-cutting features at the REST layer, like injecting a `"Access-Control-Allow-Origin"` header, we use the JAX-RS 2.0 feature `@Provider`.
 
 ### OData style query options for filtering and sorting ###
 
@@ -153,7 +157,7 @@ The base for the implementation of OData $filter and $orderby query options in R
 	@TableGenerator(name = "Alloc100", allocationSize = 100)
 ```
 
-- Currently the solution must use *olingo-odata2-core 2.0.6-SNAPSHOT* in JBoss environments, because of this bug: [OLINGO-761](https://issues.apache.org/jira/browse/OLINGO-761?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel)
+- Currently the solution must use *olingo-odata2-core 2.0.6-SNAPSHOT* in *JBoss environments*, because of this bug: [OLINGO-761](https://issues.apache.org/jira/browse/OLINGO-761?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel)
 
 - OData filtering (lt, gt) for Date fields is not yet implemented
 
@@ -173,9 +177,7 @@ This is not a good idea together with I18N! Best solution would be to separate t
   - For the different environments, we should use Maven profiles in the [pom.xml](pom.xml).
 
 - Test improvement
-  - Using JSON schema validation of REST-assured in the API tests.
-  - Unit tests for the OData implementation are missed. There is only a test page `webapp/test/index.html`.
-  - The unit tests with *REST-assured* aren't real unit tests - they need a server with a well known configuration. See [TestPmsCoreApi](src/com/giraone/samples/pmspoc1/boundary/test/TestPmsCoreApi.java) in the source to see, what we mean.
+  - There are no unit tests for the OData implementation yet. There is only a test page `webapp/test/index.html`.
   
 ## Future goals of the project ##
 
@@ -185,5 +187,5 @@ This is not a good idea together with I18N! Best solution would be to separate t
 - Usage of **Swagger** (or **RAML**) for the REST API definition to have a **contract-first approach**.
 - Usage of [swagger-js-codegen](https://github.com/wcandillon/swagger-js-codegen) or similar to generate JavaScript/Angular code from the Swagger definition.
 - Usage of [swagger-codegen](https://github.com/swagger-api/swagger-codegen) to generate JAX-RS skeletons and the Java DTO classes from the Swagger definition.
-- Catalog tables for offering typical **lookup tables**, like ISO country codes, ZIP codes, ... 
+- Catalog tables for offering typical **lookup tables**, like ISO country codes or ZIP codes. **Hint:** For this task there is already another separate [GitHub project giraone/catalog-jee-01](https://github.com/giraone/catalog-jee-01)
 

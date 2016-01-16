@@ -12,7 +12,4 @@ public class EmployeePostalAddress_ extends PostalAddress_
 	public static final String SQL_NAME = "PostalAddress";
 	public static final String SQL_NAME_employee = "employee";
 	public static final String SQL_NAME_employeeId = "employeeId";
-	
-	public static final String DTO_NAME = "PostalAddress";
-	public static final String DTO_NAME_employeeId = "employeeId";
 }

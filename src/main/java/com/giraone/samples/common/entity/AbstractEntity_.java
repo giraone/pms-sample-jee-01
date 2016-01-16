@@ -1,4 +1,4 @@
-package com.giraone.samples.pmspoc1.entity;
+package com.giraone.samples.common.entity;
 
 public class AbstractEntity_
 {

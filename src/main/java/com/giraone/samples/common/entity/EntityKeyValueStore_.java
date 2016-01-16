@@ -1,22 +1,17 @@
 package com.giraone.samples.common.entity;
 
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
-import javax.validation.constraints.Size;
-
-import com.giraone.samples.pmspoc1.entity.AbstractEntity_;
 
 @StaticMetamodel(EntityKeyValueStore.class)
 public class EntityKeyValueStore_ extends AbstractEntity_
 {
-	public static volatile SingularAttribute<EntityKeyValueStore, Long> oid;
-	public static volatile SingularAttribute<EntityKeyValueStore, String> identification;
-	public static volatile SingularAttribute<EntityKeyValueStore, String> description;
+	// Currently not needed/used.
+	// public static volatile SingularAttribute<EntityKeyValueStore, String> name;
+	// public static volatile SingularAttribute<EntityKeyValueStore, String> type;
+	// public static volatile SingularAttribute<EntityKeyValueStore, Date> valueTimestamp;
+	
+	public static final String DEFAULT_SQL_PARENT_NAME = "parent";
+	public static final String DEFAULT_SQL_PARENT_ID_NAME = "parentId";
 	
 	public static final String SQL_NAME = "EntityKeyValueStore";
 	public static final String SQL_NAME_name = "name";

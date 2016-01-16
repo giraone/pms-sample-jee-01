@@ -14,21 +14,18 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.giraone.samples.common.entity.enums.EnumInteger;
-import com.giraone.samples.common.entity.enums.EnumString;
 import com.giraone.samples.common.entity.enums.EnumValueType;
 import com.giraone.samples.common.entity.enums.StringEnumeration;
+import com.giraone.samples.common.utilities.lang.EnumInteger;
+import com.giraone.samples.common.utilities.lang.EnumString;
 
 /**
- * An abstract JPA entity to store properties of an entity (or resource in REST terms) not in
- * columns of the corresponding SQL table, but in key value rows of an associated key value table.
+ * An abstract JPA entity to store properties of an entity not in columns of a single corresponding SQL table,
+ * but in key value rows of an associated key value table.
  */
 @MappedSuperclass
 public abstract class EntityKeyValueStore<T>
-{
-	public static final String DEFAULT_SQL_PARENT_NAME = "parent";
-	public static final String DEFAULT_SQL_PARENT_ID_NAME = "parentId";
-	
+{	
 	private static final Long BOOLEAN_FALSE = new Long(0);
 	private static final Long BOOLEAN_TRUE = new Long(1);
 	
