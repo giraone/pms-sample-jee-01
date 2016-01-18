@@ -1,4 +1,4 @@
-package com.giraone.samples.pmspoc1.boundary.core.dto;
+package com.giraone.samples.pmspoc1.boundary.dto;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

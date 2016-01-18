@@ -51,7 +51,7 @@ The running solution is hosted currently on 3 PaaS provider sites:
 | JEE container | JBoss Wildfly 9.0.1 | IBM WebSphere Liberty 8.5.5.8 | IBM WebSphere Liberty 8.5.5.7 |
 | Database      | PostgreSQL 9.2      | IBM DB2                       | ElephantSQL (PostgreSQL 9.4.4)|
 | JPA provider  | Hibernate           | EclipseLink                   | EclipseLink                   |
-| JAX-RS        | Resteasy/Jersey     | ?/Jackson                     | ?/Jackson                     |
+| JAX-RS/JSON   | Resteasy/Jersey     | CXF/Jackson                   | CXF/Jackson                   |
   
 - In local development environments the code was tested with:
   - JEE container:
@@ -173,6 +173,9 @@ This is not a good idea together with I18N! Best solution would be to separate t
 
 - Usage of `@XmlRootElement` vs. `@JsonSerialize` to serialize the JAX-RS DTOs is an open issues. This includes some decisions, e.g. how to serialize date and time values: ISO strings vs. long values? This should be addressed together with the contract-first approach.
 
+- Logging
+  - There is only a simple Log4J 2 configuration yet.
+  
 - Build/Deploy improvements
   - For the different environments, we should use Maven profiles in the [pom.xml](pom.xml).
 

@@ -1,4 +1,4 @@
-package com.giraone.samples.pmspoc1.boundary.core.dto;
+package com.giraone.samples.pmspoc1.boundary.dto;
 
 public class EmployeePostalAddressDTO_ extends PostalAddressDTO_
 {

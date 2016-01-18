@@ -1,4 +1,4 @@
-package com.giraone.samples.pmspoc1.boundary.core;
+package com.giraone.samples.pmspoc1.boundary;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -41,13 +41,16 @@ import com.giraone.samples.common.entity.UserTransactionConstraintViolationExcep
 import com.giraone.samples.common.entity.UserTransactionException;
 import com.giraone.samples.common.entity.UserTransactional;
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
-import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterDTO;
-import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeDTO;
-import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeePostalAddressDTO;
-import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeSummaryDTO;
-import com.giraone.samples.pmspoc1.boundary.core.dto.EmployeeWithPropertiesDTO;
+import com.giraone.samples.pmspoc1.boundary.dto.CostCenterDTO;
+import com.giraone.samples.pmspoc1.boundary.dto.EmployeeDTO;
+import com.giraone.samples.pmspoc1.boundary.dto.EmployeeDocumentDTO;
+import com.giraone.samples.pmspoc1.boundary.dto.EmployeePostalAddressDTO;
+import com.giraone.samples.pmspoc1.boundary.dto.EmployeeSummaryDTO;
+import com.giraone.samples.pmspoc1.boundary.dto.EmployeeWithPropertiesDTO;
 import com.giraone.samples.pmspoc1.entity.CostCenter;
 import com.giraone.samples.pmspoc1.entity.Employee;
+import com.giraone.samples.pmspoc1.entity.EmployeeDocument;
+import com.giraone.samples.pmspoc1.entity.EmployeeDocument_;
 import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress;
 import com.giraone.samples.pmspoc1.entity.EmployeePostalAddress_;
 import com.giraone.samples.pmspoc1.entity.Employee_;
@@ -353,6 +356,8 @@ public class EmployeeEndpoint extends BaseEndpoint
 		return Response.noContent().build();
 	}
 
+	//-- ADDRESS ---------------------------------------------------------------------------------------------
+
 	/**
 	 * Find an employee address by its object id.
 	 * @param id	The entity object id.
@@ -501,6 +506,8 @@ public class EmployeeEndpoint extends BaseEndpoint
 		em.remove(entity);
 		return Response.noContent().build();
 	}
+
+	//-- SUMMARY ---------------------------------------------------------------------------------------------
 	
     @GET
     @Path("/summary")
@@ -517,6 +524,43 @@ public class EmployeeEndpoint extends BaseEndpoint
         return Response.ok(dto).build();
     }
     
+    //--------------------------------------------------------------------------------------------------------
+    
+	/**
+	 * Find an employee address by its object id.
+	 * @param id	The entity object id.
+	 * @return	A found {@link EmployeePostalAddressDTO} object (status 200) or status "not found (404).
+	 */
+	@GET
+	@Path("/{employeeId:[0-9][0-9]*}/documents/{documentId:[0-9][0-9]*}")
+	@Produces("application/json; charset=UTF-8")
+	public Response findDocumentById(@PathParam("employeeId") long employeeId, @PathParam("documentId") long documentId)
+	{
+		final CriteriaBuilder cb = em.getCriteriaBuilder();
+		final CriteriaQuery<EmployeeDocument> c = cb.createQuery(EmployeeDocument.class);
+		final Root<EmployeeDocument> table = c.from(EmployeeDocument.class);		
+		final CriteriaQuery<EmployeeDocument> select = c.select(table);
+		final Predicate predicate = cb.and(
+			cb.equal(table.get(EmployeeDocument_.employee).get(Employee_.oid), employeeId),
+			cb.equal(table.get(EmployeeDocument_.oid), documentId));
+		select.where(predicate);
+		final TypedQuery<EmployeeDocument> tq = em.createQuery(select);
+
+		final EmployeeDocument entity = PersistenceUtil.sanityCheckForSingleResultList(tq.getResultList(),
+			EmployeeDocument_.SQL_NAME_oid);
+		if (entity != null)
+		{
+			EmployeeDocumentDTO dto = new EmployeeDocumentDTO(entity);
+			return Response.ok(dto).build();
+		}
+		else
+		{
+			return Response.status(Status.NOT_FOUND).build();
+		}
+	}
+	
+    //--------------------------------------------------------------------------------------------------------
+
     public Object handleUserTransactionException(UserTransactionException userTransactionException)
     {
     	if (logger.isDebugEnabled())

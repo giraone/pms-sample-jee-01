@@ -42,11 +42,11 @@ import com.giraone.samples.pmspoc1.entity.enums.EnumGender;
  * <li>Employees may have 0 to n postal addresses, which have an order. When an employee is
  * removed, the postal addresses are removed also.</li>
  * <li>Employees have two kinds of attributes:</li>
- * <ul>
- * <li>Those, that are stored in the "main" SQL table, because the attributes are primary keys, foreign keys,
+ *  <ul>
+ *  <li>Those, that are stored in the "main" SQL table, because the attributes are primary keys, foreign keys,
  * attributes that are used in queries or joins.</li>
- * <li>Everything else. The other attributes are stored in a key value table.
- * </ul>
+ *  <li>Everything else. The other attributes are stored in a key value table.
+ *  </ul>
  * </ul>
  */
 @Entity

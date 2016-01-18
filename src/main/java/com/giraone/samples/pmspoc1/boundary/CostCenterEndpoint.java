@@ -1,4 +1,4 @@
-package com.giraone.samples.pmspoc1.boundary.core;
+package com.giraone.samples.pmspoc1.boundary;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,8 +36,8 @@ import com.giraone.samples.common.entity.UserTransactionConstraintViolationExcep
 import com.giraone.samples.common.entity.UserTransactionException;
 import com.giraone.samples.common.entity.UserTransactional;
 import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
-import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterDTO;
-import com.giraone.samples.pmspoc1.boundary.core.dto.CostCenterSummaryDTO;
+import com.giraone.samples.pmspoc1.boundary.dto.CostCenterDTO;
+import com.giraone.samples.pmspoc1.boundary.dto.CostCenterSummaryDTO;
 import com.giraone.samples.pmspoc1.entity.CostCenter;
 import com.giraone.samples.pmspoc1.entity.CostCenter_;
 

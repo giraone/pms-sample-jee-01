@@ -12,7 +12,9 @@ import java.util.Map;
  * @param <T>	The JPA key value store class, where the attributes are stored.
  */
 public abstract class EntityWithProperties<S, T extends EntityKeyValueStore<S>>
-{
+{	
+	public static final String JAVA_PROPERTIES_MAP_NAME = "properties";
+	
 	Class<S> parentClass;
 	Class<T> keyValueClass;
 	
