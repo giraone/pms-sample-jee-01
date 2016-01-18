@@ -35,11 +35,17 @@
 
 
 			<!-- Properties for EclipseLink (ignored in non-EclipseLink environments) -->
-			<property name="eclipselink.ddl-generation" value="create-or-extend-tables" /> <!-- UPDATE tables, if needed -->		
-			<!-- <property name="eclipselink.ddl-generation" value="create-tables" /> --> <!-- CREATE tables -->
+			<!-- <property name="eclipselink.ddl-generation" value="create-or-extend-tables" /> --> <!-- UPDATE tables, if needed -->		
+			<property name="eclipselink.ddl-generation" value="create-tables" /> <!-- CREATE tables -->
 			<!-- <property name="eclipselink.ddl-generation" value="drop-and-create-tables" /> --> <!-- DROP and CREATE tables -->			
-			<property name="eclipselink.ddl-generation.output-mode" value="database" /> <!-- Needed for create-or-extend-tables -->			
-				
+			
+			<!-- Only for DDL script generation -->
+			<!--
+			<property name="eclipselink.application-location" value="C:/Workspaces/GitHub/pms-sample-jee-01/sql" />
+			<property name="eclipselink.create-ddl-jdbc-file-name" value="create-tables.sql" />
+			<property name="eclipselink.drop-ddl-jdbc-file-name" value="drop-tables.sql" />
+			-->
+			
 			<!-- Optimization - statement caching -->
 			<property name="eclipselink.jdbc.cache-statements" value="true" />
 
