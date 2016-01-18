@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
@@ -20,6 +21,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import javax.transaction.UserTransaction;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -27,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
-import com.giraone.samples.common.entity.UserTransactional;
 import com.giraone.samples.pmspoc1.entity.Employee;
 import com.giraone.samples.pmspoc1.entity.EmployeeDocument;
 
@@ -50,13 +52,18 @@ public class EmployeeDocumentPostServlet extends HttpServlet
     
     @PersistenceContext(unitName = PmsCoreApi.PERSISTENCE_UNIT)
     private EntityManager em;
-        
+       
+    @Resource
+	private UserTransaction userTransaction;
+    
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException
-    {
-		System.err.println("DocumentPostServlet.doPost");
-		
+    {	
 		String employeeIdString = request.getParameter("employeeId");
+		if (logger != null && logger.isDebugEnabled())
+		{
+			logger.debug(LOG_TAG, "EmployeeDocumentPostServlet.doPost employeeId=" + employeeIdString);
+		}
 		long employeeId;
 		try
 		{
@@ -111,12 +118,33 @@ public class EmployeeDocumentPostServlet extends HttpServlet
 		}
     }
 	
-	@UserTransactional
 	private void saveDocument(EmployeeDocument document)
 	{
+		try
+		{
+			userTransaction.begin();
+		}
+		catch (Exception e)
+		{
+			if (logger != null)
+				logger.error(LOG_TAG, "Cannot open transaction.", e);
+			throw new WebApplicationException("Cannot open transaction.", Status.SERVICE_UNAVAILABLE.getStatusCode());
+		}
+		
 		em.persist(document);		
 		if (logger != null && logger.isInfoEnabled())
 			logger.info(LOG_TAG, "Document created with OID=" + document.getOid());
+		
+		try
+		{
+			userTransaction.commit();
+		}
+		catch (Exception e)
+		{
+			if (logger != null)
+				logger.error(LOG_TAG, "Cannot open transaction.", e);
+			throw new WebApplicationException("Cannot commit transaction.", Status.SERVICE_UNAVAILABLE.getStatusCode());
+		}
 	}
 	
 	private static long readBlob(InputStream in, OutputStream out)
