@@ -43,7 +43,7 @@ public class BaseEndpoint
 	private static final String CORS_ALLOW_METHODS_HEADER = "Access-Control-Allow-Methods";
 	private static final String CORS_ALLOW_REQUEST_HEADER = "Access-Control-Allow-Headers";
 
-	private static final int THROTTLE_MSEC = 0; // 1000;
+	private static final int THROTTLE_MSEC = "true".equals(System.getProperty("com.giraone.boundary.throttle1sec")) ? 1000 : 0;
 
 	@Inject
 	protected Logger logger;
