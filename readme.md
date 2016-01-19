@@ -1,6 +1,6 @@
 # Kickstart 1 for JEE (JAX-RS/EJB/JPA) Web Application #
 
-This project is indented to show the basic modules of a modern REST-based web application with a ***back-end based on core JEE technology***, like JPA, EJB and JAX-RS and a ***front-end based on HTML5/JS/CSS3*** using the "main stream frameworks" *Google Angular 2* and *Twitter Bootstrap*. From a functional perspective, it is designed to be a CRUD application with some more features, than a typical TODO list application normally has. The starter project should be easily understandable for everybody and comes with only three entities
+This project is indented to show the basic modules of a modern REST-based web application with a ***back-end based on core JEE technology***, like JPA, EJB and JAX-RS and a ***front-end based on HTML5/JS/CSS3*** using the "main stream frameworks" *Google Angular 2* and *Twitter Bootstrap*. From a functional perspective, it is designed to be a CRUD application with some more features, than a typical todo list application normally has. The starter project should be easily understandable for everybody and comes with only three entities
 
 - Cost centers
 - Employees

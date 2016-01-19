@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
@@ -17,7 +18,9 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.UserTransaction;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -33,6 +36,7 @@ import org.apache.logging.log4j.MarkerManager;
 
 import com.giraone.samples.common.boundary.BaseEndpoint;
 import com.giraone.samples.common.boundary.MultipartRequestMap;
+import com.giraone.samples.common.entity.UserTransactional;
 import com.giraone.samples.pmspoc1.entity.Employee;
 import com.giraone.samples.pmspoc1.entity.EmployeeDocument;
 
@@ -51,11 +55,12 @@ public class EmployeeDocumentEndpoint extends BaseEndpoint
 	
     @PersistenceContext(unitName = PmsCoreApi.PERSISTENCE_UNIT)
     private EntityManager em;
-
+    
     @POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces("application/json; charset=UTF-8")
+    @UserTransactional
 	public Response uploadFileUsingMultipartPost(@Context HttpServletRequest request)
 	{
     	MultipartRequestMap map;

@@ -398,7 +398,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}/addresses")
 	@Produces("application/json; charset=UTF-8")
-    public List<EmployeePostalAddressDTO> listAll(@PathParam("employeeId") long employeeId)
+    public List<EmployeePostalAddressDTO> listAllPostalAddresses(@PathParam("employeeId") long employeeId)
     {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<EmployeePostalAddress> c = cb.createQuery(EmployeePostalAddress.class);
@@ -527,9 +527,9 @@ public class EmployeeEndpoint extends BaseEndpoint
     //--------------------------------------------------------------------------------------------------------
     
 	/**
-	 * Find an employee address by its object id.
+	 * Find an employee's document by its object id.
 	 * @param id	The entity object id.
-	 * @return	A found {@link EmployeePostalAddressDTO} object (status 200) or status "not found (404).
+	 * @return	A found {@link EmployeeDocumentDTO} object (status 200) or status "not found (404).
 	 */
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}/documents/{documentId:[0-9][0-9]*}")
@@ -558,6 +558,32 @@ public class EmployeeEndpoint extends BaseEndpoint
 			return Response.status(Status.NOT_FOUND).build();
 		}
 	}
+
+    /**
+     * List all documents of an employee ordered by their ranking.
+     * @return list of {@link EmployeePostalAddressDTO} object.
+     */
+	@GET
+	@Path("/{employeeId:[0-9][0-9]*}/documents")
+	@Produces("application/json; charset=UTF-8")
+    public List<EmployeeDocumentDTO> listAllDocuments(@PathParam("employeeId") long employeeId)
+    {    	
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<EmployeeDocument> c = cb.createQuery(EmployeeDocument.class);
+        final Root<EmployeeDocument> table = c.from(EmployeeDocument.class);
+        final CriteriaQuery<EmployeeDocument> select = c.select(table);
+        select.where(cb.equal(table.get(EmployeeDocument_.employee).get(Employee_.oid), employeeId));
+        select.orderBy(cb.asc(table.get(EmployeeDocument_.publishingDate)));
+        final TypedQuery<EmployeeDocument> tq = em.createQuery(select);              
+        final List<EmployeeDocument> searchResults = tq.getResultList();
+        final List<EmployeeDocumentDTO> results = new ArrayList<EmployeeDocumentDTO>();
+        for (EmployeeDocument searchResult : searchResults)
+        {
+        	EmployeeDocumentDTO dto = new EmployeeDocumentDTO(searchResult);
+            results.add(dto);
+        }
+        return results;
+    }
 	
     //--------------------------------------------------------------------------------------------------------
 
