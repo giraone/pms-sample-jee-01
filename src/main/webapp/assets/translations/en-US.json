@@ -10,6 +10,7 @@
     "noNotifications": "No notification!",
     "back": "Back",
     "delete": "Delete",
+    "show": "Show",
     "requestError": "Request failed! Please try again later.",
     "requestErrorUnprocessable": "Cannot store data! Duplicate key attributes.",
     "requestErrorConflict": "Cannot store data! Data was modified by somebody else and is not up-to-date.",
@@ -65,6 +66,7 @@
     "successUpdate": "Cost center has been updated!",
     "tab0Title": "Master Data",
     "tab1Title": "Postal Addresses",
+    "tab2Title": "Documents",
     "identification": "Unique identification",
     "identification_placeholder": "Enter a unique identification",
     "description": "Description",
@@ -211,6 +213,30 @@
     "poBoxNumber": {
       "label": "P.O. Box Number",
       "placeholder": "P.O. Box Number for post box addresses"
+    }
+  },
+  "employeeDocument": {
+    "add": "Add document",
+    "delete": "Delete document",
+    "deleteSuccess": "Selected document of employee was deleted.",
+    "noDocuments": "No documents available!",
+    "businessType": {
+      "label": "Type",
+      "image": {
+        "portrait": "Photo"
+      },
+      "document": {
+        "contract": "Contract"
+      }
+    },
+    "mimeType": {
+      "label": "Format"
+    },
+    "publishingDate": {
+      "label": "Date"
+    },
+    "byteSize": {
+      "label": "Size"
     }
   }
 }
