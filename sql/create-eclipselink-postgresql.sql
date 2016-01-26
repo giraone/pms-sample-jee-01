@@ -38,6 +38,20 @@ CREATE TABLE EmployeeDocument
  PRIMARY KEY (oid)
 )
 
+CREATE TABLE EmployeeDocument
+(
+ oid INT8 NOT NULL,
+ businesstype VARCHAR(128) NOT NULL,
+ bytesize INT8 NOT NULL,
+ bytes BYTEA(2147483647),
+ mimetype VARCHAR(128) NOT NULL,
+ publishingdate DATE,
+ versionnumber INT4,
+ employeeid INT8 NOT NULL,
+ originalid INT8,
+ PRIMARY KEY (oid)
+);
+	
 CREATE TABLE CostCenter
 (
  oid BIGINT NOT NULL,
@@ -64,7 +78,9 @@ ALTER TABLE PostalAddress ADD CONSTRAINT FK_PostalAddress_employeeId FOREIGN KEY
 
 ALTER TABLE EmployeeProperties ADD CONSTRAINT FK_EmployeeProperties_parentId FOREIGN KEY (parentId) REFERENCES Employee (oid)
 
-ALTER TABLE Employee ADD CONSTRAINT FK_Employee_COSTCENTER_oid FOREIGN KEY (COSTCENTER_oid) REFERENCES CostCenter (oid)
+ALTER TABLE Employee ADD CONSTRAINT FK_Employee_CostCenter_oid FOREIGN KEY (COSTCENTER_oid) REFERENCES CostCenter (oid)
+
+ALTER TABLE EmployeeDocument ADD CONSTRAINT FK_EmployeeDocument_originalid FOREIGN KEY (originalid) REFERENCES EmployeeDocument (oid);
 
 CREATE TABLE SEQUENCE (SEQ_NAME VARCHAR(50) NOT NULL, SEQ_COUNT DECIMAL(38), PRIMARY KEY (SEQ_NAME))
 
