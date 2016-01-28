@@ -10,17 +10,13 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.UserTransaction;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -37,11 +33,12 @@ import org.apache.logging.log4j.MarkerManager;
 import com.giraone.samples.common.boundary.BaseEndpoint;
 import com.giraone.samples.common.boundary.MultipartRequestMap;
 import com.giraone.samples.common.entity.UserTransactional;
+import com.giraone.samples.pmspoc1.boundary.blobs.MimeTypeUtil;
 import com.giraone.samples.pmspoc1.entity.Employee;
 import com.giraone.samples.pmspoc1.entity.EmployeeDocument;
 
 /**
- * REST end point for CRUD operations on "cost center" entities.
+ * REST end point for CRUD operations on "Employee" entities.
  */
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
@@ -74,7 +71,8 @@ public class EmployeeDocumentEndpoint extends BaseEndpoint
 			return Response.status(Response.Status.BAD_REQUEST).entity("Cannot parse multi-part: " + e.getMessage()).build();
 		}
 
-    	logger.debug(LOG_TAG, "CCCCCCCCCCCCCC " + map);
+    	logger.debug(LOG_TAG, "uploadFileUsingMultipartPost map=" + map);
+    	
     	long employeeId = Long.parseLong(map.getStringParameter("employeeId"));
     	String businessType = map.getStringParameter("businessType");
     	String mimeType = map.getStringParameter("mimeType");
@@ -95,6 +93,10 @@ public class EmployeeDocumentEndpoint extends BaseEndpoint
 			logger.debug(LOG_TAG, "#EmployeeDocumentEndpoint.uploadFileUsingMultipartPost#" + file.getAbsolutePath().substring(0, Math.min(file.getAbsolutePath().length(), 80)) + "#");
 		}
 		
+		if (!MimeTypeUtil.isKnownType(mimeType))
+		{
+			return Response.status(Response.Status.BAD_REQUEST).entity("Invalid MIME type " + mimeType).build();
+		}
 		EmployeeDocument document = new EmployeeDocument();
 		Employee employee = em.find(Employee.class, employeeId);
 		if (employee == null)
@@ -103,10 +105,9 @@ public class EmployeeDocumentEndpoint extends BaseEndpoint
 		}
 		
 		document.setEmployee(employee);
-		document.setBusinessType(businessType);
-		//TODO: MIME Type check
+		document.setBusinessType(businessType);		
 		document.setMimeType(mimeType);
-		document.setDocumentBytesSize(file.length());
+		document.setByteSize(file.length());
 		
 		try
 		{
@@ -178,9 +179,9 @@ public class EmployeeDocumentEndpoint extends BaseEndpoint
 		{
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			long size = pipeBlob(in, out);
-			if (size != document.getDocumentBytesSize())
+			if (size != document.getByteSize())
 			{
-				throw new IllegalStateException("File " + file.getAbsolutePath() + " was " + document.getDocumentBytesSize()
+				throw new IllegalStateException("File " + file.getAbsolutePath() + " was " + document.getByteSize()
 					+ "Bytes. Buffer read was " + size + " Bytes!");
 			}
 			document.setDocumentBytes(out.toByteArray());

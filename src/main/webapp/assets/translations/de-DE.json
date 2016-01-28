@@ -10,6 +10,7 @@
     "noNotifications": "Keine Hinweise!",
     "back": "Zurück",
     "delete": "Löschen",
+    "show": "Anzeigen",
     "requestError": "Anfrage konnte nicht ausgeführt werden! Bitte probieren Sie es später noch einmal.",
     "requestErrorUnprocessable": "Speichern konnte nicht ausgeführt werden! Schlüssel nicht eindeutig.",
     "requestErrorConflict": "Speichern konnte nicht ausgeführt werden! Daten wurde von einem anderen Anwender geändert und sind nicht mehr aktuell.",
@@ -92,6 +93,7 @@
     "successUpdate": "Mitarbeiter wurde geändert!",
     "tab0Title": "Stammdaten",
     "tab1Title": "Postadressen",
+    "tab2Title": "Dokumente",
     "personnelNumber": {
       "label": "Personalnummer",
       "placeholder": "Geben Sie eine eindeutige Personalnummer ein"
@@ -210,6 +212,30 @@
     "poBoxNumber": {
       "label": "Postfachnummer",
       "placeholder": "Postfach bei Postfachadressen"
+    }
+  },
+  "employeeDocument": {
+    "add": "Dokument hinzufügen",
+    "delete": "Dokument löschen",
+    "deleteSuccess": "Ausgewähltes Dokument des Mitarbeiters wurde gelöscht.",
+    "noDocuments": "Keine Dokumente hinterlegt!",
+    "businessType": {
+      "label": "Typ",
+      "image": {
+        "portrait": "Foto"
+      },
+      "document": {
+        "contract": "Vertrag"
+      }
+    },
+    "mimeType": {
+      "label": "Format"
+    },
+    "publishingDate": {
+      "label": "Datum"
+    },
+    "byteSize": {
+      "label": "Größe"
     }
   }
 }

@@ -86,7 +86,7 @@ public class EmployeeDocumentPostServlet extends HttpServlet
 		
 		InputStream fileContent = filePart.getInputStream();		   
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		long bytesSize = readBlob(fileContent, out);
+		long byteSize = readBlob(fileContent, out);
 		
 		EmployeeDocument document = new EmployeeDocument();
 		Employee employee = em.find(Employee.class, employeeId);
@@ -101,7 +101,7 @@ public class EmployeeDocumentPostServlet extends HttpServlet
 		document.setEmployee(employee);
 		document.setBusinessType(businessType);
 		document.setMimeType(mimeType);
-		document.setDocumentBytesSize(bytesSize);
+		document.setByteSize(byteSize);
 		document.setDocumentBytes(out.toByteArray());
 				
 		try

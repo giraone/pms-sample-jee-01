@@ -1,5 +1,6 @@
 package com.giraone.samples.pmspoc1.boundary;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -17,6 +18,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -27,6 +30,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -40,7 +44,9 @@ import com.giraone.samples.common.entity.PersistenceUtil;
 import com.giraone.samples.common.entity.UserTransactionConstraintViolationException;
 import com.giraone.samples.common.entity.UserTransactionException;
 import com.giraone.samples.common.entity.UserTransactional;
-import com.giraone.samples.pmspoc1.boundary.PmsCoreApi;
+import com.giraone.samples.pmspoc1.boundary.blobs.BlobManager;
+import com.giraone.samples.pmspoc1.boundary.blobs.BlobModelConfig;
+import com.giraone.samples.pmspoc1.boundary.blobs.MimeTypeUtil;
 import com.giraone.samples.pmspoc1.boundary.dto.CostCenterDTO;
 import com.giraone.samples.pmspoc1.boundary.dto.EmployeeDTO;
 import com.giraone.samples.pmspoc1.boundary.dto.EmployeeDocumentDTO;
@@ -62,9 +68,35 @@ import com.giraone.samples.pmspoc1.entity.Employee_;
 @TransactionManagement(TransactionManagementType.BEAN)
 @Path("/employees")
 public class EmployeeEndpoint extends BaseEndpoint
-{		
+{	
+	final static BlobModelConfig BlobModelConfig = new BlobModelConfig(
+		EmployeeDocument.class.getSimpleName(),
+		EmployeeDocument_.SQL_NAME_oid,
+		EmployeeDocument_.SQL_NAME_bytes,
+		EmployeeDocument_.SQL_NAME_byteSize);
+
+	
 	@PersistenceContext(unitName = PmsCoreApi.PERSISTENCE_UNIT)
 	private EntityManager em;
+
+	//-- SUMMARY ---------------------------------------------------------------------------------------------
+	
+    @GET
+    @Path("/summary")
+    @Produces("application/json; charset=UTF-8")
+    public Response employeeSummary()
+    {    	
+    	CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+		Root<Employee> table = countQuery.from(Employee.class);
+		countQuery.select(cb.count(table));
+		long count = em.createQuery(countQuery).getSingleResult().longValue();
+        Calendar lastUpdate = new GregorianCalendar(); // Currently a simple time stamp is returned 
+        EmployeeSummaryDTO dto = new EmployeeSummaryDTO(count, lastUpdate);
+        return Response.ok(dto).build();
+    }
+
+	//-- EMPLOYEE --------------------------------------------------------------------------------------------
 
 	/**
 	 * Find an employee by its object id.
@@ -74,7 +106,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}")
 	@Produces("application/json; charset=UTF-8")
-	public Response findById(@PathParam("employeeId") long employeeId)
+	public Response findEmployeeById(@PathParam("employeeId") long employeeId)
 	{		
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
 		final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
@@ -117,7 +149,7 @@ public class EmployeeEndpoint extends BaseEndpoint
     @GET
     @Path("/pnr-{personnelNumber:[0-9a-zA-Z][0-9a-zA-Z]*}")
     @Produces("application/json; charset=UTF-8")
-    public Response findByPersonnelNumber(@PathParam("personnelNumber") String personnelNumber)
+    public Response findEmployeeByPersonnelNumber(@PathParam("personnelNumber") String personnelNumber)
     {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
@@ -159,7 +191,7 @@ public class EmployeeEndpoint extends BaseEndpoint
      */
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	public Response listBlock(
+	public Response listEmployeeBlockwise(
 		@QueryParam("filter") @DefaultValue("") String filter,
 		@QueryParam("orderby") @DefaultValue("") String orderby,
 		@QueryParam("skip") @DefaultValue("0") int skip,
@@ -233,7 +265,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@POST
 	@Consumes("application/json")
 	@UserTransactional
-	public Response create(EmployeeWithPropertiesDTO dto)
+	public Response createEmployee(EmployeeWithPropertiesDTO dto)
 	{  
 		final Employee entity;
 		try
@@ -266,7 +298,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@Path("/{employeeId:[0-9][0-9]*}")
 	@Consumes("application/json")
 	@UserTransactional
-	public Response update(@PathParam("employeeId") long employeeId, EmployeeWithPropertiesDTO dto)
+	public Response updateEmployee(@PathParam("employeeId") long employeeId, EmployeeWithPropertiesDTO dto)
 	{    	
 		if (dto == null || employeeId == 0)
 		{
@@ -345,7 +377,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@DELETE
 	@Path("/{employeeId:[0-9][0-9]*}")
 	@UserTransactional
-	public Response deleteById(@PathParam("employeeId") long employeeId)
+	public Response deleteEmployeeById(@PathParam("employeeId") long employeeId)
 	{    	
 		Employee entity = em.find(Employee.class, employeeId);
 		if (entity == null)
@@ -360,7 +392,8 @@ public class EmployeeEndpoint extends BaseEndpoint
 
 	/**
 	 * Find an employee address by its object id.
-	 * @param id	The entity object id.
+	 * @param employeeId	The employee's object id.
+	 * @param addressId		The postal addresses object id.
 	 * @return	A found {@link EmployeePostalAddressDTO} object (status 200) or status "not found (404).
 	 */
 	@GET
@@ -393,6 +426,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 
     /**
      * List all postal addresses of an employee ordered by their ranking.
+     * @param employeeId	The employee's object id.
      * @return list of {@link EmployeePostalAddressDTO} object.
      */
 	@GET
@@ -419,14 +453,15 @@ public class EmployeeEndpoint extends BaseEndpoint
  
 	/**
 	 * Create a new employee address
-	 * @param dto the new employee postal address data.
+	 * @param employeeId	The employee's object id.
+	 * @param dto 			The new employee postal address data.
 	 * @return Status CREATED (success), BAD_REQUEST (argument fault), NOT_FOUND (created but not found in DB);
 	 */
 	@POST
 	@Path("/{employeeId:[0-9][0-9]*}/addresses")
 	@Consumes("application/json")
 	@UserTransactional
-	public Response create(@PathParam("employeeId") long employeeId, EmployeePostalAddressDTO dto)
+	public Response createPostalAddress(@PathParam("employeeId") long employeeId, EmployeePostalAddressDTO dto)
 	{    			
 		Employee employee = em.find(Employee.class, employeeId);
 		if (employee == null)
@@ -451,11 +486,17 @@ public class EmployeeEndpoint extends BaseEndpoint
 			.build();
 	}
 
+	/**
+	 * Update an employee's postal address using its object id.
+	 * @param employeeId	The employee's object id.
+	 * @param addressId		The postal addresses object id.
+	 * @return NOT_FOUND (address not found), CONFLICT (id mismatch) or NO_CONTENT (success).
+	 */
 	@PUT
 	@Path("/{employeeId:[0-9][0-9]*}/addresses/{addressId:[0-9][0-9]*}")
 	@Consumes("application/json")
 	@UserTransactional
-	public Response update(@PathParam("employeeId") long employeeId, @PathParam("addressId") long addressId,
+	public Response updatePostalAddress(@PathParam("employeeId") long employeeId, @PathParam("addressId") long addressId,
 		EmployeePostalAddressDTO dto)
 	{    	
 		if (dto == null || employeeId == 0L || addressId == 0L)
@@ -490,13 +531,14 @@ public class EmployeeEndpoint extends BaseEndpoint
 
 	/**
 	 * Delete an employee's postal address using its object id.
-	 * @param id	the postal address object id.
+	 * @param employeeId	The employee's object id.
+	 * @param addressId		The postal addresses object id.
 	 * @return NOT_FOUND (address not found) or NO_CONTENT (success).
 	 */
 	@DELETE
 	@Path("/{employeeId:[0-9][0-9]*}/addresses/{addressId:[0-9][0-9]*}")
 	@UserTransactional
-	public Response deleteById(@PathParam("employeeId") long employeeId, @PathParam("addressId") long addressId)
+	public Response deletePostalAddressById(@PathParam("employeeId") long employeeId, @PathParam("addressId") long addressId)
 	{    	
 		EmployeePostalAddress entity = em.find(EmployeePostalAddress.class, addressId);
 		if (entity == null)
@@ -507,28 +549,12 @@ public class EmployeeEndpoint extends BaseEndpoint
 		return Response.noContent().build();
 	}
 
-	//-- SUMMARY ---------------------------------------------------------------------------------------------
-	
-    @GET
-    @Path("/summary")
-    @Produces("application/json; charset=UTF-8")
-    public Response summary()
-    {    	
-    	CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-		Root<Employee> table = countQuery.from(Employee.class);
-		countQuery.select(cb.count(table));
-		long count = em.createQuery(countQuery).getSingleResult().longValue();
-        Calendar lastUpdate = new GregorianCalendar(); // Currently a simple time stamp is returned 
-        EmployeeSummaryDTO dto = new EmployeeSummaryDTO(count, lastUpdate);
-        return Response.ok(dto).build();
-    }
-    
-    //--------------------------------------------------------------------------------------------------------
+	//-- DOCUMENT --------------------------------------------------------------------------------------------
     
 	/**
 	 * Find an employee's document by its object id.
-	 * @param id	The entity object id.
+	 * @param employeeId	The employee's object id.
+	 * @param documentId	The document's object id.
 	 * @return	A found {@link EmployeeDocumentDTO} object (status 200) or status "not found (404).
 	 */
 	@GET
@@ -536,18 +562,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@Produces("application/json; charset=UTF-8")
 	public Response findDocumentById(@PathParam("employeeId") long employeeId, @PathParam("documentId") long documentId)
 	{
-		final CriteriaBuilder cb = em.getCriteriaBuilder();
-		final CriteriaQuery<EmployeeDocument> c = cb.createQuery(EmployeeDocument.class);
-		final Root<EmployeeDocument> table = c.from(EmployeeDocument.class);		
-		final CriteriaQuery<EmployeeDocument> select = c.select(table);
-		final Predicate predicate = cb.and(
-			cb.equal(table.get(EmployeeDocument_.employee).get(Employee_.oid), employeeId),
-			cb.equal(table.get(EmployeeDocument_.oid), documentId));
-		select.where(predicate);
-		final TypedQuery<EmployeeDocument> tq = em.createQuery(select);
-
-		final EmployeeDocument entity = PersistenceUtil.sanityCheckForSingleResultList(tq.getResultList(),
-			EmployeeDocument_.SQL_NAME_oid);
+		final EmployeeDocument entity = this.fetchEmployeeDocument(employeeId, documentId);
 		if (entity != null)
 		{
 			EmployeeDocumentDTO dto = new EmployeeDocumentDTO(entity);
@@ -560,7 +575,8 @@ public class EmployeeEndpoint extends BaseEndpoint
 	}
 
     /**
-     * List all documents of an employee ordered by their ranking.
+     * List all documents of an employee ordered by their publishing date.
+     * @param employeeId	The employee's object id.
      * @return list of {@link EmployeePostalAddressDTO} object.
      */
 	@GET
@@ -584,6 +600,198 @@ public class EmployeeEndpoint extends BaseEndpoint
         }
         return results;
     }
+
+    /**
+     * Create a new employee document (without content.
+     * @param employeeId	The employee's object id.
+     * @param dto			The document's meta data.
+	 * @return Status CREATED (success), NOT_FOUND (created but not found in DB);
+     */
+	@POST
+	@Path("/{employeeId:[0-9][0-9]*}/documents")
+	@Consumes("application/json")
+	@UserTransactional
+	public Response createDocument(@PathParam("employeeId") long employeeId, EmployeeDocumentDTO dto)
+	{    			
+		Employee employee = em.find(Employee.class, employeeId);
+		if (employee == null)
+		{			
+			return Response.status(Status.NOT_FOUND).build();
+		}		
+		final EmployeeDocument entity = dto.entityFromDTO();
+		entity.setEmployee(employee);
+		entity.setByteSize(-1L);
+		em.persist(entity);
+		
+		return Response
+			.created(UriBuilder.fromResource(EmployeeEndpoint.class)
+				.path(String.valueOf(employeeId))
+				.path("documents")
+				.path(String.valueOf(entity.getOid()))
+				.build())
+			.build();
+	}
+
+
+	/**
+	 * Delete an employee document using its object id.
+     * @param employeeId	The employee's object id.
+     * @param documentId	The document's object id.
+	 * @return NOT_FOUND (document not found) or NO_CONTENT (success).
+	 */
+	@DELETE
+	@Path("/{employeeId:[0-9][0-9]*}/documents/{documentId:[0-9][0-9]*}")
+	@UserTransactional
+	public Response deleteDocumentById(@PathParam("employeeId") long employeeId, @PathParam("documentId") long documentId)
+	{    	
+		EmployeeDocument entity = em.find(EmployeeDocument.class, documentId);
+		if (entity == null)
+		{
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		em.remove(entity);
+		return Response.noContent().build();
+	}
+	
+	/**
+	 * Add or update the BLOB content of an employee's document
+     * @param employeeId	The employee's object id.
+     * @param documentId	The document's object id.
+	 * @param request		The servlet request object, from with the binary content is read.
+	 * @return NOT_FOUND (document not found) or CREATED (success).
+	 */
+	@PUT
+	@Path("/{employeeId:[0-9][0-9]*}/documents/{documentId:[0-9][0-9]*}/content")
+	@UserTransactional
+	public Response updateDocumentContent(
+		@PathParam("employeeId") long employeeId,
+		@PathParam("documentId") long documentId,
+		@Context HttpServletRequest request)
+	{
+		int contentLength = request.getContentLength();
+		String contentType = request.getContentType();
+		
+		if (logger != null && logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "EmployeeEndpoint.updateDocumentContent contentLength=" + contentLength
+				+ ", contentType=" + contentType + ", employeeId=" + employeeId + ", documentId=" + documentId);
+		
+		if (contentLength >= 0 && contentLength < 10) // plausibility check
+		{
+			return Response.status(Status.BAD_REQUEST).entity("ContentLength " + contentLength + " given, but lower than 10 bytes!").build();
+		}
+		BlobManager blobManager = new BlobManager();
+		boolean ret;
+		
+		try
+		{
+			ret = blobManager.streamBlobToDatabase(this.em.unwrap(Connection.class), request.getInputStream(), contentLength, BlobModelConfig, documentId);
+			if (logger != null && logger.isDebugEnabled())
+				logger.debug(LOG_TAG, "EmployeeEndpoint.updateDocumentContent ret=" + ret);
+		}
+		catch (Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Cannot write BLOB of EmployeeDocument " + documentId
+				+ ": " + e.getClass().getName() + " " + e.getMessage()).build();
+		}
+		if (!ret)
+		{
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		
+		return Response
+			.created(UriBuilder.fromResource(EmployeeEndpoint.class)
+				.path(String.valueOf(employeeId))
+				.path("documents")
+				.path(String.valueOf(documentId))
+				.build())
+			.build();
+	}
+
+	/**
+	 * Stream/read the BLOB content of an employee's document. 
+     * @param employeeId	The employee's object id.
+     * @param documentId	The document's object id.
+	 * @param response		The servlet response object, to with the binary content is streamed/written.
+	 * @return NOT_FOUND (document not found), NO_CONTENT (BLOB content is empty) or OK (success).
+	 */
+	@GET
+	@Path("/{employeeId:[0-9][0-9]*}/documents/{documentId:[0-9][0-9]*}/content")
+	@UserTransactional // We need this because otherwise unwrap within BlobManager will not work!
+	public void fetchDocumentContent(
+		@PathParam("employeeId") final long employeeId,
+		@PathParam("documentId") final long documentId,
+		@Context final HttpServletResponse response)
+	{
+		if (logger != null && logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "EmployeeEndpoint.fetchDocumentContent employeeId=" + employeeId + ", documentId=" + documentId);
+				
+		final BlobManager blobManager = new BlobManager();		
+		final EmployeeDocument employeeDocument = this.fetchEmployeeDocument(employeeId, documentId);
+		
+		if (employeeDocument == null)
+		{
+			response.setStatus(Status.NOT_FOUND.getStatusCode());
+			return;
+		}
+		
+		if (logger != null && logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "EmployeeEndpoint.fetchDocumentContent document.byteSize=" + employeeDocument.getByteSize());
+		
+		if (employeeDocument.getByteSize() == -1)
+		{
+			response.setStatus(Status.NO_CONTENT.getStatusCode());
+			return;
+		}
+		
+		String extension = MimeTypeUtil.getExtension(employeeDocument.getMimeType());
+		String fileName = "EmployeeDocument_" + documentId + "." + extension;
+		response.setContentType(employeeDocument.getMimeType());
+	    response.setContentLength((int) employeeDocument.getByteSize());
+		response.setHeader("Content-Disposition", "filename=" + fileName);
+		response.setStatus(Status.OK.getStatusCode());
+		
+		/*
+		This does not work, because the stream is processed asynchronously and the em/connection is closed then!
+		StreamingOutput stream = new StreamingOutput() {
+            @Override
+            public void write(OutputStream os) throws IOException, WebApplicationException {
+            	long size;
+				try
+				{
+					size = blobManager.streamBlobFromDatabase(response.getOutputStream(), BlobModelConfig, documentId);
+				}
+				catch (SQLException e)
+				{
+					e.printStackTrace();
+					if (logger != null)
+						logger.warn("Cannot read BLOB data for EmployeeDocument " + documentId, e);
+					return;
+				}
+    			if (logger != null && logger.isDebugEnabled())
+    				logger.debug(LOG_TAG, "EmployeeEndpoint.fetchDocumentContent " + size + " of " + employeeDocument.getDocumentBytesSize() + " Bytes sent.");
+            }
+        };       
+        return Response.ok(stream).build();
+        */
+		
+		// This is not yet perfect, because setStatus is called from the JAX/RS framework again, which leads to warnings:
+		// "WARNING: Cannot set status. Response already committed."
+		
+		long size = -1L;
+		try
+		{
+			size = blobManager.streamBlobFromDatabase(em.unwrap(Connection.class), response.getOutputStream(), BlobModelConfig, documentId);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			if (logger != null)
+				logger.warn("Cannot read BLOB data for EmployeeDocument " + documentId, e);
+			return;
+		}
+		if (logger != null && logger.isDebugEnabled())
+			logger.debug(LOG_TAG, "EmployeeEndpoint.fetchDocumentContent: " + size + " of " + employeeDocument.getByteSize() + " Bytes sent.");
+	}
 	
     //--------------------------------------------------------------------------------------------------------
 
@@ -607,5 +815,21 @@ public class EmployeeEndpoint extends BaseEndpoint
 			throw new IllegalArgumentException("No costcenter with oid=" + costCenterOid + " found!");
 		}
 		return costCenter;
+    }
+    
+    private EmployeeDocument fetchEmployeeDocument(long employeeId, long documentId)
+    {
+    	final CriteriaBuilder cb = em.getCriteriaBuilder();
+		final CriteriaQuery<EmployeeDocument> c = cb.createQuery(EmployeeDocument.class);
+		final Root<EmployeeDocument> table = c.from(EmployeeDocument.class);		
+		final CriteriaQuery<EmployeeDocument> select = c.select(table);
+		final Predicate predicate = cb.and(
+			cb.equal(table.get(EmployeeDocument_.employee).get(Employee_.oid), employeeId),
+			cb.equal(table.get(EmployeeDocument_.oid), documentId));
+		select.where(predicate);
+		final TypedQuery<EmployeeDocument> tq = em.createQuery(select);
+
+		return PersistenceUtil.sanityCheckForSingleResultList(tq.getResultList(),
+			EmployeeDocument_.SQL_NAME_oid);
     }
 }

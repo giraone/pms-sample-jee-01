@@ -19,8 +19,8 @@ public class EmployeeDocumentDTO implements Serializable
 	protected String businessType;
 	protected Calendar publishingDate;
 	protected String mimeType;
-	protected long documentBytesSize;
-	protected byte[] documentBytes;
+	protected long byteSize;
+	protected byte[] bytes;
 	
 	public EmployeeDocumentDTO()
 	{
@@ -37,7 +37,19 @@ public class EmployeeDocumentDTO implements Serializable
 		this.businessType = entity.getBusinessType();
 		this.publishingDate = entity.getPublishingDate();
 		this.mimeType = entity.getMimeType();
-		this.documentBytesSize = entity.getDocumentBytesSize();
+		this.byteSize = entity.getByteSize();
+	}
+	
+	public EmployeeDocument entityFromDTO()
+	{
+		EmployeeDocument ret = new EmployeeDocument();
+		ret.setVersionNumber(this.versionNumber);
+		ret.setEmployee(this.employee != null ? this.employee.entityFromDTO() : null);
+		ret.setBusinessType(this.businessType);
+		ret.setPublishingDate(this.publishingDate);
+		ret.setMimeType(this.mimeType);
+		ret.setByteSize(this.byteSize);
+		return ret;
 	}
 	
 	public long getOid()
@@ -110,23 +122,23 @@ public class EmployeeDocumentDTO implements Serializable
 		this.mimeType = mimeType;
 	}
 
-	public long getDocumentBytesSize()
+	public long getByteSize()
 	{
-		return documentBytesSize;
+		return byteSize;
 	}
 
-	public void setDocumentBytesSize(long documentBytesSize)
+	public void setByteSize(long byteSize)
 	{
-		this.documentBytesSize = documentBytesSize;
+		this.byteSize = byteSize;
 	}
 
-	public byte[] getDocumentBytes()
+	public byte[] getBytes()
 	{
-		return documentBytes;
+		return bytes;
 	}
 
-	public void setDocumentBytes(byte[] documentBytes)
+	public void setBytes(byte[] bytes)
 	{
-		this.documentBytes = documentBytes;
+		this.bytes = bytes;
 	}
 }

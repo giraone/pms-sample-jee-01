@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Employee document upload using XMLHttpRequest/PUT</title>
+<script type="text/javascript">
+function create()
+{
+	var employeeId = document.getElementById('employeeId').value;
+	var businessType = document.getElementById('businessType').value;
+	var mimeType = document.getElementById('mimeType').value;
+
+	var url = "../api/employees/" + employeeId + "/documents";
+	
+    var xhr = new XMLHttpRequest();
+    var payload = {
+   		"businessType": businessType,
+   		"mimeType": mimeType
+    };
+    
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+        	document.getElementById('result').innerHTML = "RET=" + xhr.status + " - " + xhr.responseText;
+        	if (xhr.status == 201)
+            {
+        		document.getElementById('result').innerHTML += xhr.getResponseHeader("location")
+            }
+        }
+    };
+    document.getElementById('result').innerHTML = "Start";  
+    xhr.send(JSON.stringify(payload));
+}
+function upload()
+{
+	var employeeId = document.getElementById('employeeId').value;
+	var documentId = document.getElementById('documentId').value;
+	var mimeType = document.getElementById('mimeType').value;
+	var file = document.getElementById('file').files[0];
+	if (mimeType != file.type)
+	{
+		alert("Mime type \"" + mimeType + " does not match file's type \"" + file.type + "\"!")
+	}
+	var url = "../api/employees/" + employeeId + "/documents/" + documentId + "/content";
+	
+    var xhr = new XMLHttpRequest();    
+    xhr.open("PUT", url, true);
+    xhr.setRequestHeader("Content-Type", file.type);
+    xhr.setRequestHeader("Content-Length", file.size);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+        	document.getElementById('result').innerHTML = "RET=" + xhr.status + " - " + xhr.responseText;
+        }
+    };     
+    xhr.send(file);
+}
+</script>
+</head>
+<body style="padding:5px;">
+<h1>Employee document upload using XMLHttpRequest/PUT</h1>
+<table>
+<tr><td><label for="employeeId">employeeId</label></td><td><input type="text" id="employeeId" value="146" /></td></tr>
+<tr><td><label for="businessType">businessType</label></td><td><input type="text" id="businessType" value="image.portrait" /></td></tr>
+<tr><td><label for="mimeType">mimeType</label></td><td><input type="text" id="mimeType" value="image/jpeg" /></td></tr>
+</table>
+<input type="button" value="Create document" onclick="create()"/><br />
+
+<table>
+<tr><td><label for="documentId">documentId</label></td><td><input type="text" id="documentId" value="16551" /></td></tr>
+<tr><td><label for="file">file</label></td><td><input type="file" id="file"/></td></tr>
+</table>
+<input type="button" value="Upload" onclick="upload()"/><br />
+
+<p id="result">...</p>
+</body>
+</html>

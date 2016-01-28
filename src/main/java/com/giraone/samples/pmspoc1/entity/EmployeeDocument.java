@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -65,13 +66,18 @@ public class EmployeeDocument implements Serializable
 	@Size(max = 128)
 	private String mimeType;
 
-	@Column(name = EmployeeDocument_.SQL_NAME_bytesSize, nullable = false)	
-	private long documentBytesSize;
+	@Column(name = EmployeeDocument_.SQL_NAME_byteSize, nullable = false)	
+	private long byteSize;
 	
-	@Column(name = EmployeeDocument_.SQL_NAME_documentBytes)	
+	@Column(name = EmployeeDocument_.SQL_NAME_bytes, length = 1024 * 1024 * 1024) // at least 1GB	
 	@Basic(fetch=FetchType.LAZY)
 	@Lob
 	private byte[] documentBytes;
+	
+	/** A reference to the "Original" document. This allows storage of derived document, e.g. thumbnails */
+	@ManyToOne(fetch = FetchType.LAZY, optional = true, targetEntity = EmployeeDocument.class, cascade = CascadeType.REFRESH)
+	@JoinColumn(nullable = true, name = EmployeeDocument_.SQL_NAME_originalId)
+	private EmployeeDocument original;
 	
 	public EmployeeDocument()
 	{
@@ -123,16 +129,6 @@ public class EmployeeDocument implements Serializable
 		this.mimeType = mimeType;
 	}
 
-	public long getDocumentBytesSize()
-	{
-		return documentBytesSize;
-	}
-
-	public void setDocumentBytesSize(long documentBytesSize)
-	{
-		this.documentBytesSize = documentBytesSize;
-	}
-
 	public byte[] getDocumentBytes()
 	{
 		return documentBytes;
@@ -156,5 +152,25 @@ public class EmployeeDocument implements Serializable
 	public void setEmployee(Employee employee)
 	{
 		this.employee = employee;
+	}
+
+	public long getByteSize()
+	{
+		return byteSize;
+	}
+
+	public void setByteSize(long byteSize)
+	{
+		this.byteSize = byteSize;
+	}
+
+	public EmployeeDocument getOriginal()
+	{
+		return original;
+	}
+
+	public void setOriginal(EmployeeDocument original)
+	{
+		this.original = original;
 	}
 }
