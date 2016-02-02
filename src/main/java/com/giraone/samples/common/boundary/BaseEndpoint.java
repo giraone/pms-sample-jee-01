@@ -40,8 +40,15 @@ public class BaseEndpoint
 	private final static int STRING_LOG_LIMIT = 80;
 
 	private static final String CORS_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
+	private static final String CORS_ALLOW_ORIGIN_VALUE = "*"; // "127.0.0.1" does not work
 	private static final String CORS_ALLOW_METHODS_HEADER = "Access-Control-Allow-Methods";
-	private static final String CORS_ALLOW_REQUEST_HEADER = "Access-Control-Allow-Headers";
+	private static final String CORS_ALLOW_METHODS_VALUE = "GET,POST,DELETE,PUT,OPTIONS"; // * THIS DOES NOT WORK HERE!
+	//private static final String CORS_REQUEST_HEADERS_HEADER = "Access-Control-Request-Headers";
+	//private static final String CORS_REQUEST_HEADERS_VALUE = "content-length";
+	private static final String CORS_ALLOW_HEADERS_HEADER = "Access-Control-Allow-Headers";
+	private static final String CORS_ALLOW_HEADERS_VALUE = "content-length,content-type,location";
+	//private static final String CORS_EXPOSE_HEADERS_HEADER = "Access-Control-Expose-Headers";
+	//private static final String CORS_EXPOSE_HEADERS_VALUE = "location";
 
 	private static final int THROTTLE_MSEC = 0; // 1000;
 
@@ -58,9 +65,10 @@ public class BaseEndpoint
 		}
 		return Response
 			.status(Response.Status.NO_CONTENT)
-			.header(CORS_ALLOW_ORIGIN_HEADER, "*") // "127.0.0.1" does not work
-			.header(CORS_ALLOW_METHODS_HEADER, "GET, POST, DELETE, PUT, OPTIONS") // * THIS DOES NOT WORK HERE!
-			.header(CORS_ALLOW_REQUEST_HEADER, "content-type").build();
+			.header(CORS_ALLOW_ORIGIN_HEADER, CORS_ALLOW_ORIGIN_VALUE) 
+			.header(CORS_ALLOW_METHODS_HEADER, CORS_ALLOW_METHODS_VALUE) 
+			.header(CORS_ALLOW_HEADERS_HEADER, CORS_ALLOW_HEADERS_VALUE)
+			.build();
 	}
 
 	// Match sub-resources - handle CORS pre-flight request
@@ -74,9 +82,10 @@ public class BaseEndpoint
 		}
 		return Response
 			.status(Response.Status.NO_CONTENT)
-			.header(CORS_ALLOW_ORIGIN_HEADER, "*") // "127.0.0.1" does not work
-			.header(CORS_ALLOW_METHODS_HEADER, "GET, POST, DELETE, PUT, OPTIONS") // * THIS DOES NOT WORK HERE!
-			.header(CORS_ALLOW_REQUEST_HEADER, "content-type").build();
+			.header(CORS_ALLOW_ORIGIN_HEADER, CORS_ALLOW_ORIGIN_VALUE) 
+			.header(CORS_ALLOW_METHODS_HEADER, CORS_ALLOW_METHODS_VALUE) 
+			.header(CORS_ALLOW_HEADERS_HEADER, CORS_ALLOW_HEADERS_VALUE)
+			.build();
 	}
 
 	@AroundInvoke
