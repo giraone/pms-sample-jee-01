@@ -1,12 +1,13 @@
 # Kickstart 1 for JEE (JAX-RS/EJB/JPA) Web Application #
 
-This project is indented to show the basic modules of a modern REST-based web application with a ***back-end based on core JEE technology***, like JPA, EJB and JAX-RS and a ***front-end based on HTML5/JS/CSS3*** using the "main stream frameworks" *Google Angular 2* and *Twitter Bootstrap*. From a functional perspective, it is designed to be a CRUD application with some more features, than a typical todo list application normally has. The starter project should be easily understandable for everybody and comes with only three entities
+This project is indented to show the basic modules of a modern REST-based web application with a ***back-end based on core JEE technology***, like JPA, EJB and JAX-RS and a ***front-end based on HTML5/JS/CSS3*** using the "main stream frameworks" *Google Angular 2* and *Twitter Bootstrap*. From a functional perspective, it is designed to be a CRUD application with some more features, than a typical todo list application normally has. The starter project should be easily understandable for everybody and comes with only four entities
 
 - Cost centers
 - Employees
 - Postal addresses of an employee
+- Documents (BLOBs) of an employee
 
-An employee entity is related to 0 or 1 cost center. An employee may have multiple postal addresses. Addresses cannot live without an employee and are deleted together with the employee. At the database level, the employee data is stored in two tables. One table holds the basic and important attributes in columns, the other tables is a key value store. See *Storage of data attributes* section below for more information.
+An employee entity is related to 0 or 1 cost center. An employee may have multiple postal addresses. Addresses cannot live without an employee and are deleted together with the employee. At the database level, the employee data is stored in two tables. One table holds the basic and important attributes in columns, the other tables is a key value store. See *Storage of data attributes* section below for more information. The document entity is mainly to show how BLOBs can be handled using JAX/RS and JPA.
 
 **Back-end:** This GitHub projects is the back-end application. It exposes a REST based API under `/api/costcenters` and `api/employees` with GET, POST, PUT and DELETE HTTP verbs. But it also hold a `webapp` folder, which comes with a release build of the **Front-end:** (see below), so it can be tested together with a browser front-end.
 
@@ -135,6 +136,13 @@ the table is Xyz, the key value table is named `MyWellDefined`, the key value ta
 </ul>
 Currently this approach is used only for the "Employee" entity.
 
+### BLOB storage and BLOB handling within the REST API ###
+
+The ***EmployeeDocument*** entity is defined using JPA. But for storing and retrieving the BLOBs lower level JDBC methods are used. The reason for this is the lack of a good BLOB vendor-independent streaming support in JPA. As far as I was able to find out, there are only proprietary solutions for Hibernate and OpenJPA available. Therefore I decided to go with a JDBC based streaming solution. See `com.giraone.samples.pmspoc1.boundary.blobs.BlobManager` for the code.
+
+Within the REST API, BLOB content must be uploaded without ***multipart/form-data*** support. A document resource is created using its meta data and a POST request. The BLOB content must then be uploaded using the location URL from the POST request by a plain PUT request with a binary content type. 
+
+
 ### DTOs and Mapping ###
 
 Despite the fact, that this is currently a CRUD application, JPA entities are not used at the REST interfaces. We use Data Transfer Objects (DTOs). These DTOs are currently transformed using the brand new [MapStruct](http://mapstruct.org/) code generator using its Maven plugin. This approach looks much more promising, than using reflection based bean mappers like [Dozer](http://dozer.sourceforge.net/). 
@@ -184,7 +192,6 @@ This is not a good idea together with I18N! Best solution would be to separate t
   
 ## Future goals of the project ##
 
-- Storing **BLOBS**, e.g. an image for each *employee*.
 - Extension of the REST API by using **OData** `$expand`. E.g. an expand parameter for employee to show the cost center's description.
 - Additional relationship types for the entities.
 - Usage of **Swagger** (or **RAML**) for the REST API definition to have a **contract-first approach**.

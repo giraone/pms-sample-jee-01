@@ -221,8 +221,10 @@ public class BlobManager
             {
                 out.write(buf, 0, bytesRead);
                 size += (long) bytesRead;
+                /*
                 if (logger != null && logger.isDebugEnabled())
 					logger.debug(LOG_TAG, "BlobManager.streamBlobFromDatabase size=" + size);
+				*/
             }
             return size;
         }

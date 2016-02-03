@@ -22,8 +22,14 @@ import org.apache.logging.log4j.MarkerManager;
 public class CorsFeature implements Feature, ContainerResponseFilter
 {
 	private static final Marker LOG_TAG = MarkerManager.getMarker("API-CORS");
-	private static final String CORS_ALLOW_HEADER = "Access-Control-Allow-Origin";
 	
+	private static final String CORS_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
+	private static final String CORS_ALLOW_ORIGIN_VALUE = "*"; // "127.0.0.1" does not work
+	private static final String CORS_ALLOW_HEADERS_HEADER = "Access-Control-Allow-Headers";
+	private static final String CORS_ALLOW_HEADERS_VALUE = "content-length,content-type,location";
+	private static final String CORS_EXPOSE_HEADERS_HEADER = "Access-Control-Expose-Headers";
+	private static final String CORS_EXPOSE_HEADERS_VALUE = "location";
+		
 	@Inject
 	private Logger logger;
 
@@ -38,13 +44,21 @@ public class CorsFeature implements Feature, ContainerResponseFilter
 		throws IOException
 	{
 		final MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-		if (!headers.containsKey(CORS_ALLOW_HEADER))
+		if (!headers.containsKey(CORS_ALLOW_ORIGIN_HEADER))
 		{
-			headers.add(CORS_ALLOW_HEADER, "*"); // "127.0.0.1" may not work always
+			headers.add(CORS_ALLOW_ORIGIN_HEADER, CORS_ALLOW_ORIGIN_VALUE);
+		}
+		if (!headers.containsKey(CORS_ALLOW_HEADERS_HEADER))
+		{
+			headers.add(CORS_ALLOW_HEADERS_HEADER, CORS_ALLOW_HEADERS_VALUE);
+		}
+		if (!headers.containsKey(CORS_EXPOSE_HEADERS_HEADER))
+		{
+			headers.add(CORS_EXPOSE_HEADERS_HEADER, CORS_EXPOSE_HEADERS_VALUE);
 		}
 		if (logger != null && logger.isDebugEnabled())
 		{
-			logger.debug(LOG_TAG, CORS_ALLOW_HEADER + "=" + headers.get(CORS_ALLOW_HEADER));
+			logger.debug(LOG_TAG, CORS_ALLOW_ORIGIN_HEADER + "=" + headers.get(CORS_ALLOW_ORIGIN_HEADER));
 		}
 	}
 }

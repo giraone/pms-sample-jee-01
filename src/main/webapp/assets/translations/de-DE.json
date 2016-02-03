@@ -215,7 +215,8 @@
     }
   },
   "employeeDocument": {
-    "add": "Dokument hinzufügen",
+    "addPortrait": "Foto hinzufügen",
+    "addContract": "Vertrag hinzufügen",
     "delete": "Dokument löschen",
     "deleteSuccess": "Ausgewähltes Dokument des Mitarbeiters wurde gelöscht.",
     "noDocuments": "Keine Dokumente hinterlegt!",

@@ -216,7 +216,8 @@
     }
   },
   "employeeDocument": {
-    "add": "Add document",
+    "addPortrait": "Add photo",
+    "addContract": "Add contract",
     "delete": "Delete document",
     "deleteSuccess": "Selected document of employee was deleted.",
     "noDocuments": "No documents available!",
