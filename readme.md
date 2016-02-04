@@ -43,7 +43,7 @@ The running solution is hosted currently on 3 PaaS provider sites:
   - JPA 2.0
   - EJB 3.2
   - JAX-RS 2.0
-  For the local development *JBoss Wildfly* and *WebSphere Liberty* was used. But the application should run on any other JEE6/JEE7 application server - the only implementation specific dependencies in the source code are in [pom.xml](pom.xml) and [persistence.xml](src/main/resources/META-INF/persistence.xml).
+  For the local development *JBoss Wildfly* and *WebSphere Liberty* was used. But the application should run on any other JEE7 application server - the only implementation specific dependencies in the source code are in [pom.xml](pom.xml) and [persistence.xml](src/main/resources/META-INF/persistence.xml). The code may be back-ported to JEE6. "*Grep*" for the string "JEE6" in the Java code.
 - A relational database supported by the JPA implementation. For the local development *Apache Derby Network Server* and *PostgresQL* was used. Others databases may work also with adoptions to [persistence.xml](src/main/resources/META-INF/persistence.xml).
 - In the hosting environment the following components are used:
 
