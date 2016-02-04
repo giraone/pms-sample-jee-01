@@ -6,7 +6,8 @@ import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.Feature;
+// import javax.ws.rs.core.Configurable; // JEE6 - JAX-RS 1.1 ONLY!
+import javax.ws.rs.core.Feature; // JEE7 - JAX-RS 2.0 ONLY!
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
@@ -39,6 +40,15 @@ public class CorsFeature implements Feature, ContainerResponseFilter
 		return true;
 	}
 
+	/*
+	// JEE6 - JAX-RS 1.2 version
+	@Override
+	public boolean configure(Configurable context)
+	{
+		return true;
+	}
+	*/
+	
 	@Override
 	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
 		throws IOException

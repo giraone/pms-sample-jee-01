@@ -87,7 +87,7 @@ public class UserTransactionInterceptor
 						+ invocationContext.getMethod().getName());
 			}
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
 			if (!(e instanceof RollbackException))
 			{
