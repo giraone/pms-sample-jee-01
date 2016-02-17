@@ -250,16 +250,7 @@ public class ODataToJpaQueryBuilder<T>
 					{
 						if (propertyPathDate != null)
 						{
-							Calendar cal;
-							try
-							{
-								cal = StringUtil.parseIsoDateInput((String) rightValue);
-							}
-							catch (ParseException e)
-							{
-								throw new IllegalArgumentException("Cannot parse date value " + rightValue + " for property \"" + leftPropertyName + "\"!");
-							}
-							return cb.equal(propertyPathDate, cal);
+							return cb.equal(propertyPathDate, convertToCalendar((String) rightValue, leftPropertyName));
 						}
 						else
 						{
@@ -280,28 +271,79 @@ public class ODataToJpaQueryBuilder<T>
 					}
 					else
 					{
-						return cb.notEqual(propertyPathString, rightValue);
+						if (propertyPathDate != null)
+						{
+							return cb.notEqual(propertyPathDate, convertToCalendar((String) rightValue, leftPropertyName));
+						}
+						else
+						{
+							return cb.notEqual(propertyPathString, rightValue);						
+						}
 					}
 				case LT:
 					if (rightValue instanceof Integer)
+					{
 						return cb.lessThan(propertyPathInteger, (Integer) rightValue);
+					}
 					else
-						return cb.lessThan(propertyPathString, (String) rightValue);
+					{
+						if (propertyPathDate != null)
+						{
+							return cb.lessThan(propertyPathDate, convertToDate((String) rightValue, leftPropertyName));
+						}
+						else
+						{
+							return cb.lessThan(propertyPathString, (String) rightValue);						
+						}
+					}
 				case GT:
 					if (rightValue instanceof Integer)
+					{
 						return cb.greaterThan(propertyPathInteger, (Integer) rightValue);
+					}
 					else
-						return cb.greaterThan(propertyPathString, (String) rightValue);
+					{
+						if (propertyPathDate != null)
+						{
+							return cb.greaterThan(propertyPathDate, convertToDate((String) rightValue, leftPropertyName));
+						}
+						else
+						{
+							return cb.greaterThan(propertyPathString, (String) rightValue);						
+						}
+					}
 				case LE:
 					if (rightValue instanceof Integer)
+					{
 						return cb.lessThanOrEqualTo(propertyPathInteger, (Integer) rightValue);
+					}
 					else
-						return cb.lessThanOrEqualTo(propertyPathString, (String) rightValue);
+					{
+						if (propertyPathDate != null)
+						{
+							return cb.lessThanOrEqualTo(propertyPathDate, convertToDate((String) rightValue, leftPropertyName));
+						}
+						else
+						{
+							return cb.lessThanOrEqualTo(propertyPathString, (String) rightValue);						
+						}
+					}
 				case GE:
 					if (rightValue instanceof Integer)
+					{
 						return cb.greaterThanOrEqualTo(propertyPathInteger, (Integer) rightValue);
+					}
 					else
-						return cb.greaterThanOrEqualTo(propertyPathString, (String) rightValue);
+					{
+						if (propertyPathDate != null)
+						{
+							return cb.greaterThanOrEqualTo(propertyPathDate, convertToDate((String) rightValue, leftPropertyName));
+						}
+						else
+						{
+							return cb.greaterThanOrEqualTo(propertyPathString, (String) rightValue);						
+						}
+					}
 				default:
 					throw new IllegalArgumentException("Operator " + binaryOperator.name() + " not supported!");
 			}
@@ -381,6 +423,30 @@ public class ODataToJpaQueryBuilder<T>
 		else
 		{
 			return Integer.parseInt(uriLiteral);
+		}
+	}
+	
+	private Calendar convertToCalendar(String rightValue, String leftPropertyName)
+	{
+		try
+		{
+			return StringUtil.parseIsoDateInput((String) rightValue);
+		}
+		catch (ParseException e)
+		{
+			throw new IllegalArgumentException("Cannot parse date value " + rightValue + " for property \"" + leftPropertyName + "\"!");
+		}
+	}
+
+	private Date convertToDate(String rightValue, String leftPropertyName)
+	{
+		try
+		{
+			return new Date(StringUtil.parseIsoDateInput((String) rightValue).getTime().getTime());
+		}
+		catch (ParseException e)
+		{
+			throw new IllegalArgumentException("Cannot parse date value " + rightValue + " for property \"" + leftPropertyName + "\"!");
 		}
 	}
 	
