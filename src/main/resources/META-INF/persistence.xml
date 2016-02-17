@@ -64,7 +64,7 @@
 			<!-- <property name="eclipselink.logging.logger" value="JavaLogger"/> -->
 			<!--  Most Java EE application servers have their own logging. To integrate with an application servers logging set the server logger type too -->
 			<!-- <property name="eclipselink.logging.logger" value="ServerLogger"/> -->
-			<!-- <property name="eclipselink.logging.logger" value="DefaultLogger"/> -->
+			<property name="eclipselink.logging.logger" value="DefaultLogger"/>
 									
 			<property name="eclipselink.logging.level" value="FINE"/>
 			<property name="eclipselink.logging.level.sql" value="FINE"/>

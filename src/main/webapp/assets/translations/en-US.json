@@ -96,6 +96,7 @@
     "successUpdate": "Employee data has been updated!",
     "tab0Title": "Master Data",
     "tab1Title": "Post Addresses",
+    "tab2Title": "Documents",
     "personnelNumber": {
       "label": "Personnel Number",
       "placeholder": "Personnel Number"
