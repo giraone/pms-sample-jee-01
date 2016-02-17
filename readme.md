@@ -164,8 +164,6 @@ The base for the implementation of OData $filter and $orderby query options in R
 	@TableGenerator(name = "Alloc100", allocationSize = 100)
 ```
 
-- Currently the solution must use *olingo-odata2-core 2.0.6-SNAPSHOT* in *JBoss environments*, because of this bug: [OLINGO-761](https://issues.apache.org/jira/browse/OLINGO-761?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel)
-
 - OData filtering (lt, gt) for Date fields is not yet implemented
 
 - Handling of NULL values (e.g. null vs. 0 for nrOfChildren in employee data) is not correct.
@@ -178,7 +176,9 @@ The base for the implementation of OData $filter and $orderby query options in R
 
 This is not a good idea together with I18N! Best solution would be to separate the field validation definitions together with their messages in separate configurations.
 
-- Usage of `@XmlRootElement` vs. `@JsonSerialize` to serialize the JAX-RS DTOs is an open issues. This includes some decisions, e.g. how to serialize date and time values: ISO strings vs. long values? This should be addressed together with the contract-first approach.
+- There is no validation of catalog values (currently used in the `countryOfBirth` attribute of `Employee`) yet.
+
+- Usage of `@XmlRootElement` vs. `@JsonSerialize` to serialize the JAX-RS DTOs is an open issues. This includes some decisions, e.g. how to serialize date and time  values: ISO strings vs. long values? This should be addressed together with the contract-first approach.
 
 - Logging
   - There is only a simple Log4J 2 configuration yet.
