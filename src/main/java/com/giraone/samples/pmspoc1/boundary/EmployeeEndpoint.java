@@ -229,12 +229,12 @@ public class EmployeeEndpoint extends BaseEndpoint
 		if (predicate != null) { select.where(predicate); }
 		filterBuilder.parseOrderExpression(cb, select, orderby);
 		
-		// Calculating the total count value - START
+		// Calculate the total count value using the same "table" - START		
 		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-		countQuery.select(cb.count(countQuery.from(Employee.class)));
+		countQuery.select(cb.count(table));
 		if (predicate != null) { countQuery.where(predicate); }
 		int totalCount = em.createQuery(countQuery).getSingleResult().intValue();
-		// Calculating the total count value - END
+		// Calculate the total count value using the same "table" - END
 		
         final TypedQuery<Employee> tq = em.createQuery(select);
 
