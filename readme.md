@@ -164,8 +164,6 @@ The base for the implementation of OData $filter and $orderby query options in R
 	@TableGenerator(name = "Alloc100", allocationSize = 100)
 ```
 
-- OData filtering (lt, gt) for Date fields is not yet implemented
-
 - Handling of NULL values (e.g. null vs. 0 for nrOfChildren in employee data) is not correct.
 
 - Bean validation together with I18N is not yet perfect. Currently the code uses sth. like:
