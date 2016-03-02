@@ -14,12 +14,10 @@ public interface EmployeeMapper
 	EmployeeMapper INSTANCE = Mappers.getMapper(EmployeeMapper.class);
 
 	void updateDtoFromEntity(Employee entity, @MappingTarget EmployeeDTO dto);
-
 	
-	@Mappings({
-		@Mapping(target = EmployeeDTO_.DTO_NAME_postalAddresses, ignore = true), // Is performed manually		
-		@Mapping(target = EmployeeDTO_.DTO_NAME_costCenter, ignore = true),      // Is performed manually
-		@Mapping(target = Employee.JAVA_PROPERTIES_MAP_NAME, ignore = true),     // Ignore warning from properties member
+	@Mappings({	
+		@Mapping(target = EmployeeDTO_.DTO_NAME_documents, ignore = true),         // Is not requested yet
+		@Mapping(target = Employee.JAVA_PROPERTIES_MAP_NAME, ignore = true),       // Ignore warning from properties member
 		
 		// These mappings are only to ignore warnings from setter/getter detection of MapStruct
 		@Mapping(target = EmployeeDTO_.DTO_NAME_nationalityCode, ignore = true),
@@ -39,15 +37,17 @@ public interface EmployeeMapper
 	void updateEntityFromDto(EmployeeDTO dto, @MappingTarget Employee entity);
 	
 
-	@Mappings({ @Mapping(target = EmployeeDTO_.DTO_NAME_postalAddresses, ignore = true), // Is performed manually
+	@Mappings({
+		@Mapping(target = EmployeeDTO_.DTO_NAME_documents, ignore = true),         // Is not requested yet
 	})
 	void updateDtoFromEntity(Employee entity, @MappingTarget EmployeeWithPropertiesDTO dto);
 
 	
 	@Mappings({
-		@Mapping(target = EmployeeDTO_.DTO_NAME_postalAddresses, ignore = true), // Is performed manually		
-		@Mapping(target = EmployeeDTO_.DTO_NAME_costCenter, ignore = true),      // Is performed manually
-		@Mapping(target = Employee.JAVA_PROPERTIES_MAP_NAME, ignore = true),     // Ignore warning from properties member
+		@Mapping(target = EmployeeDTO_.DTO_NAME_documents, ignore = true),       // Do not pass document changes from DTO to entity	
+		@Mapping(target = EmployeeDTO_.DTO_NAME_postalAddresses, ignore = true), // Do not pass address changes from DTO to entity		
+		@Mapping(target = EmployeeDTO_.DTO_NAME_costCenter, ignore = true),      // Do not pass cost center changes from DTO to entity	
+		@Mapping(target = Employee.JAVA_PROPERTIES_MAP_NAME, ignore = true)      // Ignore warning from properties member
 	})
 	void updateEntityFromDto(EmployeeWithPropertiesDTO dto, @MappingTarget Employee entity);
 }

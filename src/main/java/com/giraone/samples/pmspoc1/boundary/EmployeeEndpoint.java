@@ -18,6 +18,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.SingularAttribute;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -106,7 +109,8 @@ public class EmployeeEndpoint extends BaseEndpoint
 	@GET
 	@Path("/{employeeId:[0-9][0-9]*}")
 	@Produces("application/json; charset=UTF-8")
-	public Response findEmployeeById(@PathParam("employeeId") long employeeId)
+	public Response findEmployeeById(@PathParam("employeeId") long employeeId,
+		@QueryParam("expand") @DefaultValue("") String expand)
 	{		
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
 		final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
@@ -117,6 +121,20 @@ public class EmployeeEndpoint extends BaseEndpoint
 		final CriteriaQuery<Employee> select = c.select(table);
 		final Predicate predicate = cb.equal(table.get(Employee_.oid), employeeId);
 		select.where(predicate);
+		
+        if (StringUtil.isNotNullOrWhitespace(expand))
+        {
+        	ODataToJpaQueryBuilder<Employee> oDataBuilder = new ODataToJpaQueryBuilder<Employee>();
+        	List<Attribute> expands = oDataBuilder.parseExpandExpression(cb, table, Employee_.class, expand);
+			for (Attribute attribute : expands)
+			{
+				if (attribute instanceof PluralAttribute)
+					table.fetch((PluralAttribute) attribute, JoinType.LEFT);
+				else if (attribute instanceof SingularAttribute)
+					table.fetch((SingularAttribute) attribute, JoinType.LEFT);	
+			}
+        }
+        
 		final TypedQuery<Employee> tq = em.createQuery(select);
 
 		final Employee entity = PersistenceUtil.sanityCheckForSingleResultList(tq.getResultList(),
@@ -149,17 +167,33 @@ public class EmployeeEndpoint extends BaseEndpoint
     @GET
     @Path("/pnr-{personnelNumber:[0-9a-zA-Z][0-9a-zA-Z]*}")
     @Produces("application/json; charset=UTF-8")
-    public Response findEmployeeByPersonnelNumber(@PathParam("personnelNumber") String personnelNumber)
+    public Response findEmployeeByPersonnelNumber(@PathParam("personnelNumber") String personnelNumber,
+    	@QueryParam("expand") @DefaultValue("") String expand)
     {    	
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
         final Root<Employee> table = c.from(Employee.class);
-		// This is very import! We want the cost center object too (may be null) and use a left join
-		table.fetch(Employee_.costCenter, JoinType.LEFT);
         
+		// This is very import! We want the cost center object too (may be null) and use a left join
+		// table.fetch(Employee_.costCenter, JoinType.LEFT);
+		// No more needed since "expand" is used.
+		
         final CriteriaQuery<Employee> select = c.select(table);
         final Predicate predicate = cb.equal(table.get(Employee_.personnelNumber), personnelNumber);
         select.where(predicate);
+        
+        if (StringUtil.isNotNullOrWhitespace(expand))
+        {
+        	ODataToJpaQueryBuilder<Employee> oDataBuilder = new ODataToJpaQueryBuilder<Employee>();
+        	List<Attribute> expands = oDataBuilder.parseExpandExpression(cb, table, Employee_.class, expand);
+			for (Attribute attribute : expands)
+			{
+				if (attribute instanceof PluralAttribute)
+					table.fetch((PluralAttribute) attribute, JoinType.LEFT);
+				else if (attribute instanceof SingularAttribute)
+					table.fetch((SingularAttribute) attribute, JoinType.LEFT);	
+			}
+        }
         final TypedQuery<Employee> tq = em.createQuery(select);
 
         final Employee entity = PersistenceUtil.sanityCheckForSingleResultList(tq.getResultList(),
@@ -186,7 +220,8 @@ public class EmployeeEndpoint extends BaseEndpoint
      * @param filter	OData filter expression
      * @param orderby	OData sort expression
      * @param skip		OData paging
-     * @param top		OData filter expression
+     * @param top		OData paging
+     * @param expand	OData expand expression
      * @return a {@link PagingBlock} object with {@link EmployeeDTO} object.
      */
 	@GET
@@ -195,7 +230,8 @@ public class EmployeeEndpoint extends BaseEndpoint
 		@QueryParam("filter") @DefaultValue("") String filter,
 		@QueryParam("orderby") @DefaultValue("") String orderby,
 		@QueryParam("skip") @DefaultValue("0") int skip,
-		@QueryParam("top") @DefaultValue(DEFAULT_PAGING_SIZE) int top)
+		@QueryParam("top") @DefaultValue(DEFAULT_PAGING_SIZE) int top,
+		@QueryParam("expand") @DefaultValue("") String expand)
 	{		
 		// TypedQuery<Employee> findAllQuery = em.createQuery(
 		// "SELECT DISTINCT e FROM Employee e LEFT JOIN FETCH e.costCenter ORDER
@@ -205,17 +241,30 @@ public class EmployeeEndpoint extends BaseEndpoint
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
 		final CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
 		final Root<Employee> table = c.from(Employee.class);
+		
+		ODataToJpaQueryBuilder<Employee> oDataBuilder = new ODataToJpaQueryBuilder<Employee>();
+		
 		// This is very import! We want the cost center object too (may be null) and use a left join
-		table.fetch(Employee_.costCenter, JoinType.LEFT);
+		// table.fetch(Employee_.costCenter, JoinType.LEFT);
+		// No more needed since "expand" is used.
 		
+		if (StringUtil.isNotNullOrWhitespace(expand))
+		{
+			List<Attribute> expands = oDataBuilder.parseExpandExpression(cb, table, Employee_.class, expand);
+			for (Attribute attribute : expands)
+			{
+				if (attribute instanceof PluralAttribute)
+					table.fetch((PluralAttribute) attribute, JoinType.LEFT);
+				else if (attribute instanceof SingularAttribute)
+					table.fetch((SingularAttribute) attribute, JoinType.LEFT);	
+			}
+		}
 		final CriteriaQuery<Employee> select = c.select(table);
-		
-        ODataToJpaQueryBuilder<Employee> filterBuilder = new ODataToJpaQueryBuilder<Employee>();
-		filterBuilder.setCriteriaTable(cb, table);
+		        
 		Predicate predicate;
 		try
 		{
-			predicate = filterBuilder.parseFilterExpression(filter);
+			predicate = oDataBuilder.parseFilterExpression(cb, table, filter);
 		}
 		catch (IllegalArgumentException iae)
 		{
@@ -227,7 +276,7 @@ public class EmployeeEndpoint extends BaseEndpoint
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		if (predicate != null) { select.where(predicate); }
-		filterBuilder.parseOrderExpression(cb, select, orderby);
+		oDataBuilder.parseOrderExpression(cb, table, select, orderby);
 		
 		// Calculate the total count value using the same "table" - START		
 		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
@@ -244,8 +293,8 @@ public class EmployeeEndpoint extends BaseEndpoint
 		final List<Employee> searchResults = tq.getResultList();
 		final List<EmployeeDTO> results = new ArrayList<EmployeeDTO>();
 		for (Employee searchResult : searchResults)
-		{
-			EmployeeDTO dto = new EmployeeDTO(searchResult);
+		{		
+			EmployeeDTO dto = new EmployeeDTO(searchResult);			
 			results.add(dto);
 		}
 		PagingBlock<EmployeeDTO> pagingBlock = new PagingBlock<EmployeeDTO>();
@@ -268,6 +317,14 @@ public class EmployeeEndpoint extends BaseEndpoint
 	public Response createEmployee(EmployeeWithPropertiesDTO dto)
 	{  
 		final Employee entity;
+		
+		// Do not accept changes of member objects - in this case postal addresses
+		if (dto.getPostalAddresses() != null)
+			dto.getPostalAddresses().clear();
+		// Do not accept changes of member objects - in this case documents
+		if (dto.getDocuments() != null)
+			dto.getDocuments().clear();
+		
 		try
 		{
 			entity = dto.entityFromDTO();
@@ -318,7 +375,14 @@ public class EmployeeEndpoint extends BaseEndpoint
 		{
 			return Response.status(Status.NOT_FOUND).build();
 		}
-				
+			
+		// Do not accept changes of member objects - in this case postal addresses
+		if (dto.getPostalAddresses() != null)
+			dto.getPostalAddresses().clear();
+		// Do not accept changes of member objects - in this case documents
+		if (dto.getDocuments() != null)
+			dto.getDocuments().clear();
+		
 		// Now we have to fetch the properties by accessing at least one fake key (this is a bit weird in JPA!)
 		entity.getProperties().get("");
 		// Now we have to fetch the postal addresses

@@ -1,9 +1,11 @@
 package com.giraone.samples.common.boundary.odata;
 
+import java.lang.reflect.Field;
 import java.sql.Date;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -12,6 +14,7 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Attribute;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,33 +42,23 @@ import com.giraone.samples.common.StringUtil;
 public class ODataToJpaQueryBuilder<T>
 {
 	public static final Marker LOG_TAG = MarkerManager.getMarker("OData");
-	
-	// TODO: Logger is not always injected on problems with CDI!
-	@Inject
-	private Logger logger;
 
-	CriteriaBuilder cb;
-	Root<T> table;
+	// TODO: Logger is not always injected on problems with CDI!
+	// @Inject
+	private Logger logger;
 
 	public ODataToJpaQueryBuilder()
 	{
 		logger = LogManager.getLogger(ODataToJpaQueryBuilder.class);
 	}
 
-	public void setCriteriaTable(CriteriaBuilder cb, Root<T> table)
-	{
-		this.cb = cb;
-		this.table = table;
-	}
-	
 	/**
 	 * Parse an OData filter expression and return a JPA predicate
 	 * 
-	 * @param oDataFilter
-	 *            OData filter string e.g. "displayName eq 'Test' and version = 1"
+	 * @param oDataFilter OData filter string e.g. "displayName eq 'Test' and version = 1"
 	 * @return
 	 */
-	public Predicate parseFilterExpression(String oDataFilter)
+	public Predicate parseFilterExpression(CriteriaBuilder cb, Root<T> table, String oDataFilter)
 	{
 		if (logger != null && logger.isDebugEnabled())
 			logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.parseFilterExpression \"" + oDataFilter + "\"");
@@ -87,20 +80,18 @@ public class ODataToJpaQueryBuilder<T>
 			throw new IllegalArgumentException("Cannot parse OData filter \"" + oDataFilter + "\"", e);
 		}
 		CommonExpression commonExpression = filterExpression.getExpression();
-		return this.processFilterExpression(commonExpression);
+		return this.processFilterExpression(cb, table, commonExpression);
 	}
-	
+
 	/**
 	 * Parse an OData orderby expression and set it on a given criteria API query object.
 	 * 
-	 * @param cb
-	 *            The criteria builder for the request
-	 * @param select
-	 *            The query to which the order by statement is added
-	 * @param oDataOrder
-	 *            The orderby expression, e.g. "orderby=name asc, age desc"
+	 * @param cb The criteria builder for the request
+	 * @param cb The root table
+	 * @param select The query to which the order by statement is added
+	 * @param oDataOrder The orderby expression, e.g. "orderby=name asc, age desc"
 	 */
-	public void parseOrderExpression(CriteriaBuilder cb, CriteriaQuery<T> select, String oDataOrder)
+	public void parseOrderExpression(CriteriaBuilder cb, Root<T> table, CriteriaQuery<T> select, String oDataOrder)
 	{
 		if (logger != null && logger.isDebugEnabled())
 			logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.parseOrderExpression \"" + oDataOrder + "\"");
@@ -131,12 +122,13 @@ public class ODataToJpaQueryBuilder<T>
 			final PropertyExpression propertyExpression = (PropertyExpression) commonExpression;
 			final String propertyName = propertyExpression.getUriLiteral();
 			@SuppressWarnings("rawtypes")
-			final Path propertyPath = this.getPropertyPathByDotName(propertyName);
+			final Path propertyPath = this.getPropertyPathByDotName(table, propertyName);
 			if (propertyPath != null)
 			{
-				final Order order = SortOrder.desc == orderExpression.getSortOrder() ? cb.desc(propertyPath) : cb.asc(propertyPath);
+				final Order order = SortOrder.desc == orderExpression.getSortOrder() ? cb.desc(propertyPath)
+					: cb.asc(propertyPath);
 				if (logger != null && logger.isDebugEnabled())
-					logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.parseOrderExpression order=" + order);			
+					logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.parseOrderExpression order=" + order);
 				orderList.add(order);
 			}
 		}
@@ -144,48 +136,94 @@ public class ODataToJpaQueryBuilder<T>
 		return;
 	}
 
-	protected Predicate processFilterExpression(CommonExpression commonExpression)
+	public List<Attribute> parseExpandExpression(CriteriaBuilder cb, Root<T> table, Class metaModel, String oDataExpand)
+	{
+		ArrayList<Attribute> ret = new ArrayList<Attribute>();
+		
+		if (oDataExpand.startsWith(",") || oDataExpand.endsWith(","))
+		{
+			throw new IllegalArgumentException("Cannot parse OData expand \"" + oDataExpand + "\": misplaced colon!");
+		}
+
+		for (String expandItemString : oDataExpand.split(","))
+		{
+			expandItemString = expandItemString.trim();
+			if ("".equals(expandItemString))
+			{
+				throw new IllegalArgumentException("Cannot parse OData expand \"" + oDataExpand + "\": empty segment!");
+			}
+			if (expandItemString.startsWith("/") || expandItemString.endsWith("/"))
+			{
+				throw new IllegalArgumentException("Cannot parse OData expand \"" + oDataExpand + "\": misplaced slash!");
+			}
+
+			Attribute attribute = null;
+			for (String expandPropertyName : expandItemString.split("/"))
+			{
+				if ("".equals(expandPropertyName))
+				{
+					throw new IllegalArgumentException("Cannot parse OData expand \"" + oDataExpand + "\": empty slash segment!");
+				}
+				
+				try
+				{
+					attribute = this.getAttributeFromMetaModel(metaModel, expandPropertyName);
+				}
+				catch (Exception e)
+				{
+					throw new IllegalArgumentException("Cannot parse OData expand \"" + oDataExpand + "\": unknown property \""
+						+ expandPropertyName + "\" for table \"" + table.getModel().getName());
+				}			
+			}
+			ret.add(attribute);
+		}
+		return ret;
+	}
+
+	protected Predicate processFilterExpression(CriteriaBuilder cb, Root<T> table, CommonExpression commonExpression)
 	{
 		if (commonExpression instanceof BinaryExpression)
 		{
-			return this.processFilterExpression((BinaryExpression) commonExpression);
+			return this.processFilterExpression(cb, table, (BinaryExpression) commonExpression);
 		}
 		else if (commonExpression instanceof UnaryExpression)
 		{
-			return this.process((UnaryExpression) commonExpression);
+			return this.process(cb, table, (UnaryExpression) commonExpression);
 		}
 		else
 		{
-			throw new IllegalArgumentException("Filter like " + commonExpression.getClass() + " that are not binary expressions are not supported yet!");
+			throw new IllegalArgumentException("Filter like " + commonExpression.getClass()
+				+ " that are not binary expressions are not supported yet!");
 		}
 	}
 
-	private Predicate processFilterExpression(BinaryExpression binaryExpression)
+	private Predicate processFilterExpression(CriteriaBuilder cb, Root<T> table, BinaryExpression binaryExpression)
 	{
 		final CommonExpression leftOperand = binaryExpression.getLeftOperand();
 		final CommonExpression rightOperand = binaryExpression.getRightOperand();
 		final BinaryOperator binaryOperator = binaryExpression.getOperator();
 
 		if (logger != null && logger.isDebugEnabled())
-			logger.debug(LOG_TAG + 
-				"ODataFilterToJpaQueryBuilder.processFilterExpression operatator=" + binaryOperator.name());
+			logger.debug(
+				LOG_TAG + "ODataFilterToJpaQueryBuilder.processFilterExpression operatator=" + binaryOperator.name());
 
 		if (binaryOperator == BinaryOperator.AND)
 		{
-			return this.cb.and(new Predicate[] { this.processFilterExpression(leftOperand),
-				this.processFilterExpression(rightOperand) });
+			return cb.and(new Predicate[] { this.processFilterExpression(cb, table, leftOperand),
+				this.processFilterExpression(cb, table, rightOperand) });
 		}
 		else if (binaryOperator == BinaryOperator.OR)
 		{
-			return this.cb.or(new Predicate[] { this.processFilterExpression(leftOperand),
-				this.processFilterExpression(rightOperand) });
+			return cb.or(new Predicate[] { this.processFilterExpression(cb,table, leftOperand),
+				this.processFilterExpression(cb, table, rightOperand) });
 		}
 		else
 		{
 			final MethodOrPropertyExpression methodOrPropertyExpression = this.getLeftOperand(leftOperand);
 			String leftPropertyName, methodName = null;
-			Object rightValue = null; boolean rightMethodBoolean = true;
-			
+			Object rightValue = null;
+			boolean rightMethodBoolean = true;
+
 			if (methodOrPropertyExpression.isMethodExpression())
 			{
 				methodName = methodOrPropertyExpression.getMethodName();
@@ -201,13 +239,13 @@ public class ODataToJpaQueryBuilder<T>
 				LiteralExpression rightLiteralExpression = this.getRightOperand(rightOperand);
 				rightValue = this.getValue(rightLiteralExpression.getUriLiteral());
 			}
-					
+
 			// TODO: A bit ugly and not fully correct, but type safe (hs).
 			Path<String> propertyPathString = null;
 			Path<Date> propertyPathDate = null;
 			Path<Integer> propertyPathInteger = null;
 			@SuppressWarnings("rawtypes")
-			final Path p = this.getPropertyPathByDotName(leftPropertyName);
+			final Path p = this.getPropertyPathByDotName(table, leftPropertyName);
 			if (p.getJavaType() == Calendar.class)
 			{
 				propertyPathDate = p;
@@ -220,7 +258,7 @@ public class ODataToJpaQueryBuilder<T>
 			{
 				propertyPathString = p;
 			}
-			
+
 			switch (binaryOperator)
 			{
 				case EQ:
@@ -235,7 +273,8 @@ public class ODataToJpaQueryBuilder<T>
 							return cb.equal(propertyPathInteger, rightValue);
 						}
 					}
-					else if (methodName != null) // currently only one method (startsWith) supported and eq/ne with true/false.
+					else if (methodName != null) // currently only one method (startsWith) supported and eq/ne with
+													// true/false.
 					{
 						if (rightMethodBoolean)
 						{
@@ -254,15 +293,16 @@ public class ODataToJpaQueryBuilder<T>
 						}
 						else
 						{
-							return cb.equal(propertyPathString, rightValue);						
+							return cb.equal(propertyPathString, rightValue);
 						}
 					}
 				case NE:
 					if (rightValue instanceof Integer)
 					{
 						return cb.notEqual(propertyPathInteger, rightValue);
-					}				
-					else if (methodName != null) // currently only one method (startsWith) supported and eq/ne with true/false.
+					}
+					else if (methodName != null) // currently only one method (startsWith) supported and eq/ne with
+													// true/false.
 					{
 						if (rightMethodBoolean)
 							return cb.notLike(propertyPathString, (String) rightValue + "%");
@@ -273,11 +313,12 @@ public class ODataToJpaQueryBuilder<T>
 					{
 						if (propertyPathDate != null)
 						{
-							return cb.notEqual(propertyPathDate, convertToCalendar((String) rightValue, leftPropertyName));
+							return cb.notEqual(propertyPathDate,
+								convertToCalendar((String) rightValue, leftPropertyName));
 						}
 						else
 						{
-							return cb.notEqual(propertyPathString, rightValue);						
+							return cb.notEqual(propertyPathString, rightValue);
 						}
 					}
 				case LT:
@@ -293,7 +334,7 @@ public class ODataToJpaQueryBuilder<T>
 						}
 						else
 						{
-							return cb.lessThan(propertyPathString, (String) rightValue);						
+							return cb.lessThan(propertyPathString, (String) rightValue);
 						}
 					}
 				case GT:
@@ -305,11 +346,12 @@ public class ODataToJpaQueryBuilder<T>
 					{
 						if (propertyPathDate != null)
 						{
-							return cb.greaterThan(propertyPathDate, convertToDate((String) rightValue, leftPropertyName));
+							return cb.greaterThan(propertyPathDate,
+								convertToDate((String) rightValue, leftPropertyName));
 						}
 						else
 						{
-							return cb.greaterThan(propertyPathString, (String) rightValue);						
+							return cb.greaterThan(propertyPathString, (String) rightValue);
 						}
 					}
 				case LE:
@@ -321,11 +363,12 @@ public class ODataToJpaQueryBuilder<T>
 					{
 						if (propertyPathDate != null)
 						{
-							return cb.lessThanOrEqualTo(propertyPathDate, convertToDate((String) rightValue, leftPropertyName));
+							return cb.lessThanOrEqualTo(propertyPathDate,
+								convertToDate((String) rightValue, leftPropertyName));
 						}
 						else
 						{
-							return cb.lessThanOrEqualTo(propertyPathString, (String) rightValue);						
+							return cb.lessThanOrEqualTo(propertyPathString, (String) rightValue);
 						}
 					}
 				case GE:
@@ -337,11 +380,12 @@ public class ODataToJpaQueryBuilder<T>
 					{
 						if (propertyPathDate != null)
 						{
-							return cb.greaterThanOrEqualTo(propertyPathDate, convertToDate((String) rightValue, leftPropertyName));
+							return cb.greaterThanOrEqualTo(propertyPathDate,
+								convertToDate((String) rightValue, leftPropertyName));
 						}
 						else
 						{
-							return cb.greaterThanOrEqualTo(propertyPathString, (String) rightValue);						
+							return cb.greaterThanOrEqualTo(propertyPathString, (String) rightValue);
 						}
 					}
 				default:
@@ -350,19 +394,19 @@ public class ODataToJpaQueryBuilder<T>
 		}
 	}
 
-	private Predicate process(UnaryExpression unaryExpression)
+	private Predicate process(CriteriaBuilder cb, Root<T> table, UnaryExpression unaryExpression)
 	{
 		CommonExpression operand = unaryExpression.getOperand();
 		UnaryOperator unaryOperator = unaryExpression.getOperator();
 		switch (unaryOperator)
 		{
 			case NOT:
-				return this.cb.not(this.processFilterExpression(operand));
+				return cb.not(this.processFilterExpression(cb, table, operand));
 			default:
 				throw new IllegalArgumentException("Unary Operator " + unaryOperator.name() + " not supported!");
 		}
 	}
-	
+
 	private MethodOrPropertyExpression getLeftOperand(CommonExpression leftOperand)
 	{
 		if (leftOperand instanceof PropertyExpression)
@@ -376,7 +420,7 @@ public class ODataToJpaQueryBuilder<T>
 		else if (leftOperand instanceof LiteralExpression)
 		{
 			throw new IllegalArgumentException("LeftOperands must not be a literal!");
-		}	
+		}
 		else
 		{
 			throw new IllegalArgumentException(
@@ -425,7 +469,7 @@ public class ODataToJpaQueryBuilder<T>
 			return Integer.parseInt(uriLiteral);
 		}
 	}
-	
+
 	private Calendar convertToCalendar(String rightValue, String leftPropertyName)
 	{
 		try
@@ -434,7 +478,8 @@ public class ODataToJpaQueryBuilder<T>
 		}
 		catch (ParseException e)
 		{
-			throw new IllegalArgumentException("Cannot parse date value " + rightValue + " for property \"" + leftPropertyName + "\"!");
+			throw new IllegalArgumentException(
+				"Cannot parse date value " + rightValue + " for property \"" + leftPropertyName + "\"!");
 		}
 	}
 
@@ -446,47 +491,50 @@ public class ODataToJpaQueryBuilder<T>
 		}
 		catch (ParseException e)
 		{
-			throw new IllegalArgumentException("Cannot parse date value " + rightValue + " for property \"" + leftPropertyName + "\"!");
+			throw new IllegalArgumentException(
+				"Cannot parse date value " + rightValue + " for property \"" + leftPropertyName + "\"!");
 		}
 	}
-	
+
 	class MethodOrPropertyExpression
 	{
 		private static final String METHOD_startsWith = "STARTSWITH";
-		
+
 		PropertyExpression propertyExpression;
 		MethodExpression methodExpression;
-		
+
 		public MethodOrPropertyExpression(PropertyExpression propertyExpression)
 		{
 			this.propertyExpression = propertyExpression;
 		}
-		
+
 		public MethodOrPropertyExpression(MethodExpression methodExpression)
 		{
 			if (!METHOD_startsWith.equals(methodExpression.getMethod().name()))
 			{
-				throw new IllegalArgumentException("Method \"" + methodExpression.getMethod().name() + "\" not supported! " +
-					"Only \"" + METHOD_startsWith + "\"");
-			}	
+				throw new IllegalArgumentException("Method \"" + methodExpression.getMethod().name()
+					+ "\" not supported! " + "Only \"" + METHOD_startsWith + "\"");
+			}
 			if (methodExpression.getParameterCount() != 2)
 			{
 				throw new IllegalArgumentException("Method expression " + methodExpression.getUriLiteral()
 					+ " must have 2 arguments, not " + methodExpression.getParameterCount() + "!");
-			}	
+			}
 			if (!(methodExpression.getParameters().get(0) instanceof PropertyExpression))
 			{
-				throw new IllegalArgumentException("Method expression parameter1 " + methodExpression.getParameters().get(0).getClass()
-					+ " of method " + methodExpression.getUriLiteral() + " must be a property!");
-			}	
+				throw new IllegalArgumentException(
+					"Method expression parameter1 " + methodExpression.getParameters().get(0).getClass() + " of method "
+						+ methodExpression.getUriLiteral() + " must be a property!");
+			}
 			if (!(methodExpression.getParameters().get(1) instanceof LiteralExpression))
 			{
-				throw new IllegalArgumentException("Method expression parameter2 " + methodExpression.getParameters().get(1).getClass()
-					+ " of method " + methodExpression.getUriLiteral() + " must be a literal!");
-			}	
+				throw new IllegalArgumentException(
+					"Method expression parameter2 " + methodExpression.getParameters().get(1).getClass() + " of method "
+						+ methodExpression.getUriLiteral() + " must be a literal!");
+			}
 			this.methodExpression = methodExpression;
 		}
-		
+
 		boolean isMethodExpression()
 		{
 			return this.methodExpression != null;
@@ -501,22 +549,22 @@ public class ODataToJpaQueryBuilder<T>
 		{
 			return methodExpression;
 		}
-		
+
 		public String getMethodName()
 		{
 			return methodExpression.getMethod().name();
 		}
-		
+
 		public PropertyExpression getMethodExpressionParameter1()
 		{
 			return (PropertyExpression) methodExpression.getParameters().get(0);
 		}
-		
+
 		public LiteralExpression getMethodExpressionParameter2()
 		{
 			return (LiteralExpression) methodExpression.getParameters().get(1);
 		}
-		
+
 		public String getUriLiteral()
 		{
 			if (this.methodExpression != null)
@@ -525,14 +573,14 @@ public class ODataToJpaQueryBuilder<T>
 				return this.propertyExpression.getUriLiteral();
 		}
 	}
-	
-	private Path getPropertyPathByDotName(String propertyName)
+
+	private Path getPropertyPathByDotName(Root<T> table, String propertyName)
 	{
 		if (logger != null && logger.isDebugEnabled())
 		{
 			logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.getPropertyPathByDotName \"" + propertyName + "\"");
 		}
-		
+
 		Path<Object> ret = null;
 		int i = 0;
 		while (propertyName.length() > 0 && ((i = propertyName.indexOf('.')) > 0))
@@ -540,22 +588,44 @@ public class ODataToJpaQueryBuilder<T>
 			final String nextProperty = propertyName.substring(0, i);
 			if (logger != null && logger.isDebugEnabled())
 			{
-				logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.getPropertyPathByDotName nextProperty=\"" + nextProperty + "\"");
+				logger.debug(LOG_TAG,
+					"ODataFilterToJpaQueryBuilder.getPropertyPathByDotName nextProperty=\"" + nextProperty + "\"");
 			}
 			if (ret == null)
 			{
-				ret = this.table.get(nextProperty);
+				ret = table.get(nextProperty);
 			}
 			else
 			{
 				ret = ret.get(nextProperty);
 			}
-			propertyName = propertyName.substring(i+1);
+			propertyName = propertyName.substring(i + 1);
 		}
 		if (logger != null && logger.isDebugEnabled())
 		{
 			logger.debug(LOG_TAG, "ODataFilterToJpaQueryBuilder.getPropertyPathByDotName ret=" + ret);
 		}
-		return ret == null ? this.table.get(propertyName) : ret.get(propertyName);
+		return ret == null ? table.get(propertyName) : ret.get(propertyName);
+	}
+	
+	private Attribute getAttributeFromMetaModel(Class metaModel, String fieldName)
+	{
+		Field f;
+		try
+		{
+			f = metaModel.getDeclaredField(fieldName);
+		}
+		catch (Exception e)
+		{
+			throw new IllegalArgumentException("MetaModel " + metaModel + " has no field \"" + fieldName + "\"");
+		}
+		try
+		{
+			return (Attribute) f.get(null);
+		}
+		catch (Exception e)
+		{
+			throw new IllegalArgumentException("MetaModel " + metaModel + " has no attribute field \"" + fieldName + "\"");
+		}
 	}
 }

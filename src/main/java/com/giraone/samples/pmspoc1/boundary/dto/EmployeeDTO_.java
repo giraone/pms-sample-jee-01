@@ -32,4 +32,5 @@ public class EmployeeDTO_ extends AbstractBaseDTO_
 	public static final String DTO_NAME_contactFax2 = "contactFax2";
 	
 	public static final String DTO_NAME_postalAddresses = "postalAddresses";
+	public static final String DTO_NAME_documents = "documents";
 }

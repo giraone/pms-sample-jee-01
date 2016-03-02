@@ -132,10 +132,10 @@ public class CostCenterEndpoint extends BaseEndpoint
         final CriteriaQuery<CostCenter> select = c.select(table);
         
         ODataToJpaQueryBuilder<CostCenter> filterBuilder = new ODataToJpaQueryBuilder<CostCenter>();
-		filterBuilder.setCriteriaTable(cb, table);
-		Predicate predicate = filterBuilder.parseFilterExpression(filter);
+
+		Predicate predicate = filterBuilder.parseFilterExpression(cb, table, filter);
 		if (predicate != null) { select.where(predicate); }
-		filterBuilder.parseOrderExpression(cb, select, orderby);
+		filterBuilder.parseOrderExpression(cb, table, select, orderby);
 		
         final TypedQuery<CostCenter> tq = em.createQuery(select);
         tq.setFirstResult(skip);

@@ -1,7 +1,9 @@
 package com.giraone.samples.pmspoc1.entity;
 
 import java.sql.Date;
+import java.util.List;
 
+import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import com.giraone.samples.common.entity.AbstractEntity_;
@@ -16,6 +18,7 @@ public class Employee_ extends AbstractEntity_
 	public static volatile SingularAttribute<Employee, String> firstName;
 	public static volatile SingularAttribute<Employee, Date> dateOfBirth;
 	public static volatile SingularAttribute<Employee, String> gender;
+	public static volatile PluralAttribute<Employee, List<EmployeePostalAddress>, EmployeePostalAddress> postalAddresses;
 	
 	public static final String SQL_NAME = "Employee";
 	

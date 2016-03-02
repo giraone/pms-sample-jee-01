@@ -46,6 +46,14 @@
 <li><a href="../api/employees?filter=costCenter.identification eq 'K00012'">Employees - filter=costCenter.identification eq 'K00012'</a></li>
 <li><a href="../api/employees?orderby=oid asc&filter=startswith(lastName, 'S') eq true">Employees - filter=startswith(lastName, 'S') eq true</a></li>
 <li><a href="../api/employees?orderby=oid asc&filter=startswith(lastName, 'S') eq true or startswith(lastName, 'S') eq true">Employees - filter=startswith(lastName, 'S') eq true or startswith(lastName, 'S') eq true</a></li>
+<li><a href="../api/employees?expand=postalAddresses">Employees - expand=postalAddresses</a></li>
+<li><a href="../api/employees?expand=postalAddresses">Employees - expand=costCenter,postalAddresses</a></li>
+<li><a href="../api/employees?filter=costCenter.identification eq 'K00012'&expand=costCenter">Employees - filter=costCenter.identification eq 'K00012'; expand=costCenter</a></li>
+<li><a href="../api/employees?filter=postalAddresses.city eq 'Reinfeld'&expand=costCenter,postalAddresses">Employees - filter=postalAddresses.city eq 'Reinfeld'; expand=costCenter,postalAddresses</a></li>
+<li><a href="../api/employees/114">Employees 114</a></li>
+<li><a href="../api/employees/114?expand=costCenter">Employees 114 - Expand costCenter</a></li>
+<li><a href="../api/employees/114?expand=postalAddresses">Employees 114 - Expand postalAddresses</a></li>
+<li><a href="../api/employees/114?expand=costCenter,postalAddresses">Employees 114 - Expand costCenter + postalAddresses</a></li>
 </ul>
 <h2>Employee Postal Addresses</h2>
 <ul>

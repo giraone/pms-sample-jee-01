@@ -2,6 +2,7 @@ package com.giraone.samples.pmspoc1.boundary.dto;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -21,6 +22,8 @@ public class EmployeeDTO implements Serializable
 	private String firstName;
 	private String gender;	
 	private Calendar dateOfBirth;
+	private List<EmployeePostalAddressDTO> postalAddresses;
+	private List<EmployeeDocumentDTO> documents;
 	
 	public EmployeeDTO()
 	{
@@ -129,5 +132,25 @@ public class EmployeeDTO implements Serializable
 	public void setDateOfBirth(Calendar dateOfBirth)
 	{
 		this.dateOfBirth = dateOfBirth;
+	}
+
+	public List<EmployeePostalAddressDTO> getPostalAddresses()
+	{
+		return postalAddresses;
+	}
+
+	public void setPostalAddresses(List<EmployeePostalAddressDTO> postalAddresses)
+	{
+		this.postalAddresses = postalAddresses;
+	}
+
+	public List<EmployeeDocumentDTO> getDocuments()
+	{
+		return documents;
+	}
+
+	public void setDocuments(List<EmployeeDocumentDTO> documents)
+	{
+		this.documents = documents;
 	}
 }
