@@ -15,13 +15,6 @@ An employee entity is related to 0 or 1 cost center. An employee may have multip
 
 **Test project** There is an additional test project which uses [REST-assured](https://github.com/jayway/rest-assured) to test the backe-end's REST API.
 
-
-The running solution is hosted currently on 3 PaaS provider sites:
-
-- [IBM's BLUEMIX PaaS](https://www.bluemix.net) under the URL [http://pmssamplejee1.eu-gb.mybluemix.net/].
-- [Pivotal's Web Services PaaS](https://run.pivotal.io) under the URL [http://pmssamplejee1.cfapps.io/].
-- [RedHat's OPENSHIFT PaaS](https://www.openshift.com) under the URL [http://pmssamplejee01-giraone.rhcloud.com/PmsSample] - Not the latest version!
-
 ## Goals of this project ##
 
 - Definition of entities and one-to-may relationships using *JPA annotations*.

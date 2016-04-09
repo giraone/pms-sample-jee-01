@@ -10,6 +10,7 @@ $RECYCLE.BIN/
 
 # Typical Eclipse and IntelliJ stuff
 .classpath
+.metadata
 .project
 .factorypath
 .tern-project
